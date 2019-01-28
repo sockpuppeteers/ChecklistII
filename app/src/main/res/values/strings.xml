@@ -1,0 +1,14 @@
+<resources>
+    <string name="app_name">Your Checklist</string>
+    <string name="ADD_BUTTON_STRING">Add</string>
+    <string name="CHECKOFF_BUTTON_STRING">Checkoff</string>
+    <string name="HISTORY_BUTTON_STRING">History</string>
+    <string name="EDIT_BUTTON_STRING">Edit</string>
+    <string name="ACCEPT_BUTTON_STRING">Accept</string>
+    <string name="CANCEL_BUTTON_STRING">Close</string>
+    <string name="POPUP_ADD_HINT">Enter Task Name</string>
+    <string name="POPUP_HISTORY_TEXT">History</string>
+    <string name="FUNCTION_POPUP_DELETE_TEXT">Delete</string>
+    <string name="FUNCTION_POPUP_SETTINGS_TEXT">Settings</string>
+    <string name="FUNCTION_POPUP_CLOSE_TEXT">Close</string>
+</resources>

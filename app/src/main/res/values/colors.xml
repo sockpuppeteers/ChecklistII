@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#41bbbb</color>
+    <color name="colorPrimaryDark">#00574B</color>
+    <color name="colorAccent">#d8281b</color>
+    <color name="colorPopup">#b9b5b4</color>
+    <color name="colorDefaultButton">#807e7e</color>
+    <color name="colorTextSelect">#131212</color>
+    <color name="colorTaskBackground">#724646</color>
+</resources>
+
