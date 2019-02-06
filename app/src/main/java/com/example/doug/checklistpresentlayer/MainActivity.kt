@@ -10,10 +10,12 @@ import android.content.Intent
 import android.view.View
 import android.widget.Button
 import kotlinx.android.synthetic.main.activity_login.*
+import java.util.*
 
 
 class MainActivity : AppCompatActivity() {
 
+    var body: String? = ""
 //    private val mOnNavigationItemSelectedListener = BottomNavigationView.OnNavigationItemSelectedListener { item ->
 //        when (item.itemId) {
 //            R.id.navigation_home -> {
@@ -41,10 +43,16 @@ class MainActivity : AppCompatActivity() {
 //        UserName.text = "(" + user.ViewUserName() + ")"
 
 
-        val body = FetchJson()
-        val users = mutableListOf(UserPage(0,"","","",""))
-        val seprate = body?.split("[","]","{","}","\"",":",",")?.filter { it.isNotBlank() }
+        //val body = FetchJson()
+        var seprate: List<String>? = Arrays.asList("")
+
+        FetchJson()
+        val users = mutableListOf(UserPage(0, "", "", "", ""))
+        while (body == "") {
+            seprate = body?.split("[", "]", "{", "}", "\"", ":", ",")?.filter { it.isNotBlank() }
+        }
         //println(seprate)
+
         if (seprate != null) {
             var i = 0
             var UID = 0
@@ -120,10 +128,10 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    fun FetchJson() : String?
+    fun FetchJson()// : String?
     {
         val url = "https://api20190123020245.azurewebsites.net/api/users"
-        var body: String? = ""
+
         val request = Request.Builder().url(url).build()
 
         val client = OkHttpClient()
@@ -151,8 +159,8 @@ class MainActivity : AppCompatActivity() {
 //                }
             }
         })
-        Thread.sleep(2000)
-        return body
+//        Thread.sleep(2000)
+//        return body
     }
 }
 
