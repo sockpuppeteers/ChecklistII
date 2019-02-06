@@ -85,9 +85,7 @@ class BaseChecklist : AppCompatActivity(){
                 val acceptButton = popupView.PopupMainView.AcceptButton
 
                 //Creates and adds the on click action to the add button
-                acceptButton.setOnClickListener(
-                    View.OnClickListener {
-
+                acceptButton.setOnClickListener{
 
                         val popup_edittext = popupView.PopupMainView.PopupEditText
 
@@ -155,7 +153,7 @@ class BaseChecklist : AppCompatActivity(){
                                 }
                             }
 
-                            new_task_box.setOnClickListener(View.OnClickListener {
+                            new_task_box.setOnClickListener{
 
                                 if(!popupPresent) {
 
@@ -176,27 +174,27 @@ class BaseChecklist : AppCompatActivity(){
                                         }
                                     }
                                 }
-                            })
+                            }
 
                             taskLayout.addView(new_task_box)
                         }
-                })
+            }
 
                 val cancelButton = popupView.PopupMainView.CancelButton
 
-                cancelButton.setOnClickListener(View.OnClickListener {
+                cancelButton.setOnClickListener{
 
                     popupWindow.dismiss()
 
-                })
+                }
 
-                popupWindow.setOnDismissListener(PopupWindow.OnDismissListener {
+                popupWindow.setOnDismissListener{
                     val popupEdittext = popupView.PopupMainView.PopupEditText
 
                     popupEdittext.text.clear()
 
                     popupPresent = false
-                })
+                }
 
                 popupWindow.isFocusable = true
 
@@ -286,7 +284,9 @@ class BaseChecklist : AppCompatActivity(){
 
                     checklistChangeTextView.text = toAddString
 
-                    checklistChangeTextView.textSize = 10f
+                    checklistChangeTextView.setTextColor(Color.WHITE)
+
+                    checklistChangeTextView.textSize = 20f
                     checklistChangeTextView.layoutParams = LinearLayout.LayoutParams(
                         LinearLayout.LayoutParams.WRAP_CONTENT,
                         ViewGroup.LayoutParams.WRAP_CONTENT
@@ -299,14 +299,23 @@ class BaseChecklist : AppCompatActivity(){
 
                         val checklistChangeTextView = TextView(this)
 
-                        var toAddString = "---Change of " + it.changeType + " to checklist " + it.changedTo + " to task " +
-                                it.taskName + " by Current User."
+                        var toAddString = "Default"
+
+                        when(it.changeType) {
+
+                            kAction.CREATE_TASK -> toAddString = "--- Task Added: " + it.taskName +
+                                    "\n    Added By: Current User\n"
+                            kAction.DELETE_TASK -> toAddString = "--- Task Deleted: " + it.taskName +
+                                    "\n    Deleted By: Current User"
+                            kAction.COMPLETE_TASK -> toAddString = "--- Task Completed: " + it.taskName +
+                                    "\n    Completed By: Current User\n"
+                        }
 
                         checklistChangeTextView.text = toAddString
 
                         checklistChangeTextView.setTextColor(Color.WHITE)
 
-                        checklistChangeTextView.textSize = 10f
+                        checklistChangeTextView.textSize = 20f
                         checklistChangeTextView.layoutParams = LinearLayout.LayoutParams(
                             LinearLayout.LayoutParams.WRAP_CONTENT,
                             ViewGroup.LayoutParams.WRAP_CONTENT
