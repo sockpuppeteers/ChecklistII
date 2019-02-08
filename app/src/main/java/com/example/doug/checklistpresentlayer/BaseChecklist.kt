@@ -176,11 +176,11 @@ class BaseChecklist : AppCompatActivity(){
                                         }
                                     }
                                 }
-                            })
+                            }
 
                             taskLayout.addView(new_task_box)
                         }
-                })
+            }
 
                 val cancelButton = popupView.PopupMainView.CancelButton
 
