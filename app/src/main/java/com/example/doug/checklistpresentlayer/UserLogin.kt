@@ -25,7 +25,7 @@ class UserLogin : AppCompatActivity() {
         Icon.setImageResource(icon1)
 
         ToCheckList.setOnClickListener {
-            val tempIntent = Intent(this, BaseChecklist::class.java)
+            val tempIntent = Intent(this, BaseListofLists::class.java)
             startActivity(tempIntent)
         }
     }

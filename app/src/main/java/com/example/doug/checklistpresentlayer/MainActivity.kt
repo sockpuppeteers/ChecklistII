@@ -48,10 +48,9 @@ class MainActivity : AppCompatActivity() {
 
         FetchJson()
         val users = mutableListOf(UserPage(0, "", "", "", ""))
-        while (body == "") {
-            seprate = body?.split("[", "]", "{", "}", "\"", ":", ",")?.filter { it.isNotBlank() }
-        }
+        while (body == ""){}
         //println(seprate)
+        seprate = body?.split("[", "]", "{", "}", "\"", ":", ",")?.filter { it.isNotBlank() }
 
         if (seprate != null) {
             var i = 0
