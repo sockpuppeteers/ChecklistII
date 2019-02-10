@@ -46,7 +46,7 @@ class ListBox @JvmOverloads constructor(
             LinearLayout.LayoutParams.WRAP_CONTENT,
             ViewGroup.LayoutParams.WRAP_CONTENT)
 
-        val taskSwitch = Switch(context)
+//        val taskSwitch = Switch(context)
 
 //        taskSwitch.layoutParams = LinearLayout.LayoutParams(
 //            LinearLayout.LayoutParams.WRAP_CONTENT,

@@ -78,6 +78,7 @@ class BaseListofLists : AppCompatActivity(){
                 val popupWindow = PopupWindow(this)
 
                 val popupView = layoutInflater.inflate(R.layout.popup_layout, null)
+                popupView.PopupEditText.hint = "Enter List Name"
 
                 popupWindow.contentView = popupView
 
