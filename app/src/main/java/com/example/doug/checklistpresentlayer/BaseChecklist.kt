@@ -299,7 +299,7 @@ class BaseChecklist : AppCompatActivity(){
 
                         val checklistChangeTextView = TextView(this)
 
-                        var toAddString = "---Change of " + it.changeType + " to checklist " + currentChecklist.name + " to task " +
+                        var toAddString = "---Change of " + it.changeType + " to checklist " + it.changedTo + " to task " +
                                 it.taskName + " by Current User."
 
                         checklistChangeTextView.text = toAddString
