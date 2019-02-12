@@ -129,7 +129,7 @@ class MainActivity : AppCompatActivity() {
 
     fun FetchJson()// : String?
     {
-        val url = "https://api20190123020245.azurewebsites.net/api/users"
+        val url = "https://api20190207120410.azurewebsites.net/api/users"
 
         val request = Request.Builder().url(url).build()
 
