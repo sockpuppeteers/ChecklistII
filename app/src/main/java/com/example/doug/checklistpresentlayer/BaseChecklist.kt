@@ -38,7 +38,7 @@ class BaseChecklist : AppCompatActivity(){
      ********************************************/
     val edit_listener = View.OnClickListener {
 
-        var taskCount = TaskLayout.childCount - 1
+        /*var taskCount = TaskLayout.childCount - 1
 
         while (taskCount >= 0)
         {
@@ -59,6 +59,7 @@ class BaseChecklist : AppCompatActivity(){
 
             taskCount--
         }
+        */
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -70,42 +71,44 @@ class BaseChecklist : AppCompatActivity(){
         val historyButton = findViewById<Button>(R.id.HistoryButton)
         val editButton = findViewById<Button>(R.id.EditTaskButton)
 
+        //Creates the clikc listener for the add button
         val addListener = View.OnClickListener {
 
+                //If there is not a popup already [resent
             if(!popupPresent) {
 
+                //Get the view containing all the tasks
                 val mainView = findViewById<ScrollView>(R.id.TaskScrollView)
 
                 val popupWindow = PopupWindow(this)
-
+                //Create a view that is of the popup_layout in resources
                 val popupView = layoutInflater.inflate(R.layout.popup_layout, null)
-
+                //Sets the content of the popup to the popup_layout
                 popupWindow.contentView = popupView
-
+                //Retrieves the acceptButton from the popup
                 val acceptButton = popupView.PopupMainView.AcceptButton
 
                 //Creates and adds the on click action to the add button
-                acceptButton.setOnClickListener(
-                    View.OnClickListener {
-
+                acceptButton.setOnClickListener{
 
                         val popup_edittext = popupView.PopupMainView.PopupEditText
 
                         val taskLayout = findViewById<LinearLayout>(R.id.TaskLayout)
-
+                        //Retrieves the name of the task if the name is long enough
                         if (popup_edittext.text.toString().length >= 1) {
                             var new_task_box = TaskBox(
                                 this,
                                 popup_edittext.text.toString()
                             )
-
+                            //Adds the task to the checklist
                             currentChecklist.createTask(popup_edittext.text.toString(), "enable Later", User(1))
 
-                            popupWindow.dismiss()
-
-                            popupWindow.setOnDismissListener { PopupWindow.OnDismissListener {
+                            //Set dismiss listener
+                            popupWindow.setOnDismissListener {
                                 popupPresent = false
-                            } }
+                            }
+                            //Dismisses the popup
+                            popupWindow.dismiss()
 
                             val popupFunctionWindow = PopupWindow(this)
 
@@ -123,7 +126,7 @@ class BaseChecklist : AppCompatActivity(){
 
                                 popupPresent = false
                             }
-
+                            //Sets the delete button to remove the task
                             val DeleteListener = View.OnClickListener {
                                 for(i in TaskLayout.childCount downTo 0 step 1)
                                 {
@@ -151,10 +154,11 @@ class BaseChecklist : AppCompatActivity(){
 
                             popupFunctionWindow.setOnDismissListener {
                                 PopupWindow.OnDismissListener {
-                                    popupPresent = false;
+                                    popupPresent = false
                                 }
                             }
 
+                            //Sets the on lick listener for the new task gui element
                             new_task_box.setOnClickListener(View.OnClickListener {
 
                                 if(!popupPresent) {
@@ -180,8 +184,8 @@ class BaseChecklist : AppCompatActivity(){
 
                             taskLayout.addView(new_task_box)
                         }
-                })
-
+                }
+                //Set cancel button to dismiss the popup
                 val cancelButton = popupView.PopupMainView.CancelButton
 
                 cancelButton.setOnClickListener(View.OnClickListener {
@@ -189,7 +193,7 @@ class BaseChecklist : AppCompatActivity(){
                     popupWindow.dismiss()
 
                 })
-
+                //Have the popup clean up items when dismissed
                 popupWindow.setOnDismissListener(PopupWindow.OnDismissListener {
                     val popupEdittext = popupView.PopupMainView.PopupEditText
 
@@ -208,11 +212,11 @@ class BaseChecklist : AppCompatActivity(){
         }
 
         addButton.setOnClickListener(addListener)
-
+        //Create the click listener for the checkoff button
         val checkoffListener = View.OnClickListener {
 
             var taskCount = TaskLayout.childCount - 1
-
+            //Checks all current gui elements to see if they are checked
             while (taskCount >= 0)
             {
                 val currentChild = TaskLayout.getChildAt(taskCount)
@@ -279,6 +283,7 @@ class BaseChecklist : AppCompatActivity(){
                 val historyLayout = popupViewHistory.HistoryLinearLayout
 
                 //Check to see if not changes have happened
+                //Displays a message for each change that has occurred
                 if(currentChecklist.changes.isEmpty()) {
                     val checklistChangeTextView = TextView(this)
 
@@ -286,7 +291,9 @@ class BaseChecklist : AppCompatActivity(){
 
                     checklistChangeTextView.text = toAddString
 
-                    checklistChangeTextView.textSize = 10f
+                    checklistChangeTextView.setTextColor(Color.WHITE)
+
+                    checklistChangeTextView.textSize = 30f
                     checklistChangeTextView.layoutParams = LinearLayout.LayoutParams(
                         LinearLayout.LayoutParams.WRAP_CONTENT,
                         ViewGroup.LayoutParams.WRAP_CONTENT
@@ -299,14 +306,23 @@ class BaseChecklist : AppCompatActivity(){
 
                         val checklistChangeTextView = TextView(this)
 
-                        var toAddString = "---Change of " + it.changeType + " to checklist " + it.changedTo + " to task " +
-                                it.taskName + " by Current User."
+                        var toAddString = "Default"
+
+                        when(it.changeType) {
+
+                            kAction.CREATE_TASK -> toAddString = "--- Task Added: " + it.taskName +
+                                    "\n    Added By: Current User\n"
+                            kAction.DELETE_TASK -> toAddString = "--- Task Deleted: " + it.taskName +
+                                    "\n    Deleted By: Current User\n"
+                            kAction.COMPLETE_TASK -> toAddString = "--- Task Completed: " + it.taskName +
+                                    "\n    Completed By: Current User\n"
+                        }
 
                         checklistChangeTextView.text = toAddString
 
                         checklistChangeTextView.setTextColor(Color.WHITE)
 
-                        checklistChangeTextView.textSize = 10f
+                        checklistChangeTextView.textSize = 20f
                         checklistChangeTextView.layoutParams = LinearLayout.LayoutParams(
                             LinearLayout.LayoutParams.WRAP_CONTENT,
                             ViewGroup.LayoutParams.WRAP_CONTENT
