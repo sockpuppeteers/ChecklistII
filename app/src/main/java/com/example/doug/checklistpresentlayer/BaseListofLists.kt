@@ -130,7 +130,7 @@ class BaseListofLists : AppCompatActivity(){
                                     val tempChild = TaskLayout.getChildAt(i)
                                     if(tempChild is TaskBox)
                                     {
-                                        if(tempChild.taskText == currentTask?.taskText)
+                                        if(tempChild.getTaskText() == currentTask?.getTaskText())
                                         {
                                             TaskLayout.removeView(TaskLayout.getChildAt(i))
                                             currentListofLists.deleteList(i, User(1));
