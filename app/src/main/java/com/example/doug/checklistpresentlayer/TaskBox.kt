@@ -1,6 +1,8 @@
 package com.example.doug.checklistpresentlayer
 
 import android.content.Context
+import android.graphics.Color
+import android.graphics.Paint
 import android.util.AttributeSet
 import android.view.View
 import android.view.ViewGroup
@@ -24,7 +26,13 @@ class TaskBox @JvmOverloads constructor(
     attrs: AttributeSet? = null,
     defStyle: Int = 0): LinearLayout(context, attrs, defStyle) {
 
-    val taskText = text
+
+    private val taskText = text
+
+    private var taskTextView: TextView? = null
+
+    private var isRecurring = false
+    private var isComplete = false
 
     init
     {
@@ -32,7 +40,7 @@ class TaskBox @JvmOverloads constructor(
 
             orientation = LinearLayout.HORIZONTAL
 
-            val taskTextView = TextView(context)
+            taskTextView = TextView(context)
 
             layoutParams = LinearLayout.LayoutParams(
               LinearLayout.LayoutParams.WRAP_CONTENT,
@@ -40,9 +48,9 @@ class TaskBox @JvmOverloads constructor(
 
             gravity = right
 
-            taskTextView.text = taskText
-        taskTextView.textSize = 30f
-        taskTextView.layoutParams = LinearLayout.LayoutParams(
+        taskTextView?.text = taskText
+        taskTextView?.textSize = 30f
+        taskTextView?.layoutParams = LinearLayout.LayoutParams(
             LinearLayout.LayoutParams.WRAP_CONTENT,
             ViewGroup.LayoutParams.WRAP_CONTENT)
 
@@ -54,5 +62,38 @@ class TaskBox @JvmOverloads constructor(
 
         addView(taskTextView)
         addView(taskSwitch)
+    }
+
+    fun toggleReccurringIfNotComplete() {
+        if(!isComplete) {
+            isRecurring = !isRecurring
+
+            if (isRecurring)
+                taskTextView?.setTextColor(Color.RED)
+            else
+                taskTextView?.setTextColor(Color.BLACK)
+        }
+    }
+
+    fun checkCompletion():  Boolean {
+        return isComplete
+    }
+    
+    fun checkReccurring(): Boolean {
+        return isRecurring
+    }
+    
+    fun getTaskText(): String {
+        return taskText
+    }
+
+    fun completeTask(){
+        isComplete = true
+        if (taskTextView != null) {
+            taskTextView.apply { taskTextView?.paintFlags = taskTextView?.paintFlags!!.or(Paint.STRIKE_THRU_TEXT_FLAG) }
+        }
+
+        getChildAt(1).isClickable = false
+        getChildAt(1).visibility = View.INVISIBLE
     }
 }

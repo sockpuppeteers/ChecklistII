@@ -62,6 +62,104 @@ class BaseChecklist : AppCompatActivity(){
         */
     }
 
+    fun createNewTask(TaskText: String, IsReaccuring: Boolean) {
+        var new_task_box = TaskBox(
+            this,
+            TaskText
+        )
+
+        if(IsReaccuring)
+            new_task_box.toggleReccurringIfNotComplete()
+
+        val mainView = findViewById<ScrollView>(R.id.TaskScrollView)
+
+        //Adds the task to the checklist
+        currentChecklist.createTask(TaskText, "enable Later", User(1))
+
+        val popupFunctionWindow = PopupWindow(this)
+
+        val taskFunctionLayoutView =
+            layoutInflater.inflate(R.layout.task_functions_layout, null)
+
+        popupFunctionWindow.contentView = taskFunctionLayoutView
+
+        val DeleteButton = taskFunctionLayoutView.FunctionDeleteButton
+
+        val CloseButton = taskFunctionLayoutView.FunctionCloseButton
+
+        val CloseListener = View.OnClickListener {
+            popupFunctionWindow.dismiss()
+
+            popupPresent = false
+        }
+        //Sets the delete button to remove the task
+        val DeleteListener = View.OnClickListener {
+            for(i in TaskLayout.childCount downTo 0 step 1)
+            {
+                val tempChild = TaskLayout.getChildAt(i)
+                if(tempChild is TaskBox)
+                {
+                    if(tempChild == currentTask)
+                    {
+                        TaskLayout.removeView(TaskLayout.getChildAt(i))
+                        currentChecklist.deleteTask(i, User(1));
+                    }
+                }
+            }
+
+            popupFunctionWindow.dismiss()
+
+            popupPresent = false
+        }
+
+        val SettingsButton = taskFunctionLayoutView.FunctionSettingsButton
+
+        SettingsButton.setOnClickListener{
+            currentTask?.toggleReccurringIfNotComplete()
+        }
+
+        popupFunctionWindow.contentView = taskFunctionLayoutView
+
+        DeleteButton.setOnClickListener(DeleteListener)
+
+        CloseButton.setOnClickListener(CloseListener)
+
+        popupFunctionWindow.setOnDismissListener {
+            PopupWindow.OnDismissListener {
+                popupPresent = false
+            }
+        }
+
+        //Sets the on lick listener for the new task gui element
+        new_task_box.setOnClickListener{
+
+            if(!popupPresent) {
+
+                popupPresent = true
+
+                popupFunctionWindow.isFocusable()
+
+                popupFunctionWindow.showAtLocation(mainView, Gravity.CENTER, 0, 0)
+
+                for(i in TaskLayout.childCount downTo 0 step 1)
+                {
+                    val tempChild = TaskLayout.getChildAt(i)
+                    if(tempChild is TaskBox)
+                    {
+                        if(tempChild == new_task_box) {
+                            currentTask = tempChild
+                        }
+                    }
+                }
+            }
+        }
+
+        val taskLayout = findViewById<LinearLayout>(R.id.TaskLayout)
+
+        taskLayout.addView(new_task_box)
+    }
+
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_base_checklist)
@@ -93,97 +191,17 @@ class BaseChecklist : AppCompatActivity(){
 
                         val popup_edittext = popupView.PopupMainView.PopupEditText
 
-                        val taskLayout = findViewById<LinearLayout>(R.id.TaskLayout)
                         //Retrieves the name of the task if the name is long enough
                         if (popup_edittext.text.toString().length >= 1) {
-                            var new_task_box = TaskBox(
-                                this,
-                                popup_edittext.text.toString()
-                            )
-                            //Adds the task to the checklist
-                            currentChecklist.createTask(popup_edittext.text.toString(), "enable Later", User(1))
-
-                            //Set dismiss listener
-                            popupWindow.setOnDismissListener {
-                                popupPresent = false
-                            }
-                            //Dismisses the popup
-                            popupWindow.dismiss()
-
-                            val popupFunctionWindow = PopupWindow(this)
-
-                            val taskFunctionLayoutView =
-                                layoutInflater.inflate(R.layout.task_functions_layout, null)
-
-                            popupFunctionWindow.contentView = taskFunctionLayoutView
-
-                            val DeleteButton = taskFunctionLayoutView.FunctionDeleteButton
-
-                            val CloseButton = taskFunctionLayoutView.FunctionCloseButton
-
-                            val CloseListener = View.OnClickListener {
-                                popupFunctionWindow.dismiss()
-
-                                popupPresent = false
-                            }
-                            //Sets the delete button to remove the task
-                            val DeleteListener = View.OnClickListener {
-                                for(i in TaskLayout.childCount downTo 0 step 1)
-                                {
-                                    val tempChild = TaskLayout.getChildAt(i)
-                                    if(tempChild is TaskBox)
-                                    {
-                                        if(tempChild.taskText == currentTask?.taskText)
-                                        {
-                                            TaskLayout.removeView(TaskLayout.getChildAt(i))
-                                            currentChecklist.deleteTask(i, User(1));
-                                        }
-                                    }
-                                }
-
-                                popupFunctionWindow.dismiss()
-
-                                popupPresent = false
-                            }
-
-                            popupFunctionWindow.contentView = taskFunctionLayoutView
-
-                            DeleteButton.setOnClickListener(DeleteListener)
-
-                            CloseButton.setOnClickListener(CloseListener)
-
-                            popupFunctionWindow.setOnDismissListener {
-                                PopupWindow.OnDismissListener {
-                                    popupPresent = false
-                                }
-                            }
-
-                            //Sets the on lick listener for the new task gui element
-                            new_task_box.setOnClickListener(View.OnClickListener {
-
-                                if(!popupPresent) {
-
-                                    popupPresent = true
-
-                                    popupFunctionWindow.isFocusable()
-
-                                    popupFunctionWindow.showAtLocation(mainView, Gravity.CENTER, 0, 0)
-
-                                    for(i in TaskLayout.childCount downTo 0 step 1)
-                                    {
-                                        val tempChild = TaskLayout.getChildAt(i)
-                                        if(tempChild is TaskBox)
-                                        {
-                                            if(tempChild.taskText == new_task_box.taskText) {
-                                                currentTask = tempChild
-                                            }
-                                        }
-                                    }
-                                }
-                            })
-
-                            taskLayout.addView(new_task_box)
+                            createNewTask(popup_edittext.text.toString(), false)
                         }
+
+                    //Set dismiss listener
+                    popupWindow.setOnDismissListener {
+                        popupPresent = false
+                    }
+                    //Dismisses the popup
+                    popupWindow.dismiss()
                 }
                 //Set cancel button to dismiss the popup
                 val cancelButton = popupView.PopupMainView.CancelButton
@@ -229,13 +247,20 @@ class BaseChecklist : AppCompatActivity(){
                     {
                         if(taskSwitch.isChecked)
                         {
-                            var found = false
+                            if(!currentChild.checkCompletion()) {
+                                if (currentChild.checkReccurring()) {
+                                    createNewTask(currentChild.getTaskText(), true)
+                                    currentChecklist.createTask(currentChild.getTaskText(), "enable Later", User(1))
+                                }
 
-                            TaskLayout.removeView(TaskLayout.getChildAt(taskCount))
+                                currentChild.completeTask()
 
-                            val taskIterator = currentChecklist.tasks.iterator()
+                                //TaskLayout.removeView(TaskLayout.getChildAt(taskCount))
 
-                            currentChecklist.completeTask(taskCount, User(1))
+                                val taskIterator = currentChecklist.tasks.iterator()
+
+                                currentChecklist.completeTask(taskCount, User(1))
+                            }
                         }
                     }
                 }
