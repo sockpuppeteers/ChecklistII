@@ -3,11 +3,11 @@ package com.example.doug.checklistpresentlayer
 import android.app.Activity
 
 data class Users(var dUID: Int, var dUserName: String = "", var dFName: String = "",
-                var dLName: String = "", val dPw: String = "" )
+                var dLName: String = "", val dError: String? = "" )
 
-class UserPage(mUID: Int, mUserName: String, mFName: String, mLName: String, private val mPw: String)
+class UserPage(mUID: Int, mUserName: String, mFName: String, mLName: String, mError: String?)
 {
-    private val h_User: Users = Users(mUID,mUserName,mFName,mLName,mPw)
+    private val h_User: Users = Users(mUID,mUserName,mFName,mLName,mError)
 
     fun ViewUserName() : String
     {
@@ -24,13 +24,18 @@ class UserPage(mUID: Int, mUserName: String, mFName: String, mLName: String, pri
         return h_User.dLName
     }
 
-    fun CorectPW(pw: String) : Boolean
+    fun ViewError() : String?
     {
-        var right = false
-        if (pw == mPw)
+        return h_User.dError
+    }
+
+    fun ErrorCheck() : Boolean
+    {
+        var success = false
+        if ( h_User.dError == "none")
         {
-            right = true
+            success = true
         }
-        return right
+        return success
     }
 }

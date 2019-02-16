@@ -35,131 +35,36 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_login)
 
-//        navigation2.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener)
+        var user = UserPage(0, "", "", "", "")
 
-//        val user = UserPage(1000, "Scrumtaclause", "Nate", "Swenson", "123")
-//
-//        FLName.text = user.ViewFName() + " " + user.ViewLName()
-//        UserName.text = "(" + user.ViewUserName() + ")"
-
-
-        //val body = FetchJson()
-        var seprate: List<String>? = Arrays.asList("")
-
-        FetchJson()
-        val users = mutableListOf(UserPage(0, "", "", "", ""))
-        while (body == ""){}
-        //println(seprate)
-        seprate = body?.split("[", "]", "{", "}", "\"", ":", ",")?.filter { it.isNotBlank() }
-
-        if (seprate != null) {
-            var i = 0
-            var UID = 0
-            var UN = ""
-            var FN = ""
-            var LN = ""
-            for (item in seprate) {
-                if (i == 0) {
-                    if (item == "UserID") {
-                        i = 1
-                    }
-                    if (item == "Username") {
-                        i = 2
-                    }
-                    if (item == "FName") {
-                        i = 3
-                    }
-                    if (item == "Lname") {
-                        i = 4
-                    }
-                    if (item == "pw") {
-                        i = 5
-                    }
-                }
-                else
-                {
-                    if (i == 1)
-                    {
-                        UID = item.toInt()
-                        i = 0
-                    }
-                    else if (i == 2)
-                    {
-                        UN = item
-                        i = 0
-                    }
-                    else if (i == 3)
-                    {
-                        FN = item
-                        i = 0
-                    }
-                    else if (i == 4)
-                    {
-                        LN = item
-                        i = 0
-                    }
-                    else if (i == 5)
-                    {
-                        i = 0
-                        val user = UserPage(UID,UN,FN,LN,item)
-                        users.add(user)
-                    }
-                }
-            }
-        }
-        var found = false
         login_button.setOnClickListener {
-            for (item in users) {
-                if (eUserName.text.toString() == item.ViewUserName() && item.CorectPW(ePW.text.toString())) {
-                    val tempIntent = Intent(this, UserLogin::class.java).apply {
-                        putExtra("uname", item.ViewUserName())
-                        putExtra("fname", item.ViewFName())
-                        putExtra("lname", item.ViewLName())
-                    }
-                    startActivity(tempIntent)
-                    found = true
-                    break
+            val db = Database(eUserName.text.toString())
+            user = db.LogIn(ePW.text.toString())
+            if (!user.ErrorCheck())
+            {
+                if (user.ViewError() == "failed")
+                {
+                    ErrorText.text = "Failed to connect to server"
+                }
+                else if (user.ViewError() == "{\"Message\":\"username or password is wrong dude\"}")
+                {
+                    ErrorText.text = "Wrong username or password"
+                }
+                else if (user.ViewError() == "{\"Message\":\"An error has occurred.\"}")
+                {
+                    ErrorText.text = "Something weird went wrong"
                 }
             }
-            if (!found) {
-                ErrorText.text = "Wrong username or password"
+            else
+            {
+                val tempIntent = Intent(this, UserLogin::class.java).apply {
+                        putExtra("uname", user.ViewUserName())
+                        putExtra("fname", user.ViewFName())
+                        putExtra("lname", user.ViewLName())
+                }
+                startActivity(tempIntent)
             }
         }
-    }
-
-    fun FetchJson()// : String?
-    {
-        val url = "https://api20190207120410.azurewebsites.net/api/users"
-
-        val request = Request.Builder().url(url).build()
-
-        val client = OkHttpClient()
-        client.newCall(request).enqueue(object: Callback {
-            override fun onFailure(call: Call, e: IOException) {
-                println("Failed to execute request")
-            }
-
-            override fun onResponse(call: Call, response: Response) {
-                body = response.body()?.string()
-                println(body)
-
-//                return if (body != null)
-//                    Gson().fromJson(body, listOf<UserPage>().javaClass)
-//                else
-//                    listOf()
-
-//                val gson = GsonBuilder().create()
-//
-//                val collectionType = object : TypeToken<List<UserPage>>(){}.type
-//                val enums = gson.fromJson(body, collectionType::class.java)
-//                val userpage = gson.fromJson(body, UserPage::class.java)
-//                runOnUiThread{
-//                    recyclerView_main.adapter = MainAdapter(userpage)
-//                }
-            }
-        })
-//        Thread.sleep(2000)
-//        return body
     }
 }
 
