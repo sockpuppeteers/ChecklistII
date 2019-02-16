@@ -11,4 +11,5 @@
     <string name="FUNCTION_POPUP_DELETE_TEXT">Delete</string>
     <string name="FUNCTION_POPUP_SETTINGS_TEXT">Settings</string>
     <string name="FUNCTION_POPUP_CLOSE_TEXT">Close</string>
+    <string name="RECURSION_TEXT">Task Recursion</string>
 </resources>
