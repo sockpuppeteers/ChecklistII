@@ -20,7 +20,7 @@ import kotlinx.android.synthetic.main.task_functions_layout.view.*
 class BaseListofLists : AppCompatActivity(){
 
     var inEdit = false
-    var currentListofLists = ListofLists("Your Checklist")
+    var currentListofLists = ListofLists("Your CheckLists", "none")
 
     //Flag to see if any popups are present
     var popupPresent = false

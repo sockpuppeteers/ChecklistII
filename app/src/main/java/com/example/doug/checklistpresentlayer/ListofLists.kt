@@ -2,7 +2,7 @@ package com.example.doug.checklistpresentlayer
 import java.time.LocalDateTime
 
 
-class ListofLists(var name: String ) {
+class ListofLists(var name: String, var error: String? ) {
 
     //List of tasks within a checklist
     var lists =  mutableListOf<ListClass>()

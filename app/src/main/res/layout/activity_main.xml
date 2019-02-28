@@ -38,12 +38,12 @@
             android:layout_marginLeft="8dp" android:layout_marginEnd="8dp" app:layout_constraintEnd_toEndOf="parent"
             android:layout_marginRight="8dp"/>
     <Button
-            android:text="CheckList"
+            android:text="CheckLists"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/ToCheckList" android:layout_marginTop="32dp"
             app:layout_constraintTop_toBottomOf="@+id/UserName" android:layout_marginStart="8dp"
-            app:layout_constraintStart_toStartOf="parent" android:layout_marginLeft="8dp"
-            app:layout_constraintEnd_toEndOf="parent" android:layout_marginEnd="8dp" android:layout_marginRight="8dp"/>
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" android:layout_marginEnd="8dp"/>
 
 </android.support.constraint.ConstraintLayout>
