@@ -2,6 +2,7 @@ package com.example.doug.checklistpresentlayer
 
 import android.graphics.Color
 import android.os.Bundle
+import android.support.constraint.ConstraintLayout
 import android.support.v7.app.AppCompatActivity
 import android.view.Gravity
 import android.view.View
@@ -11,6 +12,7 @@ import kotlinx.android.synthetic.main.activity_base_checklist.*
 import kotlinx.android.synthetic.main.history_popup.view.*
 import kotlinx.android.synthetic.main.popup_layout.view.*
 import kotlinx.android.synthetic.main.task_functions_layout.view.*
+import kotlinx.android.synthetic.main.task_settings_popup.view.*
 
 
 /********************************************
@@ -62,6 +64,43 @@ class BaseChecklist : AppCompatActivity(){
         */
     }
 
+    private fun createSettingsPopup() {
+        if (!popupPresent ) {
+            popupPresent = true
+
+            val mainView = findViewById<ScrollView>(R.id.TaskScrollView)
+
+            val popupSettingsWindow = PopupWindow(this)
+
+            val taskSettingsLayoutView =
+                layoutInflater.inflate(R.layout.task_settings_popup, null)
+
+            popupSettingsWindow.contentView = taskSettingsLayoutView
+
+            //This is the weirdest statement I have ever written but it yells at me otherwise
+            taskSettingsLayoutView.RecursionSwitch.isChecked =
+                currentTask?.checkReccurring() != null && currentTask?.checkReccurring() == true
+
+            taskSettingsLayoutView.RecursionSwitch.setOnClickListener {
+                currentTask?.toggleReccurringIfNotComplete()
+            }
+
+            taskSettingsLayoutView.CloseButton.setOnClickListener {
+                popupSettingsWindow.dismiss()
+            }
+
+            taskSettingsLayoutView.taskNameView.text = currentTask?.getTaskText()
+
+            popupSettingsWindow.setOnDismissListener {
+                popupPresent = false
+            }
+
+            popupSettingsWindow.isFocusable = true
+
+            popupSettingsWindow.showAtLocation(mainView, Gravity.CENTER, 0, 0)
+        }
+    }
+
     fun createNewTask(TaskText: String, IsReaccuring: Boolean) {
         var new_task_box = TaskBox(
             this,
@@ -81,19 +120,22 @@ class BaseChecklist : AppCompatActivity(){
         val taskFunctionLayoutView =
             layoutInflater.inflate(R.layout.task_functions_layout, null)
 
-        popupFunctionWindow.contentView = taskFunctionLayoutView
-
-        val DeleteButton = taskFunctionLayoutView.FunctionDeleteButton
-
-        val CloseButton = taskFunctionLayoutView.FunctionCloseButton
-
-        val CloseListener = View.OnClickListener {
+        taskFunctionLayoutView.FunctionCloseButton.setOnClickListener {
             popupFunctionWindow.dismiss()
 
             popupPresent = false
         }
+
+        taskFunctionLayoutView.FunctionSettingsButton.setOnClickListener {
+            popupFunctionWindow.dismiss()
+
+            popupPresent = false
+
+            createSettingsPopup()
+        }
+
         //Sets the delete button to remove the task
-        val DeleteListener = View.OnClickListener {
+        taskFunctionLayoutView.FunctionDeleteButton.setOnClickListener {
             for(i in TaskLayout.childCount downTo 0 step 1)
             {
                 val tempChild = TaskLayout.getChildAt(i)
@@ -112,17 +154,7 @@ class BaseChecklist : AppCompatActivity(){
             popupPresent = false
         }
 
-        val SettingsButton = taskFunctionLayoutView.FunctionSettingsButton
-
-        SettingsButton.setOnClickListener{
-            currentTask?.toggleReccurringIfNotComplete()
-        }
-
         popupFunctionWindow.contentView = taskFunctionLayoutView
-
-        DeleteButton.setOnClickListener(DeleteListener)
-
-        CloseButton.setOnClickListener(CloseListener)
 
         popupFunctionWindow.setOnDismissListener {
             PopupWindow.OnDismissListener {
@@ -256,8 +288,6 @@ class BaseChecklist : AppCompatActivity(){
                                 currentChild.completeTask()
 
                                 //TaskLayout.removeView(TaskLayout.getChildAt(taskCount))
-
-                                val taskIterator = currentChecklist.tasks.iterator()
 
                                 currentChecklist.completeTask(taskCount, User(1))
                             }
