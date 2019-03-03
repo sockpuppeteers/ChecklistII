@@ -13,6 +13,8 @@
             android:theme="@style/AppTheme">
         <activity android:name=".UserLogin">
         </activity>
+        <activity android:name=".Registration">
+        </activity>
         <activity android:name=".BaseChecklist">
         </activity>
         <activity android:name=".BaseListofLists">
