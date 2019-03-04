@@ -119,6 +119,27 @@ class BaseChecklist : AppCompatActivity(){
                 }
             }
 
+            taskSettingsLayoutView.ClearDeadline.setOnClickListener {
+                if(currentTask?.getDeadline() != "No Deadline") {
+                    for (i in TaskLayout.childCount downTo 0 step 1) {
+                        val tempChild = TaskLayout.getChildAt(i)
+                        if (tempChild is TaskBox) {
+                            if (tempChild == currentTask) {
+                                var newDeadline = "No Deadline"
+
+                                currentTask?.setDeadline(newDeadline)
+
+                                currentChecklist.removeDeadline(i, User(1))
+
+                                val currentDeadlineText = getString(R.string.CURRENT_DEADLINE_TEXT) + "\n" + newDeadline
+
+                                taskSettingsLayoutView.DeadlineDisplayText.text = currentDeadlineText
+                            }
+                        }
+                    }
+                }
+            }
+
             val currentDeadlineText = getString(R.string.CURRENT_DEADLINE_TEXT) + "\n" + currentTask?.getDeadline()
 
             taskSettingsLayoutView.DeadlineDisplayText.text = currentDeadlineText
@@ -398,11 +419,15 @@ class BaseChecklist : AppCompatActivity(){
                         when(it.changeType) {
 
                             kAction.CREATE_TASK -> toAddString = "--- Task Added: " + it.taskName +
-                                    "\n    Added By: Current User\n"
+                                    "\n\tAdded By: Current User\n"
                             kAction.DELETE_TASK -> toAddString = "--- Task Deleted: " + it.taskName +
-                                    "\n    Deleted By: Current User\n"
+                                    "\n\tDeleted By: Current User\n"
                             kAction.COMPLETE_TASK -> toAddString = "--- Task Completed: " + it.taskName +
-                                    "\n    Completed By: Current User\n"
+                                    "\n\tCompleted By: Current User\n"
+                            kAction.CHANGE_TASK_DEADLINE -> toAddString = "---Deadline Changed On: \n\t\t" + it.taskName +
+                                    "\n\tBy: Current User\n"
+                            kAction.REMOVE_TASK_DEADLINE -> toAddString = "---Deadline Removed On: \n\t\t" + it.taskName +
+                                    "\n\tBy: Current User\n"
                         }
 
                         checklistChangeTextView.text = toAddString

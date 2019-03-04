@@ -109,7 +109,7 @@ class Checklist( var name: String ) {
      ***************************************************************/
     fun changeTaskDeadline(arrayIndex: Int, modifiedBy: User, deadline: String) {
         if (arrayIndex >= 0 && arrayIndex < tasks.size) {
-            logChange(tasks[arrayIndex].name, modifiedBy, kAction.DELETE_TASK)
+            logChange(tasks[arrayIndex].name, modifiedBy, kAction.CHANGE_TASK_DEADLINE)
             tasks[arrayIndex].Deadline = deadline
         }
     }
@@ -119,7 +119,7 @@ class Checklist( var name: String ) {
      ***************************************************************/
     fun removeDeadline(arrayIndex: Int, modifiedBy: User) {
         if (arrayIndex >= 0 && arrayIndex < tasks.size) {
-            logChange(tasks[arrayIndex].name, modifiedBy, kAction.DELETE_TASK)
+            logChange(tasks[arrayIndex].name, modifiedBy, kAction.REMOVE_TASK_DEADLINE)
             tasks[arrayIndex].Deadline = ""
             tasks[arrayIndex].HasDL = false;
         }

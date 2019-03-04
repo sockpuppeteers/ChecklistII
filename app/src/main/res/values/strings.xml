@@ -99,4 +99,5 @@
     </string-array>
     <string name="APPLY_DEADLINE_TEXT">Apply Deadline</string>
     <string name="CURRENT_DEADLINE_TEXT">Current Deadline: </string>
+    <string name="CLEAR_DEADLINE_TEXT">Clear Deadline</string>
 </resources>
