@@ -1,16 +1,9 @@
 package com.example.doug.checklistpresentlayer
 
 import android.os.Bundle
-import android.support.design.widget.BottomNavigationView
 import android.support.v7.app.AppCompatActivity
-import kotlinx.android.synthetic.main.activity_main.*
-import okhttp3.*
-import java.io.IOException
 import android.content.Intent
-import android.view.View
-import android.widget.Button
 import kotlinx.android.synthetic.main.activity_login.*
-import java.util.*
 
 
 class MainActivity : AppCompatActivity() {
@@ -35,11 +28,11 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_login)
 
-        var user = UserPage(0, "", "", "", "")
+        var user: UserPage
 
         login_button.setOnClickListener {
-            val db = Database(eUserName.text.toString())
-            user = db.LogIn(ePW.text.toString())
+            val db = Database(lUN.text.toString())
+            user = db.LogIn(lPW.text.toString())
             if (!user.ErrorCheck())
             {
                 if (user.ViewError() == "failed")
@@ -64,6 +57,10 @@ class MainActivity : AppCompatActivity() {
                 }
                 startActivity(tempIntent)
             }
+        }
+        register_text_button.setOnClickListener {
+            val tempIntent = Intent(this, Registration::class.java)
+            startActivity(tempIntent)
         }
     }
 }

@@ -228,6 +228,52 @@ class Database( var uName: String ) {
         return LoL
     }
 
+    fun RegisterUser(Email: String, FName: String, LName: String, PW1: String, PW2: String) : String
+    {
+        var error: String = ""
+        if (PW1 == PW2) {
+            FetchJsonUser()
+            while (body == ""){}
+            if (body != "{\"Message\":\"User with username = " + uName +" not found\"}")
+                error = "Username Taken"
+            else if (PW1.length > 16)
+                error = "Password to long"
+            else if (PW1.length < 4)
+                error = "Password to short"
+            else if (!Email.contains('@'))
+            {
+                error = "Must be a valid email"
+            }
+            else if (PW1.contains("([a-z]|[A-Z]|!|-|_|@|#|$|%|&|[0-9])*".toRegex())) {
+                if (!(PW1.contains(".*([a-z]|[A-Z]).*".toRegex()))) {
+                    error = "Password must contain a letter"
+                }
+                if (!(PW1.contains(".*[0-9].*".toRegex()))) {
+                    if (error.isEmpty())
+                        error = "Password must contain a number"
+                    else
+                        error += " and a number"
+                }
+                if (!(PW1.contains('!') || PW1.contains('-') || PW1.contains('_')
+                            || PW1.contains('@') || PW1.contains('#') || PW1.contains('$')
+                            || PW1.contains('%') || PW1.contains('&'))
+                )
+                {
+                    if (error.isEmpty())
+                        error = "Password must contain a nonstandard character"
+                    else
+                        error += " and a nonstandard character"
+                }
+            }
+            else {
+                error = "Password contains an unusable character"
+            }
+        }
+        else
+            error = "Passwords don't match"
+        return error
+    }
+
     fun FetchJsonUser()//used whenever we need info for a user
     {
         val url = "https://api20190207120410.azurewebsites.net/Api/Users/GetString/" + uName
