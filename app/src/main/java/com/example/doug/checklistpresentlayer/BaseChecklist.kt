@@ -91,6 +91,8 @@ class BaseChecklist : AppCompatActivity(){
 
             taskSettingsLayoutView.taskNameView.text = currentTask?.getTaskText()
 
+
+
             popupSettingsWindow.setOnDismissListener {
                 popupPresent = false
             }

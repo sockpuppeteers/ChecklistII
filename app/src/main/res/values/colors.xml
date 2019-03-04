@@ -2,7 +2,7 @@
 <resources>
     <color name="colorPrimary">#41bbbb</color>
     <color name="colorPrimaryDark">#00574B</color>
-    <color name="colorAccent">#d8281b</color>
+    <color name="colorAccent">#D8281B</color>
     <color name="colorPopup">#b9b5b4</color>
     <color name="colorDefaultButton">#807e7e</color>
     <color name="colorTextSelect">#131212</color>
