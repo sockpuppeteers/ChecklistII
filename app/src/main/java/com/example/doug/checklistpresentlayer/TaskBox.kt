@@ -34,6 +34,16 @@ class TaskBox @JvmOverloads constructor(
     private var isRecurring = false
     private var isComplete = false
 
+    private var deadlineText = "No Deadline"
+
+    fun setDeadline(newDeadline: String) {
+        deadlineText = newDeadline
+    }
+
+    fun getDeadline(): String {
+        return deadlineText
+    }
+
     init
     {
             //setBackgroundColor(ContextCompat.getColor(context, R.color.colorTaskBackground))

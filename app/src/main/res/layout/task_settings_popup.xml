@@ -77,7 +77,7 @@
             <LinearLayout
                     android:orientation="horizontal"
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent">
+                    android:layout_height="wrap_content">
                 <Spinner
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content" android:id="@+id/HourSpinner" android:layout_weight="1"
@@ -90,6 +90,26 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content" android:id="@+id/AmPmSpinner" android:layout_weight="1"
                         android:entries="@array/AMPM_TEXT"/>
+            </LinearLayout>
+            <LinearLayout
+                    android:orientation="horizontal"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+                <Button
+                        android:text="@string/APPLY_DEADLINE_TEXT"
+                        android:layout_width="match_parent"
+                        android:id="@+id/ApplyButton" android:layout_weight="1" android:layout_height="50dp"/>
+            </LinearLayout>
+            <LinearLayout
+                    android:orientation="horizontal"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent">
+                <TextView
+                        android:text="TextView"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content" android:id="@+id/DeadlineDisplayText"
+                        android:layout_weight="1" android:gravity="center" android:textSize="24sp"
+                        android:textColor="@android:color/white"/>
             </LinearLayout>
         </LinearLayout>
     </android.support.constraint.ConstraintLayout>

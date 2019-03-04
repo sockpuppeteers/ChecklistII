@@ -91,7 +91,37 @@ class BaseChecklist : AppCompatActivity(){
 
             taskSettingsLayoutView.taskNameView.text = currentTask?.getTaskText()
 
+            taskSettingsLayoutView.ApplyButton.setOnClickListener {
 
+                for(i in TaskLayout.childCount downTo 0 step 1)
+                {
+                    val tempChild = TaskLayout.getChildAt(i)
+                    if(tempChild is TaskBox)
+                    {
+                        if(tempChild == currentTask)
+                        {
+                            var newDeadline = taskSettingsLayoutView.DaySpinner.selectedItem.toString()
+                            newDeadline += "/" + taskSettingsLayoutView.MonthSpinner.selectedItem.toString()
+                            newDeadline += "/" + taskSettingsLayoutView.YearSpinner.selectedItem.toString()
+                            newDeadline += " " + taskSettingsLayoutView.HourSpinner.selectedItem.toString()
+                            newDeadline += ":" + taskSettingsLayoutView.MinuteSpinner.selectedItem.toString()
+                            newDeadline += " " + taskSettingsLayoutView.AmPmSpinner.selectedItem.toString()
+
+                            currentTask?.setDeadline(newDeadline)
+
+                            currentChecklist.changeTaskDeadline(i, User(1), newDeadline)
+
+                            val currentDeadlineText = getString(R.string.CURRENT_DEADLINE_TEXT) + "\n" + newDeadline
+
+                            taskSettingsLayoutView.DeadlineDisplayText.text = currentDeadlineText
+                        }
+                    }
+                }
+            }
+
+            val currentDeadlineText = getString(R.string.CURRENT_DEADLINE_TEXT) + "\n" + currentTask?.getDeadline()
+
+            taskSettingsLayoutView.DeadlineDisplayText.text = currentDeadlineText
 
             popupSettingsWindow.setOnDismissListener {
                 popupPresent = false

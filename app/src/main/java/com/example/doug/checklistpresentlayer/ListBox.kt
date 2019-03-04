@@ -26,6 +26,7 @@ class ListBox @JvmOverloads constructor(
 
     val listText = text
 
+
     init
     {
             //setBackgroundColor(ContextCompat.getColor(context, R.color.colorTaskBackground))
