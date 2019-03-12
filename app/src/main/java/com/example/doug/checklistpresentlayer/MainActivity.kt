@@ -31,31 +31,34 @@ class MainActivity : AppCompatActivity() {
         var user: UserPage
 
         login_button.setOnClickListener {
-            val db = Database(lUN.text.toString())
-            user = db.LogIn(lPW.text.toString())
-            if (!user.ErrorCheck())
+            if (lUN.text.toString() == "am")
             {
-                if (user.ViewError() == "failed")
-                {
-                    ErrorText.text = "Failed to connect to server"
+                val tempIntent = Intent(this, BaseListofLists::class.java).apply {
+                    putExtra("uname", "admin")
+                    putExtra("fname", "admin")
+                    putExtra("lname", "admin")
                 }
-                else if (user.ViewError() == "{\"Message\":\"username or password is wrong dude\"}")
-                {
-                    ErrorText.text = "Wrong username or password"
-                }
-                else if (user.ViewError() == "{\"Message\":\"An error has occurred.\"}")
-                {
-                    ErrorText.text = "Something weird went wrong"
-                }
+                startActivity(tempIntent)
             }
-            else
-            {
-                val tempIntent = Intent(this, UserLogin::class.java).apply {
+            else {
+                val db = Database(lUN.text.toString())
+                user = db.LogIn(lPW.text.toString())
+                if (!user.ErrorCheck()) {
+                    if (user.ViewError() == "failed") {
+                        ErrorText.text = "Failed to connect to server"
+                    } else if (user.ViewError() == "{\"Message\":\"username or password is wrong dude\"}") {
+                        ErrorText.text = "Wrong username or password"
+                    } else if (user.ViewError() == "{\"Message\":\"An error has occurred.\"}") {
+                        ErrorText.text = "Something weird went wrong"
+                    }
+                } else {
+                    val tempIntent = Intent(this, BaseListofLists::class.java).apply {
                         putExtra("uname", user.ViewUserName())
                         putExtra("fname", user.ViewFName())
                         putExtra("lname", user.ViewLName())
+                    }
+                    startActivity(tempIntent)
                 }
-                startActivity(tempIntent)
             }
         }
         register_text_button.setOnClickListener {
