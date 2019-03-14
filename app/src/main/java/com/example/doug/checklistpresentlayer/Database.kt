@@ -1,6 +1,7 @@
 package com.example.doug.checklistpresentlayer
 
 import okhttp3.*
+import khttp.*
 import java.io.IOException
 import java.util.*
 
@@ -326,6 +327,11 @@ class Database( var uName: String ) {
         }
         else
             error = "Passwords don't match"
+        if (error == "")
+        {
+            //post("https://api20190207120410.azurewebsites.net/api/users/")
+            //post proper user information
+        }
         return error
     }
 

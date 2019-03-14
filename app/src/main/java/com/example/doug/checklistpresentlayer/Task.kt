@@ -2,6 +2,7 @@ package com.example.doug.checklistpresentlayer
 
 import kotlin.concurrent.thread
 import khttp.*
+import org.json.JSONObject
 
 data class Task (var i_name: String, var i_desc: String) : ListTaskBase(i_name, i_desc, false) {
 
@@ -31,13 +32,15 @@ data class Task (var i_name: String, var i_desc: String) : ListTaskBase(i_name, 
     }
     fun postTask(key : Int)
     {
-        val payload = mapOf("Name" to i_name, "HasDeadline" to HasDL.toString(), "Completed" to completed.toString(),
-            "ChecklistID" to key.toString())
+        val payload = mapOf("ChecklistID" to key, "Name" to i_name, "HasDeadline" to HasDL, "Completed" to completed)
         thread()
         {
-            val post1 = post("https://api20190207120410.azurewebsites.net/api/tasks/" + key.toString(),
-            payload)
-            println(post1.statusCode)
+            val url = "https://api20190207120410.azurewebsites.net/api/task"
+            val payload = "{\"ChecklistID\":7,\"Name\":\"" + i_name + "\"}"
+            val r = post(url, data=payload, headers = mapOf("Content-Type" to "application/json"))
+            println(r.text)
+            //println(post1.statusCode)
+
         }
     }
 }

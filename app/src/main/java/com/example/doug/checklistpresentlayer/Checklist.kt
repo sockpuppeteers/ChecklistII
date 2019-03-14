@@ -5,6 +5,7 @@ import java.time.LocalDateTime
 class Checklist( var name: String ) {
 
     var uID = 0
+    var checkID = 0
     //List of tasks within a checklist
     var tasks =  mutableListOf<Task>()
 
