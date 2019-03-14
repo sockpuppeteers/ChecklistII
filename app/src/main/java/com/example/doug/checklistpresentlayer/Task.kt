@@ -37,6 +37,7 @@ data class Task (var i_name: String, var i_desc: String) : ListTaskBase(i_name, 
         {
             val post1 = post("https://api20190207120410.azurewebsites.net/api/tasks/" + key.toString(),
             payload)
+            println(post1.statusCode)
         }
     }
 }

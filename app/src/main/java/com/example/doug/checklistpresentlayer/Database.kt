@@ -189,7 +189,7 @@ class Database( var uName: String ) {
                                 currentlist = item.toInt()
                             }
                         }
-                        if (item == "ChecklistID") {
+                        if (item == "\"ChecklistID\"") {
                             z = 1
                         }
                     }
@@ -214,7 +214,7 @@ class Database( var uName: String ) {
                                 i = 9
                             }
                         }
-                        if (item == "ChecklistID") {
+                        if (item == "\"ChecklistID\"") {
                             z = 1
                         }
                     }

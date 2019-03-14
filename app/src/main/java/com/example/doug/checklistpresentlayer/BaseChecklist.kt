@@ -199,12 +199,13 @@ class BaseChecklist : AppCompatActivity(){
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_base_checklist)
         var db = Database(intent.getStringExtra("uname"))
-        currentChecklist.tasks = db.GetTasks(intent.getIntExtra("ChecklistID", 0))
+        var currentTasks = db.GetTasks(intent.getIntExtra("ChecklistID", 0))
         val taskLayout = findViewById<LinearLayout>(R.id.TaskLayout)
         var tempBox: TaskBox
-        for (Task in currentChecklist.tasks)
+        for (Task in currentTasks)
         {
-            createNewTask(Task.i_name, false)
+            if (Task.i_name != "")
+                createNewTask(Task.i_name, false)
         }
         val addButton = findViewById<Button>(R.id.AddTaskButton)
         val checkoffButton = findViewById<Button>(R.id.CheckoffButton)
