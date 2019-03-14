@@ -4,6 +4,7 @@ import java.time.LocalDateTime
 
 class Checklist( var name: String ) {
 
+    var uID = 0
     //List of tasks within a checklist
     var tasks =  mutableListOf<Task>()
 
@@ -36,6 +37,7 @@ class Checklist( var name: String ) {
     fun createTask(name: String, description: String, createdBy: User) {
         val task = Task(name, description)
         tasks.add(task)
+        tasks.last().postTask(uID)
         logChange(name, createdBy, kAction.CREATE_TASK, name)
     }
     /****************************************************************

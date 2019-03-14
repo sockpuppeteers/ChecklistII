@@ -1,5 +1,7 @@
 package com.example.doug.checklistpresentlayer
 
+import android.content.Intent
+import khttp.*
 import android.graphics.Color
 import android.os.Bundle
 import android.support.constraint.ConstraintLayout
@@ -13,6 +15,7 @@ import kotlinx.android.synthetic.main.history_popup.view.*
 import kotlinx.android.synthetic.main.popup_layout.view.*
 import kotlinx.android.synthetic.main.task_functions_layout.view.*
 import kotlinx.android.synthetic.main.task_settings_popup.view.*
+import kotlin.concurrent.thread
 
 
 /********************************************
@@ -113,7 +116,7 @@ class BaseChecklist : AppCompatActivity(){
         val mainView = findViewById<ScrollView>(R.id.TaskScrollView)
 
         //Adds the task to the checklist
-        currentChecklist.createTask(TaskText, "enable Later", User(1))
+        currentChecklist.createTask(TaskText, "enable Later", User(intent.getIntExtra("UserID", 0)))
 
         val popupFunctionWindow = PopupWindow(this)
 
@@ -195,7 +198,14 @@ class BaseChecklist : AppCompatActivity(){
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_base_checklist)
-
+        var db = Database(intent.getStringExtra("uname"))
+        currentChecklist.tasks = db.GetTasks(intent.getIntExtra("ChecklistID", 0))
+        val taskLayout = findViewById<LinearLayout>(R.id.TaskLayout)
+        var tempBox: TaskBox
+        for (Task in currentChecklist.tasks)
+        {
+            createNewTask(Task.i_name, false)
+        }
         val addButton = findViewById<Button>(R.id.AddTaskButton)
         val checkoffButton = findViewById<Button>(R.id.CheckoffButton)
         val historyButton = findViewById<Button>(R.id.HistoryButton)
@@ -226,6 +236,8 @@ class BaseChecklist : AppCompatActivity(){
                         //Retrieves the name of the task if the name is long enough
                         if (popup_edittext.text.toString().length >= 1) {
                             createNewTask(popup_edittext.text.toString(), false)
+                            currentChecklist.createTask(popup_edittext.text.toString(),
+                                "none", User(intent.getIntExtra("UserID", 0)))
                         }
 
                     //Set dismiss listener

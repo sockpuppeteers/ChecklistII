@@ -3,7 +3,8 @@ import kotlin.concurrent.thread
 import khttp.*
 
 data class ListClass (var i_name: String, var error : String?) : ListTaskBase(i_name, "Checklist", true) {
-    val p_key = Int
+    var p_key : Int = 0
+
     fun PostObject(uID : Int)
     {
         //val payload = mapOf("Name" to i_name)

@@ -1,5 +1,8 @@
 package com.example.doug.checklistpresentlayer
 
+import kotlin.concurrent.thread
+import khttp.*
+
 data class Task (var i_name: String, var i_desc: String) : ListTaskBase(i_name, i_desc, false) {
 
     var HasDL : Boolean = false
@@ -25,5 +28,15 @@ data class Task (var i_name: String, var i_desc: String) : ListTaskBase(i_name, 
     fun setId(key : Int)
     {
         db_key = key
+    }
+    fun postTask(key : Int)
+    {
+        val payload = mapOf("Name" to i_name, "HasDeadline" to HasDL.toString(), "Completed" to completed.toString(),
+            "ChecklistID" to key.toString())
+        thread()
+        {
+            val post1 = post("https://api20190207120410.azurewebsites.net/api/tasks/" + key.toString(),
+            payload)
+        }
     }
 }

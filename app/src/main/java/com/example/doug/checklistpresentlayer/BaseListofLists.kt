@@ -69,7 +69,11 @@ class BaseListofLists : AppCompatActivity(){
             //Set The action to be executed when the list in clicked
             tempBox.setOnClickListener{
                 val tempIntent = Intent(this, BaseChecklist::class.java).apply {
-                    putExtra("ListName", ListClass.i_name)
+                    putExtra("ChecklistID", ListClass.p_key)
+                    putExtra("uname", intent.getStringExtra("uname"))
+                    putExtra("fname", intent.getStringExtra("fname"))
+                    putExtra("lname", intent.getStringExtra("lname"))
+                    putExtra("UserID",intent.getIntExtra("UserID", 0))
                 }
 
                 //Start the BaseChecklist Activity
@@ -199,6 +203,11 @@ class BaseListofLists : AppCompatActivity(){
                                 val tempIntent = Intent(this, BaseChecklist::class.java).apply {
                                     putExtra("ListName", popup_edittext.text.toString())
                                     putExtra("UserName", UName)
+                                    putExtra("ChecklistID", currentListofLists.lists.last().p_key)
+                                    putExtra("uname", intent.getStringExtra("uname"))
+                                    putExtra("fname", intent.getStringExtra("fname"))
+                                    putExtra("lname", intent.getStringExtra("lname"))
+                                    putExtra("UserID",intent.getIntExtra("UserID", 0))
                                 }
                                 startActivity(tempIntent)
                             }

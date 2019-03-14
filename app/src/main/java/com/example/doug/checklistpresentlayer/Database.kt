@@ -78,6 +78,7 @@ class Database( var uName: String ) {
                 var i = 0
                 var x = 0
                 var name = ""
+                var id = 0
                 for (item in seprate) {
                     if (i == 0) {
                         if (item == "\"Checklists\"" || item == "\"Changes\"") {
@@ -96,15 +97,26 @@ class Database( var uName: String ) {
                     }
                     else if (i == 2)
                     {
-                        if (item == "\"Name\"" && x == 0)
+                        if (item == "\"ChecklistID\"" && x == 0)
                         {
                             x = 1
                         }
                         else if (x == 1)
                         {
+                            id = item.toInt()
+                            x = 0
+                        }
+                        if (item == "\"Name\"" && x == 0)
+                        {
+                            x = 2
+                        }
+                        else if (x == 2)
+                        {
                             name = item.drop(1)
                             name = name.dropLast(1)
-                            LoL.add(ListClass(name, "none"))
+                            val temp = ListClass(name, "none")
+                            temp.p_key = id
+                            LoL.add(temp)
                             x = 0
                             i = 0
                         }
@@ -155,28 +167,13 @@ class Database( var uName: String ) {
                 var name = ""
                 var dis = ""
                 var dl = ""
+                var currentlist = 0
                 for (item in seprate) {
                     if (i == 0) {
                         if (item == "\"Checklists\"" || item == "\"Changes\"")
                         {//finds the start of a list, skipping user
                             i = 9
                         }
-//                        else if (item == "\"ChecklistID\"")
-//                        {//this is to find the id of the list we want. makes the next if go on the next loop
-//                            y = 1
-//                        }
-//                        else if (y == 1)
-//                        {//this checks that the tasks we read in are the right tasks. if yes exit loop if not emty list
-//                            if (item.toInt() == ID)
-//                            {
-//                                break
-//                            }
-//                            else
-//                            {
-//                                LoL = mutableListOf<Task>()
-//                                y = 0
-//                            }
-//                        }
                     }
                     else if (i == 9) {
                         if (z == 1)
@@ -188,7 +185,33 @@ class Database( var uName: String ) {
                             }
                             else
                             {
-                                i = 2
+                                i = 11
+                                currentlist = item.toInt()
+                            }
+                        }
+                        if (item == "ChecklistID") {
+                            z = 1
+                        }
+                    }
+                    else if (i == 11)
+                    {
+                        if (item == "\"Users\"")
+                        {
+                            i = 12
+                        }
+                    }
+                    else if (i == 12)
+                    {
+                        if (z == 1)
+                        {
+                            z = 0
+                            if (item.toInt() == currentlist)
+                            {
+                                i = 1
+                            }
+                            else
+                            {
+                                i = 9
                             }
                         }
                         if (item == "ChecklistID") {
@@ -228,9 +251,9 @@ class Database( var uName: String ) {
                             i = 1
                         }
                         else if (x == 2) {
-                            if (item == "null") {
+                            if (item == "false") {
                                 x = 4
-                            } else if (item == "Deadline") {
+                            } else if (item == "\"Deadline\"") {
                                 x = 3
                             }
                         }
@@ -238,6 +261,7 @@ class Database( var uName: String ) {
                         {
                             dl = item.drop(1)
                             dl = dl.dropLast(1)
+                            x = 4
                         }
                         else if (x == 4) {
                             val t = Task(name, dis, dl)
