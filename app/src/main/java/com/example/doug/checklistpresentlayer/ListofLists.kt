@@ -1,8 +1,8 @@
 package com.example.doug.checklistpresentlayer
 import java.time.LocalDateTime
+import com.microsoft.windowsazure.mobileservices.*
 
-
-class ListofLists(var name: String, var error: String? ) {
+class ListofLists(var name: String, var error: String?, var uID : Int = 0) {
 
     //List of tasks within a checklist
     var lists =  mutableListOf<ListClass>()
@@ -30,9 +30,10 @@ class ListofLists(var name: String, var error: String? ) {
      *  Purpose: Creates an appropriate task with a name and
      *      description, shows who made it, and adds it to a list
      ***************************************************************/
-    fun createList(name: String, description: String, createdBy: User) {
-        val list = ListClass(name, description)
+    fun createList(name: String, createdBy: User) {
+        val list = ListClass(name, null)
         lists.add(list)
+        lists.last().PostObject(uID)
         logChange(name, createdBy, kAction.CREATE_TASK, name)
     }
     /****************************************************************
@@ -65,5 +66,10 @@ class ListofLists(var name: String, var error: String? ) {
             logChange(lists[arrayIndex].name, modifiedBy, kAction.DELETE_TASK)
             lists[arrayIndex].desc = description
         }
+    }
+
+    fun setuId(id : Int)
+    {
+        uID = id
     }
 }

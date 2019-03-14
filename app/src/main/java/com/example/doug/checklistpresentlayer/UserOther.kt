@@ -2,12 +2,17 @@ package com.example.doug.checklistpresentlayer
 
 import android.app.Activity
 
-data class Users(var dUID: Int, var dUserName: String = "", var dFName: String = "",
+data class User(var dUID: Int, var dUserName: String = "", var dFName: String = "",
                 var dLName: String = "", val dError: String? = "" )
 
 class UserPage(mUID: Int, mUserName: String, mFName: String, mLName: String, mError: String?)
 {
-    private val h_User: Users = Users(mUID,mUserName,mFName,mLName,mError)
+    private val h_User: User = User(mUID,mUserName,mFName,mLName,mError)
+
+    fun ViewID() : Int
+    {
+        return h_User.dUID
+    }
 
     fun ViewUserName() : String
     {

@@ -4,6 +4,7 @@ import okhttp3.*
 import java.io.IOException
 import java.util.*
 
+
 class Database( var uName: String ) {
 
     var body: String? = ""
@@ -60,20 +61,20 @@ class Database( var uName: String ) {
         }
         return user
     }
-
-    fun GetListofLists() : MutableList<ListofLists>//returns all lists user has access to
+    fun GetListofLists() : MutableList<ListClass>//returns all lists user has access to
     {
-        var LoL = mutableListOf<ListofLists>()
+        var LoL = mutableListOf<ListClass>()
         if (body == "")
             FetchJsonUser()
         while (body == ""){}
         if (body == "failed" || body == "{\"Message\":\"An error has occurred.\"}") {
-            LoL.add(ListofLists("", body))
+            LoL.add(ListClass("", body))
         }
         else {
             var seprate: List<String>? = body?.split("[", "]", "{", "}", ":", ",")?.filter { it.isNotBlank() }
 
             if (seprate != null) {
+                var found_us = false
                 var i = 0
                 var x = 0
                 var name = ""
@@ -84,22 +85,26 @@ class Database( var uName: String ) {
                         }
                     }
                     else if (i == 1) {
-                        if (item == "\"Users\"")
+                        if (item == "\"Users\"" && found_us)
                         {
                             i = 2
+                        }
+                        else if (item == "\"Users\"" && !found_us)
+                        {
+                            found_us = true
                         }
                     }
                     else if (i == 2)
                     {
                         if (item == "\"Name\"" && x == 0)
                         {
-                            x == 1
+                            x = 1
                         }
                         else if (x == 1)
                         {
                             name = item.drop(1)
                             name = name.dropLast(1)
-                            LoL.add(ListofLists(name, "none"))
+                            LoL.add(ListClass(name, "none"))
                             x = 0
                             i = 0
                         }
@@ -311,4 +316,5 @@ class Database( var uName: String ) {
             }
         })
     }
+
 }

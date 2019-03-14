@@ -1,6 +1,7 @@
 package com.example.doug.checklistpresentlayer
 
 import android.content.Intent
+import khttp.*
 import android.graphics.Color
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
@@ -20,8 +21,8 @@ import kotlinx.android.synthetic.main.task_functions_layout.view.*
 class BaseListofLists : AppCompatActivity(){
 
     var inEdit = false
-    var currentListofLists = ListofLists("Your CheckLists", "none")
 
+    var currentListofLists = ListofLists("Your CheckLists", "none")
     //Flag to see if any popups are present
     var popupPresent = false
 
@@ -30,41 +31,39 @@ class BaseListofLists : AppCompatActivity(){
     //Intialize things here
     init {
 
-    }
 
-    /********************************************
-     *Purpose: Click Listener for the edit button
-     *
-     * DO NOT USE
-     ********************************************/
-    val edit_listener = View.OnClickListener {
-
-        var taskCount = TaskLayout.childCount - 1
-
-        while (taskCount >= 0)
-        {
-            val currentChild = TaskLayout.getChildAt(taskCount)
-
-            if(currentChild is TaskBox)
-            {
-                val taskSwitch = currentChild.getChildAt(1)
-
-                if(taskSwitch is Switch)
-                {
-                    if(taskSwitch.isChecked)
-                    {
-                        TaskLayout.removeView(TaskLayout.getChildAt(taskCount))
-                    }
-                }
-            }
-
-            taskCount--
-        }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_base_listoflists)
+        currentListofLists.setuId(intent.getIntExtra("UserID", 0))
+        var db = Database(intent.getStringExtra("uname"))
+        currentListofLists.lists = db.GetListofLists()
+        //Get layout of checklist names
+        val taskLayout = findViewById<LinearLayout>(R.id.TaskLayout)
+        var tempBox: ListBox
+
+        for (ListClass in currentListofLists.lists) {
+            //Fill box with checklist name
+            tempBox = ListBox(
+                this,
+                ListClass.i_name
+            )
+
+            //Set The action to be executed when the list in clicked
+            tempBox.setOnClickListener{
+                val tempIntent = Intent(this, BaseChecklist::class.java).apply {
+                    putExtra("ListName", ListClass.i_name)
+                }
+
+                //Start the BaseChecklist Activity
+                startActivity(tempIntent)
+            }
+
+            //Add box to page
+            taskLayout.addView(tempBox)
+        }
 
         val addButton = findViewById<Button>(R.id.AddListButton)
         val editButton = findViewById<Button>(R.id.EditListButton)
@@ -85,8 +84,7 @@ class BaseListofLists : AppCompatActivity(){
                 val acceptButton = popupView.PopupMainView.AcceptButton
 
                 //Creates and adds the on click action to the add button
-                acceptButton.setOnClickListener(
-                    View.OnClickListener {
+                acceptButton.setOnClickListener{
 
 
                         val popup_edittext = popupView.PopupMainView.PopupEditText
@@ -99,7 +97,9 @@ class BaseListofLists : AppCompatActivity(){
                                 popup_edittext.text.toString()
                             )
 
-                            currentListofLists.createList(popup_edittext.text.toString(), "enable Later", User(1))
+                            currentListofLists.createList(popup_edittext.text.toString(),
+                                User(intent.getIntExtra("UserID", 0)))/*, intent.getStringExtra("uname"),
+                                     intent.getStringExtra("fname"), intent.getStringExtra("lname")))*/
 
                             popupWindow.dismiss()
 
@@ -151,36 +151,36 @@ class BaseListofLists : AppCompatActivity(){
 
                             popupFunctionWindow.setOnDismissListener {
                                 PopupWindow.OnDismissListener {
-                                    popupPresent = false;
+                                    popupPresent = false
                                 }
                             }
 
-                            new_list_box.setOnClickListener(View.OnClickListener {
+                            new_list_box.setOnClickListener{
                                 val tempIntent = Intent(this, BaseChecklist::class.java).apply {
                                     putExtra("ListName", popup_edittext.text.toString())
                                 }
                                 startActivity(tempIntent)
-                            })
+                            }
 
                             taskLayout.addView(new_list_box)
                         }
-                })
+                }
 
                 val cancelButton = popupView.PopupMainView.CancelButton
 
-                cancelButton.setOnClickListener(View.OnClickListener {
+                cancelButton.setOnClickListener{
 
                     popupWindow.dismiss()
 
-                })
+                }
 
-                popupWindow.setOnDismissListener(PopupWindow.OnDismissListener {
+                popupWindow.setOnDismissListener{
                     val popupEdittext = popupView.PopupMainView.PopupEditText
 
                     popupEdittext.text.clear()
 
                     popupPresent = false
-                })
+                }
 
                 popupWindow.isFocusable = true
 
@@ -192,8 +192,5 @@ class BaseListofLists : AppCompatActivity(){
         }
 
         addButton.setOnClickListener(addListener)
-
-        editButton.setOnClickListener(edit_listener)
-
     }
 }

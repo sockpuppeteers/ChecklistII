@@ -54,6 +54,7 @@ class MainActivity : AppCompatActivity() {
                         putExtra("uname", user.ViewUserName())
                         putExtra("fname", user.ViewFName())
                         putExtra("lname", user.ViewLName())
+                        putExtra("UserID",user.ViewID())
                 }
                 startActivity(tempIntent)
             }
