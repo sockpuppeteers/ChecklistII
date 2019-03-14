@@ -114,13 +114,24 @@ class Database( var uName: String ) {
         }
         return LoL
     }
-/*{"Changes":[],"Notes":[],"Notes1":[],"Tasks":[],"Users1":[],"Users":[],"Groups":[],"Checklists":[{"Changes":[],"Tasks":
-[{"Changes":[],"User":null,"TaskID":1,"ChecklistID":1,"Name":"Feed the Hog","Description":null,"HasDeadline":false,"Deadline":null,"Completed":false,"DateCompleted":null,"CompletedBy":null},
-{"Changes":[],"User":null,"TaskID":2,"ChecklistID":1,"Name":"Be the marble","Description":null,"HasDeadline":false,"Deadline":null,"Completed":false,"DateCompleted":null,"CompletedBy":null},
-{"Changes":[],"User":null,"TaskID":3,"ChecklistID":1,"Name":"work on the database","Description":null,"HasDeadline":false,"Deadline":null,"Completed":false,"DateCompleted":null,"CompletedBy":null},
-{"Changes":[],"User":null,"TaskID":4,"ChecklistID":1,"Name":"create dummy tasks","Description":null,"HasDeadline":false,"Deadline":null,"Completed":false,"DateCompleted":null,"CompletedBy":null},
-{"Changes":[],"User":null,"TaskID":5,"ChecklistID":1,"Name":"test task","Description":null,"HasDeadline":false,"Deadline":null,"Completed":false,"DateCompleted":null,"CompletedBy":null}],
-"Users":[],"ChecklistID":1,"Name":"Sample Checklist"}],"UserID":100000002,"Username":"u","FName":"cad","Lname":"mcnIv","pw":"p"}*/
+//    {"Changes":[],"Notes":[],"Notes1":[],"Tasks":[],"Users1":[],"Users":[],"Groups":[],"Checklists":[{"Changes":[],"Tasks":
+//        [{"Changes":[],"User":null,"TaskID":8,"ChecklistID":7,"Name":"Task 1","Description":null,"HasDeadline":false,"Deadline":null,"Completed":false,"DateCompleted":null,"CompletedBy":null},
+//            {"Changes":[],"User":null,"TaskID":9,"ChecklistID":7,"Name":"Task 2","Description":null,"HasDeadline":false,"Deadline":null,"Completed":false,"DateCompleted":null,"CompletedBy":null},
+//            {"Changes":[],"User":null,"TaskID":10,"ChecklistID":7,"Name":"Task 3","Description":null,"HasDeadline":false,"Deadline":null,"Completed":false,"DateCompleted":null,"CompletedBy":null},
+//            {"Changes":[],"User":null,"TaskID":11,"ChecklistID":7,"Name":"Task 4","Description":null,"HasDeadline":false,"Deadline":null,"Completed":false,"DateCompleted":null,"CompletedBy":null},
+//            {"Changes":[],"User":null,"TaskID":12,"ChecklistID":7,"Name":"Task 5","Description":null,"HasDeadline":false,"Deadline":null,"Completed":false,"DateCompleted":null,"CompletedBy":null},
+//            {"Changes":[],"User":null,"TaskID":13,"ChecklistID":7,"Name":"Task 6","Description":null,"HasDeadline":false,"Deadline":null,"Completed":false,"DateCompleted":null,"CompletedBy":null},
+//            {"Changes":[],"User":null,"TaskID":14,"ChecklistID":7,"Name":"Unite the Koreas","Description":null,"HasDeadline":false,"Deadline":null,"Completed":false,"DateCompleted":null,"CompletedBy":null},
+//            {"Changes":[],"User":null,"TaskID":15,"ChecklistID":7,"Name":"Task 8","Description":null,"HasDeadline":false,"Deadline":null,"Completed":false,"DateCompleted":null,"CompletedBy":null},
+//            {"Changes":[],"User":null,"TaskID":16,"ChecklistID":7,"Name":"Task 9","Description":null,"HasDeadline":false,"Deadline":null,"Completed":false,"DateCompleted":null,"CompletedBy":null},
+//            {"Changes":[],"User":null,"TaskID":17,"ChecklistID":7,"Name":"Task 10","Description":null,"HasDeadline":false,"Deadline":null,"Completed":false,"DateCompleted":null,"CompletedBy":null},
+//            {"Changes":[],"User":null,"TaskID":18,"ChecklistID":7,"Name":"Task 11","Description":null,"HasDeadline":false,"Deadline":null,"Completed":false,"DateCompleted":null,"CompletedBy":null},
+//            {"Changes":[],"User":null,"TaskID":19,"ChecklistID":7,"Name":"Task 12","Description":null,"HasDeadline":false,"Deadline":null,"Completed":false,"DateCompleted":null,"CompletedBy":null}],
+//        "Users":[{"Changes":[],"Notes":[],"Notes1":[],"Tasks":[],"Users1":[],"Users":[],"Groups":[],"Checklists":[{"Changes":[],"Tasks":[],"Users":[],"ChecklistID":8,"Name":"Second Checklist"}],
+//            "UserID":100000000,"Username":"admin","FName":"newName","Lname":"rogers","pw":""},
+//        {"Changes":[],"Notes":[],"Notes1":[],"Tasks":[],"Users1":[],"Users":[],"Groups":[],"Checklists":[],"UserID":100000009,"Username":"hashTest2","FName":"joe","Lname":"rogan","pw":""}],
+//        "ChecklistID":7,"Name":"Best Checklist"},{"Changes":[],"Tasks":[],"Users":[],"ChecklistID":9,"Name":"test"}],
+//        "UserID":100000011,"Username":"hashTestInfinity","FName":"Billy","Lname":"Mays","pw":""}
 
     fun GetTasks(ID: Int) : MutableList<Task>//returns list of tasks for a list at ID on the database
     {
@@ -140,33 +151,48 @@ class Database( var uName: String ) {
                 var i = 0
                 var x = 0
                 var y = 0
+                var z = 0
                 var name = ""
                 var dis = ""
                 var dl = ""
-                var check = ""
                 for (item in seprate) {
                     if (i == 0) {
                         if (item == "\"Checklists\"" || item == "\"Changes\"")
                         {//finds the start of a list, skipping user
-                            i = 1
+                            i = 9
                         }
-                        else if (item == "\"ChecklistID\"")
-                        {//this is to find the id of the list we want. makes the next if go on the next loop
-                            y = 1
-                        }
-                        else if (y == 1)
-                        {//this checks that the tasks we read in are the right tasks. if yes exit loop if no emty list
-                            check = item.drop(1)
-                            check = check.dropLast(1)
-                            if (check.toInt() == ID)
+//                        else if (item == "\"ChecklistID\"")
+//                        {//this is to find the id of the list we want. makes the next if go on the next loop
+//                            y = 1
+//                        }
+//                        else if (y == 1)
+//                        {//this checks that the tasks we read in are the right tasks. if yes exit loop if not emty list
+//                            if (item.toInt() == ID)
+//                            {
+//                                break
+//                            }
+//                            else
+//                            {
+//                                LoL = mutableListOf<Task>()
+//                                y = 0
+//                            }
+//                        }
+                    }
+                    else if (i == 9) {
+                        if (z == 1)
+                        {
+                            z = 0
+                            if (item.toInt() == ID)
                             {
-                                break
+                                i = 1
                             }
                             else
                             {
-                                LoL = mutableListOf<Task>()
-                                y = 0
+                                i = 2
                             }
+                        }
+                        if (item == "ChecklistID") {
+                            z = 1
                         }
                     }
                     else if (i == 1) {

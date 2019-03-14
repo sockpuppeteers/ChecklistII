@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#41bbbb</color>
-    <color name="colorPrimaryDark">#00574B</color>
-    <color name="colorAccent">#d8281b</color>
-    <color name="colorPopup">#b9b5b4</color>
-    <color name="colorDefaultButton">#807e7e</color>
-    <color name="colorTextSelect">#131212</color>
-    <color name="colorTaskBackground">#724646</color>
+    <color name="colorPrimary">#1C1C58</color>
+    <color name="colorPrimaryDark">#030323</color>
+    <color name="colorAccent">#7E7518</color>
+    <color name="colorPopup">#7E5218</color>
+    <color name="colorDefaultButton">#545491</color>
+    <color name="colorTextSelect">#333374</color>
+    <color name="colorTaskBackground">#D0C669</color>
 </resources>
 
