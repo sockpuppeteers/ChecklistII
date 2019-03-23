@@ -2,9 +2,10 @@ package com.example.doug.checklistpresentlayer
 
 import okhttp3.*
 import khttp.*
+import org.json.JSONObject
 import java.io.IOException
 import java.util.*
-
+import kotlin.concurrent.thread
 
 class Database( var uName: String ) {
 
@@ -127,24 +128,6 @@ class Database( var uName: String ) {
         }
         return LoL
     }
-//    {"Changes":[],"Notes":[],"Notes1":[],"Tasks":[],"Users1":[],"Users":[],"Groups":[],"Checklists":[{"Changes":[],"Tasks":
-//        [{"Changes":[],"User":null,"TaskID":8,"ChecklistID":7,"Name":"Task 1","Description":null,"HasDeadline":false,"Deadline":null,"Completed":false,"DateCompleted":null,"CompletedBy":null},
-//            {"Changes":[],"User":null,"TaskID":9,"ChecklistID":7,"Name":"Task 2","Description":null,"HasDeadline":false,"Deadline":null,"Completed":false,"DateCompleted":null,"CompletedBy":null},
-//            {"Changes":[],"User":null,"TaskID":10,"ChecklistID":7,"Name":"Task 3","Description":null,"HasDeadline":false,"Deadline":null,"Completed":false,"DateCompleted":null,"CompletedBy":null},
-//            {"Changes":[],"User":null,"TaskID":11,"ChecklistID":7,"Name":"Task 4","Description":null,"HasDeadline":false,"Deadline":null,"Completed":false,"DateCompleted":null,"CompletedBy":null},
-//            {"Changes":[],"User":null,"TaskID":12,"ChecklistID":7,"Name":"Task 5","Description":null,"HasDeadline":false,"Deadline":null,"Completed":false,"DateCompleted":null,"CompletedBy":null},
-//            {"Changes":[],"User":null,"TaskID":13,"ChecklistID":7,"Name":"Task 6","Description":null,"HasDeadline":false,"Deadline":null,"Completed":false,"DateCompleted":null,"CompletedBy":null},
-//            {"Changes":[],"User":null,"TaskID":14,"ChecklistID":7,"Name":"Unite the Koreas","Description":null,"HasDeadline":false,"Deadline":null,"Completed":false,"DateCompleted":null,"CompletedBy":null},
-//            {"Changes":[],"User":null,"TaskID":15,"ChecklistID":7,"Name":"Task 8","Description":null,"HasDeadline":false,"Deadline":null,"Completed":false,"DateCompleted":null,"CompletedBy":null},
-//            {"Changes":[],"User":null,"TaskID":16,"ChecklistID":7,"Name":"Task 9","Description":null,"HasDeadline":false,"Deadline":null,"Completed":false,"DateCompleted":null,"CompletedBy":null},
-//            {"Changes":[],"User":null,"TaskID":17,"ChecklistID":7,"Name":"Task 10","Description":null,"HasDeadline":false,"Deadline":null,"Completed":false,"DateCompleted":null,"CompletedBy":null},
-//            {"Changes":[],"User":null,"TaskID":18,"ChecklistID":7,"Name":"Task 11","Description":null,"HasDeadline":false,"Deadline":null,"Completed":false,"DateCompleted":null,"CompletedBy":null},
-//            {"Changes":[],"User":null,"TaskID":19,"ChecklistID":7,"Name":"Task 12","Description":null,"HasDeadline":false,"Deadline":null,"Completed":false,"DateCompleted":null,"CompletedBy":null}],
-//        "Users":[{"Changes":[],"Notes":[],"Notes1":[],"Tasks":[],"Users1":[],"Users":[],"Groups":[],"Checklists":[{"Changes":[],"Tasks":[],"Users":[],"ChecklistID":8,"Name":"Second Checklist"}],
-//            "UserID":100000000,"Username":"admin","FName":"newName","Lname":"rogers","pw":""},
-//        {"Changes":[],"Notes":[],"Notes1":[],"Tasks":[],"Users1":[],"Users":[],"Groups":[],"Checklists":[],"UserID":100000009,"Username":"hashTest2","FName":"joe","Lname":"rogan","pw":""}],
-//        "ChecklistID":7,"Name":"Best Checklist"},{"Changes":[],"Tasks":[],"Users":[],"ChecklistID":9,"Name":"test"}],
-//        "UserID":100000011,"Username":"hashTestInfinity","FName":"Billy","Lname":"Mays","pw":""}
 
     fun GetTasks(ID: Int) : MutableList<Task>//returns list of tasks for a list at ID on the database
     {
@@ -327,10 +310,19 @@ class Database( var uName: String ) {
         }
         else
             error = "Passwords don't match"
+        //if there is no error then this gets called
+        //and we can post the data to the database
         if (error == "")
         {
-            //post("https://api20190207120410.azurewebsites.net/api/users/")
-            //post proper user information
+            //payload is the body of the api request
+            val payload = mapOf("Username" to uName, "FName" to FName, "LName" to LName, "pw" to PW1)
+            //api calls can't be done in the main thread
+            thread()
+            {
+                val url = "https://sockpuppeteerapi3.azurewebsites.net/api/users/"
+                val r = post(url, data=JSONObject(payload), headers = mapOf("Content-Type" to "application/json"))
+
+            }
         }
         return error
     }

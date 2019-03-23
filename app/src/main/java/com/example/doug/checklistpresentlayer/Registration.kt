@@ -14,13 +14,17 @@ class Registration : AppCompatActivity() {
         setContentView(R.layout.activity_registration)
 
         register_button.setOnClickListener {
+            //create a database object with the given username
             val db = Database(rUserName.text.toString())
+            //error will be empty if everything was successful
             var error: String = db.RegisterUser(rEmail.text.toString(),rFName.text.toString(),rLName.text.toString(),
                 rPW1.text.toString(),rPW2.text.toString())
             if (error != "")
                 rErrorText.text = error
+            //else will be called if there were no errors
             else
             {
+                //send the data to the next page
                 val tempIntent = Intent(this, UserLogin::class.java).apply {
                         putExtra("uname", rUserName.text.toString())
                         putExtra("fname", rFName.text.toString())
@@ -31,13 +35,3 @@ class Registration : AppCompatActivity() {
         }
     }
 }
-
-//class AllUsers(val users: List<UserPage>)
-//{
-//
-//}
-//
-//class UserTemp(val UserID: Int, val Username: String, val Fname: String, val Lname: String, private val pw: String)
-//{
-//
-//}
