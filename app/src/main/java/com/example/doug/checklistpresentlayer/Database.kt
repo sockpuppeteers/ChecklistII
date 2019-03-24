@@ -5,22 +5,24 @@ import kotlinx.coroutines.*
 import com.github.kittinunf.fuel.coroutines.awaitObjectResponseResult
 import com.github.kittinunf.fuel.coroutines.awaitObjectResult
 import com.github.kittinunf.fuel.coroutines.awaitStringResponseResult
+import com.github.kittinunf.fuel.gson.jsonBody
 import com.github.kittinunf.result.*
 import okhttp3.*
 import khttp.*
 import org.json.JSONObject
 import java.io.IOException
 import kotlin.concurrent.thread
+import com.google.gson.Gson
+
+
 
 class Database( var uName: String ) {
 
     var body: String? = ""
+    var user = User(0, "", "", "", "","none")
 
     fun LogIn(Password: String) : UserPage
     {
-        //create a user object
-        var user = User(0, "", "", "", "none")
-
         runBlocking {
             //make a login request to the API
             //the result is automatically deserialized into a User object with the gson library
@@ -245,60 +247,39 @@ class Database( var uName: String ) {
     fun RegisterUser(Email: String, FName: String, LName: String, PW1: String, PW2: String) : String
     {
         var error: String = ""
-        //only do anything if the passwords match
-        if (PW1 == PW2) {
-            FetchJsonUser()
-            while (body == ""){}
-            if (body != "{\"Message\":\"User with username = " + uName +" not found\"}")
-                error = "Username Taken"
-            else if (PW1.length > 16)
-                error = "Password to long"
-            else if (PW1.length < 4)
-                error = "Password to short"
-            else if (!Email.contains('@'))
-            {
-                error = "Must be a valid email"
-            }
-            else if (PW1.contains("([a-z]|[A-Z]|!|-|_|@|#|$|%|&|[0-9])*".toRegex())) {
-                if (!(PW1.contains(".*([a-z]|[A-Z]).*".toRegex()))) {
-                    error = "Password must contain a letter"
-                }
-                if (!(PW1.contains(".*[0-9].*".toRegex()))) {
-                    if (error.isEmpty())
-                        error = "Password must contain a number"
-                    else
-                        error += " and a number"
-                }
-                if (!(PW1.contains('!') || PW1.contains('-') || PW1.contains('_')
-                            || PW1.contains('@') || PW1.contains('#') || PW1.contains('$')
-                            || PW1.contains('%') || PW1.contains('&'))
+
+        if (PW1 != PW2){
+            error = "Passwords don't match"
+        }
+
+        else {
+            runBlocking {
+                //make a GET request to the api to see if a user with the given username already exists
+                val (request, response, result) = Fuel.get("https://sockpuppeteerapi3.azurewebsites.net/Api/Users/GetString/$uName").awaitStringResponseResult()
+
+                //if the username is taken, set an error message
+                //otherwise do nothing
+                result.fold(
+                    { error = "Username unavailable"}, {}
                 )
-                {
-                    if (error.isEmpty())
-                        error = "Password must contain a nonstandard character"
-                    else
-                        error += " and a nonstandard character"
-                }
-            }
-            else {
-                error = "Password contains an unusable character"
             }
         }
-        else
-            error = "Passwords don't match"
+
         //if there is no error then this gets called
         //and we can post the data to the database
-        if (error == "")
-        {
-            //payload is the body of the api request
-            val payload = mapOf("Username" to uName, "FName" to FName, "LName" to LName, "pw" to PW1)
-            //api calls can't be done in the main thread
-            thread()
-            {
-                val url = "https://sockpuppeteerapi3.azurewebsites.net/api/users/"
-                val r = post(url, data=JSONObject(payload), headers = mapOf("Content-Type" to "application/json"))
-            }
+        if (error == "") {
+            //create a json model of a user object
+            val newUser = User(null, uName, FName, LName, PW1, null)
+            val gson = Gson()
+            val json = gson.toJson(newUser)
+
+            //post the object to the database
+            Fuel.post("https://sockpuppeteerapi3.azurewebsites.net/api/users/")
+                .header("Content-Type" to "application/json")
+                .body(json.toString())
+                .response { req, res, result -> /* you could do something with the response here */ }
         }
+
         return error
     }
 
