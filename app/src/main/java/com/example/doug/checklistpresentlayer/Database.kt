@@ -1,68 +1,43 @@
 package com.example.doug.checklistpresentlayer
 
+import com.github.kittinunf.fuel.*
+import kotlinx.coroutines.*
+import com.github.kittinunf.fuel.coroutines.awaitObjectResponseResult
+import com.github.kittinunf.fuel.coroutines.awaitObjectResult
+import com.github.kittinunf.fuel.coroutines.awaitStringResponseResult
+import com.github.kittinunf.result.*
 import okhttp3.*
 import khttp.*
 import org.json.JSONObject
 import java.io.IOException
-import java.util.*
 import kotlin.concurrent.thread
 
 class Database( var uName: String ) {
 
     var body: String? = ""
 
-    fun LogIn(Password: String) : UserPage//used only to login
+    fun LogIn(Password: String) : UserPage
     {
-        var user = UserPage(0,"","","", "")
-        FetchJsonLogin(Password)
-        while (body == ""){}
-        if (body == "failed" || body == "{\"Message\":\"username or password is wrong dude\"}" || body == "{\"Message\":\"An error has occurred.\"}") {
-            user = UserPage(0,"","","", body)
-        }
-        else {
-            var seprate: List<String>? = body?.split("[", "]", "{", "}", "\"", ":", ",")?.filter { it.isNotBlank() }
+        //create a user object
+        var user = User(0, "", "", "", "none")
 
-            if (seprate != null) {
-                var i = 0
-                var UID = 0
-                var UN = ""
-                var FN = ""
-                var LN = ""
-                for (item in seprate) {
-                    if (i == 0) {
-                        if (item == "UserID") {
-                            i = 1
-                        }
-                        if (item == "Username") {
-                            i = 2
-                        }
-                        if (item == "FName") {
-                            i = 3
-                        }
-                        if (item == "Lname") {
-                            i = 4
-                        }
-                    } else {
-                        if (i == 1) {
-                            UID = item.toInt()
-                            i = 0
-                        } else if (i == 2) {
-                            UN = item
-                            i = 0
-                        } else if (i == 3) {
-                            FN = item
-                            i = 0
-                        } else if (i == 4) {
-                            LN = item
-                            i = 0
-                            user = UserPage(UID, UN, FN, LN, "none")
-                        }
-                    }
-                }
-            }
+        runBlocking {
+            //make a login request to the API
+            //the result is automatically deserialized into a User object with the gson library
+            val (request, response, result) = Fuel.get("https://sockpuppeteerapi3.azurewebsites.net/Api/Users/login/$uName/$Password").awaitObjectResponseResult(User.deserialize())
+
+            //if the request is successful, copy the data into our user object
+            //otherwise copy the error message
+            result.fold(
+                { data -> user = data
+                  user.Error = "none"},
+                { error -> user.Error = error.message }
+            )
         }
-        return user
+
+        return UserPage(user.UserID, user.Username, user.FName, user.LName, user.Error)
     }
+
     fun GetListofLists() : MutableList<ListClass>//returns all lists user has access to
     {
         var LoL = mutableListOf<ListClass>()
@@ -270,6 +245,7 @@ class Database( var uName: String ) {
     fun RegisterUser(Email: String, FName: String, LName: String, PW1: String, PW2: String) : String
     {
         var error: String = ""
+        //only do anything if the passwords match
         if (PW1 == PW2) {
             FetchJsonUser()
             while (body == ""){}
@@ -321,7 +297,6 @@ class Database( var uName: String ) {
             {
                 val url = "https://sockpuppeteerapi3.azurewebsites.net/api/users/"
                 val r = post(url, data=JSONObject(payload), headers = mapOf("Content-Type" to "application/json"))
-
             }
         }
         return error
@@ -329,7 +304,7 @@ class Database( var uName: String ) {
 
     fun FetchJsonUser()//used whenever we need info for a user
     {
-        val url = "https://api20190207120410.azurewebsites.net/Api/Users/GetString/" + uName
+        val url = "https://sockpuppeteerapi3.azurewebsites.net/api/users/GetString/$uName"
         val request = Request.Builder().url(url).build()
 
         val client = OkHttpClient()
@@ -345,24 +320,4 @@ class Database( var uName: String ) {
             }
         })
     }
-
-    fun FetchJsonLogin(password: String)//used for login only
-    {
-        val url = "https://api20190207120410.azurewebsites.net/Api/Users/login/" + uName + '/' + password
-        val request = Request.Builder().url(url).build()
-
-        val client = OkHttpClient()
-        client.newCall(request).enqueue(object: Callback {
-            override fun onFailure(call: Call, e: IOException) {
-                println("Failed to execute request")
-                body = "failed"
-            }
-
-            override fun onResponse(call: Call, response: Response) {
-                body = response.body()?.string()
-                println(body)
-            }
-        })
-    }
-
 }

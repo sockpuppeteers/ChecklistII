@@ -1,9 +1,18 @@
 package com.example.doug.checklistpresentlayer
 
 import android.app.Activity
+import com.github.kittinunf.fuel.core.ResponseDeserializable
+import com.google.gson.Gson
+import com.google.gson.annotations.SerializedName
 
-data class User(var dUID: Int, var dUserName: String = "", var dFName: String = "",
-                var dLName: String = "", val dError: String? = "" )
+data class User(@SerializedName("UserID") var UserID: Int, @SerializedName("Username") var Username: String = "",
+                @SerializedName("FName") var FName: String = "",
+                @SerializedName("Lname") var LName: String = "",
+                var Error: String? = "" ){
+    class deserialize: ResponseDeserializable<User>{
+        override fun deserialize(content: String): User = Gson().fromJson(content, User::class.java)
+    }
+}
 
 class UserPage(mUID: Int, mUserName: String, mFName: String, mLName: String, mError: String?)
 {
@@ -11,33 +20,33 @@ class UserPage(mUID: Int, mUserName: String, mFName: String, mLName: String, mEr
 
     fun ViewID() : Int
     {
-        return h_User.dUID
+        return h_User.UserID
     }
 
     fun ViewUserName() : String
     {
-        return h_User.dUserName
+        return h_User.Username
     }
 
     fun ViewFName() : String
     {
-        return h_User.dFName
+        return h_User.FName
     }
 
     fun ViewLName() : String
     {
-        return h_User.dLName
+        return h_User.LName
     }
 
     fun ViewError() : String?
     {
-        return h_User.dError
+        return h_User.Error
     }
 
     fun ErrorCheck() : Boolean
     {
         var success = false
-        if ( h_User.dError == "none")
+        if ( h_User.Error == "none")
         {
             success = true
         }
