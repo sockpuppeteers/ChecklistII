@@ -244,25 +244,18 @@ class Database( var uName: String ) {
         return LoL
     }
 
-    fun RegisterUser(Email: String, FName: String, LName: String, PW1: String, PW2: String) : String
+    fun RegisterUser(Email: String, FName: String, LName: String, PW1: String) : String
     {
-        var error: String = ""
+        var error = ""
+        runBlocking {
+            //make a GET request to the api to see if a user with the given username already exists
+            val (request, response, result) = Fuel.get("https://sockpuppeteerapi3.azurewebsites.net/Api/Users/GetString/$uName").awaitStringResponseResult()
 
-        if (PW1 != PW2){
-            error = "Passwords don't match"
-        }
-
-        else {
-            runBlocking {
-                //make a GET request to the api to see if a user with the given username already exists
-                val (request, response, result) = Fuel.get("https://sockpuppeteerapi3.azurewebsites.net/Api/Users/GetString/$uName").awaitStringResponseResult()
-
-                //if the username is taken, set an error message
-                //otherwise do nothing
-                result.fold(
-                    { error = "Username unavailable"}, {}
-                )
-            }
+            //if the username is taken, set an error message
+            //otherwise do nothing
+            result.fold(
+                { error = "Username unavailable"}, {}
+            )
         }
 
         //if there is no error then this gets called
