@@ -1,71 +1,26 @@
 package com.example.doug.checklistpresentlayer
 
+import com.github.kittinunf.fuel.core.ResponseDeserializable
+import com.google.gson.Gson
+import com.google.gson.annotations.SerializedName
 import kotlin.concurrent.thread
 import khttp.*
 import org.json.JSONObject
 
-data class Task (var i_name: String, var i_desc: String) {
-
-    var HasDL : Boolean = false
-    var Deadline : String = ""
-    var completed : Boolean = false
-    var compdatetime : String? =  null
-    var compby : User? = null
+data class Task (@SerializedName("Name") var name : String = "") {
+    @SerializedName("TaskID") var TaskID: Int? = null
+    @SerializedName("ChecklistID") var ChecklistID:  Int? = null
+    @SerializedName("Deadline") var Deadline : String? = null
+    @SerializedName("DateCompleted") var compdatetime : String? =  null
+    @SerializedName("UserID") var isRecurring : Int = 0
     var error : String? = ""
-    var db_key : Int = 0
-    constructor(_name: String, _description: String, deadline: String) : this(_name, _description){
+
+    constructor(_name: String, deadline: String) : this(_name){
         Deadline = deadline
-        HasDL = true
     }
-    constructor(_name: String, _description: String, deadline: String, key : Int) : this(_name, _description){
+
+    constructor(_name: String, deadline: String, key : Int) : this(_name){
         Deadline = deadline
-        HasDL = true
-        db_key = key
+        TaskID = key
     }
-    fun getId() : Int
-    {
-        return db_key
-    }
-    fun setId(key : Int)
-    {
-        db_key = key
-    }
-    fun postTask(key : Int)
-    {
-        thread()
-        {
-            val url = "https://api20190207120410.azurewebsites.net/api/task"
-            val payload = "{\"ChecklistID\":12,\"Name\":\"" + i_name + "\"}"
-            val r = post(url, data=payload, headers = mapOf("Content-Type" to "application/json"))
-
-            println(r.statusCode)
-
-        }
-    }
-    /*fun removeTask(key: Int)
-    {
-        thread()
-        {
-            val url = "https://api20190207120410.azurewebsites.net/api/task/"
-
-            val r = delete(url + db_key.toString())
-
-            println(r.statusCode)
-
-        }
-    }*/
-
-    /*fun putTask(key : Int)
-    {
-        thread()
-        {
-            val url = "https://api20190207120410.azurewebsites.net/api/task"
-            val payload = "{\"ChecklistID\":7,\"Name\":\"" + i_name + "\"}"
-            val r = put(url, data = payload, headers = mapOf("Content-Type" to "application/json"))
-
-            r.jsonObject
-            r.statusCode
-        }
-
-    }*/
 }

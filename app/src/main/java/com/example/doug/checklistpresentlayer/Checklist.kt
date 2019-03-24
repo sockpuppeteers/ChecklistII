@@ -1,7 +1,6 @@
 package com.example.doug.checklistpresentlayer
 import java.time.LocalDateTime
 
-
 class Checklist( var name: String ) {
 
     var uID = 0
@@ -35,18 +34,17 @@ class Checklist( var name: String ) {
      *  Purpose: Creates an appropriate task with a name and
      *      description, shows who made it, and adds it to a list
      ***************************************************************/
-    fun createTask(name: String, description: String, createdBy: User) {
-        val task = Task(name, description)
+    fun createTask(name: String, createdBy: User) {
+        val task = Task(name)
         tasks.add(task)
-        tasks.last().postTask(uID)
         logChange(name, createdBy, kAction.CREATE_TASK, name)
     }
     /****************************************************************
      *  Purpose: Overloaded function of create task that includes all
      *      previous information and also includes a deadline
      ***************************************************************/
-    fun createTask(name: String, description: String, deadline: String, createdBy: User) {
-        val task = Task(name, description, deadline)
+    fun createTask(name: String, deadline: String, createdBy: User) {
+        val task = Task(name, deadline)
         tasks.add(task)
         logChange(name, createdBy, kAction.CREATE_TASK, name)
     }
@@ -58,8 +56,6 @@ class Checklist( var name: String ) {
 
         if (arrayIndex >= 0 && arrayIndex < tasks.size) {
             logChange(tasks[arrayIndex].name, completedBy, kAction.COMPLETE_TASK)
-            tasks[arrayIndex].completed = true
-            tasks[arrayIndex].compby = completedBy
             tasks[arrayIndex].compdatetime = LocalDateTime.now().toString()
         }
     }
@@ -70,8 +66,6 @@ class Checklist( var name: String ) {
     fun completeTask(arrayIndex: Int, completedBy: User, datetimeWhenCompleted: String) {
         if (arrayIndex >= 0 && arrayIndex < tasks.size) {
             logChange(tasks[arrayIndex].name, completedBy, kAction.COMPLETE_TASK)
-            tasks[arrayIndex].completed = true
-            tasks[arrayIndex].compby = completedBy
             tasks[arrayIndex].compdatetime = datetimeWhenCompleted
         }
     }
@@ -99,16 +93,7 @@ class Checklist( var name: String ) {
             tasks[arrayIndex].name = name
         }
     }
-    /****************************************************************
-     *  Purpose: Changes the description of a task to a new value.
-     *      Shows which user modified it for logs.
-     ***************************************************************/
-    fun changeTaskDescription(arrayIndex: Int, modifiedBy: User, description: String) {
-        if (arrayIndex >= 0 && arrayIndex < tasks.size) {
-            logChange(tasks[arrayIndex].name, modifiedBy, kAction.DELETE_TASK)
-            tasks[arrayIndex].desc = description
-        }
-    }
+
     /****************************************************************
      *  Purpose: Changes the deadline of a task to a new value.
      *      Shows which user modified it for logs.
@@ -127,7 +112,6 @@ class Checklist( var name: String ) {
         if (arrayIndex >= 0 && arrayIndex < tasks.size) {
             logChange(tasks[arrayIndex].name, modifiedBy, kAction.DELETE_TASK)
             tasks[arrayIndex].Deadline = ""
-            tasks[arrayIndex].HasDL = false;
         }
     }
 }
