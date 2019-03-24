@@ -31,9 +31,8 @@ class ListofLists(var name: String, var error: String?, var uID : Int = 0) {
      *      description, shows who made it, and adds it to a list
      ***************************************************************/
     fun createList(name: String, createdBy: User) {
-        val list = ListClass(name, null)
+        val list = ListClass(null, name, null)
         lists.add(list)
-        lists.last().PostObject(uID)
         logChange(name, createdBy, kAction.CREATE_TASK, name)
     }
     /****************************************************************
@@ -42,7 +41,7 @@ class ListofLists(var name: String, var error: String?, var uID : Int = 0) {
      ***************************************************************/
     fun deleteList(arrayIndex : Int, deletedBy: User) {
         if (arrayIndex >= 0 && arrayIndex < lists.size) {
-            logChange(lists[arrayIndex].name, deletedBy, kAction.DELETE_TASK)
+            logChange(lists[arrayIndex].i_name, deletedBy, kAction.DELETE_TASK)
             lists.removeAt(arrayIndex)
         }
     }
@@ -53,18 +52,8 @@ class ListofLists(var name: String, var error: String?, var uID : Int = 0) {
     fun changeListName(arrayIndex: Int, modifiedBy: User, name: String) {
 
         if (arrayIndex >= 0 && arrayIndex < lists.size) {
-            logChange(lists[arrayIndex].name, modifiedBy, kAction.DELETE_TASK)
-            lists[arrayIndex].name = name
-        }
-    }
-    /****************************************************************
-     *  Purpose: Changes the description of a task to a new value.
-     *      Shows which user modified it for logs.
-     ***************************************************************/
-    fun changeListDescription(arrayIndex: Int, modifiedBy: User, description: String) {
-        if (arrayIndex >= 0 && arrayIndex < lists.size) {
-            logChange(lists[arrayIndex].name, modifiedBy, kAction.DELETE_TASK)
-            lists[arrayIndex].desc = description
+            logChange(lists[arrayIndex].i_name, modifiedBy, kAction.DELETE_TASK)
+            lists[arrayIndex].i_name = name
         }
     }
 

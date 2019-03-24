@@ -54,7 +54,7 @@ class BaseListofLists : AppCompatActivity(){
         setContentView(R.layout.activity_base_listoflists)
         currentListofLists.setuId(intent.getIntExtra("UserID", 0))
         var db = Database(intent.getStringExtra("uname"))
-        currentListofLists.lists = db.GetListofLists()
+        currentListofLists.lists = db.GetListofLists(UName)
         //Get layout of checklist names
         val taskLayout = findViewById<LinearLayout>(R.id.TaskLayout)
         var tempBox: ListBox
@@ -69,7 +69,7 @@ class BaseListofLists : AppCompatActivity(){
             //Set The action to be executed when the list in clicked
             tempBox.setOnClickListener{
                 val tempIntent = Intent(this, BaseChecklist::class.java).apply {
-                    putExtra("ChecklistID", ListClass.p_key)
+                    putExtra("ChecklistID", ListClass.listID)
                     putExtra("uname", intent.getStringExtra("uname"))
                     putExtra("fname", intent.getStringExtra("fname"))
                     putExtra("lname", intent.getStringExtra("lname"))
@@ -203,7 +203,7 @@ class BaseListofLists : AppCompatActivity(){
                                 val tempIntent = Intent(this, BaseChecklist::class.java).apply {
                                     putExtra("ListName", popup_edittext.text.toString())
                                     putExtra("UserName", UName)
-                                    putExtra("ChecklistID", currentListofLists.lists.last().p_key)
+                                    putExtra("ChecklistID", currentListofLists.lists.last().listID)
                                     putExtra("uname", intent.getStringExtra("uname"))
                                     putExtra("fname", intent.getStringExtra("fname"))
                                     putExtra("lname", intent.getStringExtra("lname"))

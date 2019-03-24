@@ -1,16 +1,11 @@
 package com.example.doug.checklistpresentlayer
+import com.github.kittinunf.fuel.core.ResponseDeserializable
+import com.google.gson.Gson
+import com.google.gson.annotations.SerializedName
 import kotlin.concurrent.thread
 import khttp.*
 
-data class ListClass (var i_name: String, var error : String?) {
-    var p_key : Int = 0
+data class ListClass (@SerializedName("ChecklistID") var listID: Int? = null,
+                      @SerializedName("Name")var i_name: String, var error : String?) {
 
-    fun PostObject(uID : Int)
-    {
-        //val payload = mapOf("Name" to i_name)
-        thread() {
-            val post1 = post("https://api20190207120410.azurewebsites.net/api/checklist/" + uID.toString(), data = mapOf("Name" to i_name))
-            println(post1.statusCode)
-        }
-    }
 }

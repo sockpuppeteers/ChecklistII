@@ -13,12 +13,11 @@ import org.json.JSONObject
 import java.io.IOException
 import kotlin.concurrent.thread
 import com.google.gson.Gson
-
+import android.provider.MediaStore.Video
+import com.google.gson.reflect.TypeToken
 
 
 class Database( var uName: String ) {
-
-    var body: String? = ""
     var user = User(0, "", "", "", "","none")
 
     fun LogIn(Password: String) : UserPage
@@ -40,208 +39,52 @@ class Database( var uName: String ) {
         return UserPage(user.UserID, user.Username, user.FName, user.LName, user.Error)
     }
 
-    fun GetListofLists() : MutableList<ListClass>//returns all lists user has access to
+    fun GetListofLists(Username: String) : MutableList<ListClass>//returns all lists user has access to
     {
-        var LoL = mutableListOf<ListClass>()
-        if (body == "")
-            FetchJsonUser()
-        while (body == ""){}
-        if (body == "failed" || body == "{\"Message\":\"An error has occurred.\"}") {
-            LoL.add(ListClass("", body))
-        }
-        else {
-            var seprate: List<String>? = body?.split("[", "]", "{", "}", ":", ",")?.filter { it.isNotBlank() }
+        var checklists = mutableListOf<ListClass>()
 
-            if (seprate != null) {
-                var found_us = false
-                var i = 0
-                var x = 0
-                var name = ""
-                var id = 0
-                for (item in seprate) {
-                    if (i == 0) {
-                        if (item == "\"Checklists\"" || item == "\"Changes\"") {
-                            i = 1
-                        }
-                    }
-                    else if (i == 1) {
-                        if (item == "\"Users\"" && found_us)
-                        {
-                            i = 2
-                        }
-                        else if (item == "\"Users\"" && !found_us)
-                        {
-                            found_us = true
-                        }
-                    }
-                    else if (i == 2)
-                    {
-                        if (item == "\"ChecklistID\"" && x == 0)
-                        {
-                            x = 1
-                        }
-                        else if (x == 1)
-                        {
-                            id = item.toInt()
-                            x = 0
-                        }
-                        if (item == "\"Name\"" && x == 0)
-                        {
-                            x = 2
-                        }
-                        else if (x == 2)
-                        {
-                            name = item.drop(1)
-                            name = name.dropLast(1)
-                            val temp = ListClass(name, "none")
-                            temp.p_key = id
-                            LoL.add(temp)
-                            x = 0
-                            i = 0
-                        }
-                    }
-                }
-            }
+        runBlocking {
+            //Do an api to get a list of all checklists the user is a part of
+            val (request, response, result) = Fuel.get("https://sockpuppeteerapi3.azurewebsites.net/Api/checklist/user/$uName").awaitStringResponseResult()
+
+            //if the request is successful, copy the data into our checklists object
+            //otherwise copy the error message
+            result.fold(
+                {
+                    //create a json model of the return body
+                    //the code is funky because the object is wrapped in a list, idk exactly how it works
+                    val gson = Gson()
+                    checklists = gson.fromJson(result.component1(), object : TypeToken<MutableList<ListClass>>() {}.type)},
+                //print a message if the api call fails
+                { println("api call failure in GetListofLists function") }
+            )
         }
-        return LoL
+
+        return checklists
     }
 
     fun GetTasks(ID: Int) : MutableList<Task>//returns list of tasks for a list at ID on the database
     {
-        var LoL = mutableListOf<Task>()
-        if (body == "")
-            FetchJsonUser()
-        while (body == ""){}
-        if (body == "failed" || body == "{\"Message\":\"An error has occurred.\"}") {
-            val t = Task("","","")
-            t.error = body
-            LoL.add(t)
-        }
-        else {
-            var seprate: List<String>? = body?.split("[", "]", "{", "}", ":", ",")?.filter { it.isNotBlank() }
+        var tasks = mutableListOf<Task>()
 
-            if (seprate != null) {
-                var i = 0
-                var x = 0
-                var y = 0
-                var z = 0
-                var name = ""
-                var dis = ""
-                var dl = ""
-                var currentlist = 0
-                for (item in seprate) {
-                    if (i == 0) {
-                        if (item == "\"Checklists\"" || item == "\"Changes\"")
-                        {//finds the start of a list, skipping user
-                            i = 9
-                        }
-                    }
-                    else if (i == 9) {
-                        if (z == 1)
-                        {
-                            z = 0
-                            if (item.toInt() == ID)
-                            {
-                                i = 1
-                            }
-                            else
-                            {
-                                i = 11
-                                currentlist = item.toInt()
-                            }
-                        }
-                        if (item == "\"ChecklistID\"") {
-                            z = 1
-                        }
-                    }
-                    else if (i == 11)
-                    {
-                        if (item == "\"Users\"")
-                        {
-                            i = 12
-                        }
-                    }
-                    else if (i == 12)
-                    {
-                        if (z == 1)
-                        {
-                            z = 0
-                            if (item.toInt() == currentlist)
-                            {
-                                i = 1
-                            }
-                            else
-                            {
-                                i = 9
-                            }
-                        }
-                        if (item == "\"ChecklistID\"") {
-                            z = 1
-                        }
-                    }
-                    else if (i == 1) {
-                        if (item == "\"Name\"")
-                        {
-                            i = 2
-                        }
-                        if (item == "\"Description\"")
-                        {
-                            i = 2
-                            x = 1
-                        }
-                        if (item == "\"HasDeadline\"") {
-                            i = 2
-                            x = 2
-                        }
-                    }
-                    else if (i == 2)
-                    {
-                        if (x == 0)
-                        {
-                            name = item.drop(1)//all items have "", these lines get rid of them
-                            name = name.dropLast(1)
-                            i = 1
-                        }
-                        else if (x == 1) {
-                            if (item != "null") {
-                                dis = item.drop(1)
-                                dis = dis.dropLast(1)
-                            } else {
-                                dis = ""
-                            }
-                            i = 1
-                        }
-                        else if (x == 2) {
-                            if (item == "false") {
-                                x = 4
-                            } else if (item == "\"Deadline\"") {
-                                x = 3
-                            }
-                        }
-                        else if (x == 3)
-                        {
-                            dl = item.drop(1)
-                            dl = dl.dropLast(1)
-                            x = 4
-                        }
-                        else if (x == 4) {
-                            val t = Task(name, dis, dl)
-                            t.error = "none"
-                            LoL.add(t)
-                            x = 0
-                            i = 0
-                        }
-                    }
-                }
-            }
+        runBlocking {
+            //Do an api to get a list of all tasks in a checklist
+            val (request, response, result) = Fuel.get("https://sockpuppeteerapi3.azurewebsites.net/Api/task/$ID").awaitStringResponseResult()
+
+            //if the request is successful, copy the data into our tasks object
+            //otherwise copy the error message
+            result.fold(
+                {
+                    //create a json model of the return body
+                    //the code is funky because the object is wrapped in a list, idk exactly how it works
+                    val gson = Gson()
+                    tasks = gson.fromJson(result.component1(), object : TypeToken<MutableList<Task>>() {}.type)},
+                //print a message if the api call fails
+                { println("api call failure in GetTasks function") }
+            )
         }
-        if (LoL.isEmpty())//checks if we found list. if not adds an error to list.
-        {
-            val t = Task("", "", "")
-            t.error = "List is not in users lists"
-            LoL.add(t)
-        }
-        return LoL
+
+        return tasks
     }
 
     fun RegisterUser(Email: String, FName: String, LName: String, PW1: String) : String
@@ -274,24 +117,5 @@ class Database( var uName: String ) {
         }
 
         return error
-    }
-
-    fun FetchJsonUser()//used whenever we need info for a user
-    {
-        val url = "https://sockpuppeteerapi3.azurewebsites.net/api/users/GetString/$uName"
-        val request = Request.Builder().url(url).build()
-
-        val client = OkHttpClient()
-        client.newCall(request).enqueue(object: Callback {
-            override fun onFailure(call: Call, e: IOException) {
-                println("Failed to execute request")
-                body = "failed"
-            }
-
-            override fun onResponse(call: Call, response: Response) {
-                body = response.body()?.string()
-                println(body)
-            }
-        })
     }
 }

@@ -203,8 +203,8 @@ class BaseChecklist : AppCompatActivity(){
 
         for (Task in currentTasks)
         {
-            if (Task.i_name != "")
-                createNewTask(Task.i_name, false)
+            if (Task.name != "")
+                createNewTask(Task.name, false)
         }
         val addButton = findViewById<Button>(R.id.AddTaskButton)
         val checkoffButton = findViewById<Button>(R.id.CheckoffButton)
