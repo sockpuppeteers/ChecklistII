@@ -236,8 +236,8 @@ class BaseChecklist : AppCompatActivity(){
                         //Retrieves the name of the task if the name is long enough
                         if (popup_edittext.text.toString().length >= 1) {
                             createNewTask(popup_edittext.text.toString(), false)
-                            currentChecklist.createTask(popup_edittext.text.toString(),
-                                "none", User(intent.getIntExtra("UserID", 0)))
+                            //currentChecklist.createTask(popup_edittext.text.toString(),
+                            //   "none", User(intent.getIntExtra("UserID", 0)))
                         }
 
                     //Set dismiss listener
@@ -294,7 +294,7 @@ class BaseChecklist : AppCompatActivity(){
                             if(!currentChild.checkCompletion()) {
                                 if (currentChild.checkReccurring()) {
                                     createNewTask(currentChild.getTaskText(), true)
-                                    currentChecklist.createTask(currentChild.getTaskText(), "enable Later", User(1))
+                                    //currentChecklist.createTask(currentChild.getTaskText(), "enable Later", User(1))
                                 }
 
                                 currentChild.completeTask()

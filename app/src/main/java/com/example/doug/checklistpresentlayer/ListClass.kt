@@ -2,7 +2,7 @@ package com.example.doug.checklistpresentlayer
 import kotlin.concurrent.thread
 import khttp.*
 
-data class ListClass (var i_name: String, var error : String?) : ListTaskBase(i_name, "Checklist", true) {
+data class ListClass (var i_name: String, var error : String?) {
     var p_key : Int = 0
 
     fun PostObject(uID : Int)

@@ -4,7 +4,7 @@ import kotlin.concurrent.thread
 import khttp.*
 import org.json.JSONObject
 
-data class Task (var i_name: String, var i_desc: String) : ListTaskBase(i_name, i_desc, false) {
+data class Task (var i_name: String, var i_desc: String) {
 
     var HasDL : Boolean = false
     var Deadline : String = ""
@@ -32,15 +32,40 @@ data class Task (var i_name: String, var i_desc: String) : ListTaskBase(i_name, 
     }
     fun postTask(key : Int)
     {
-        val payload = mapOf("ChecklistID" to key, "Name" to i_name, "HasDeadline" to HasDL, "Completed" to completed)
+        thread()
+        {
+            val url = "https://api20190207120410.azurewebsites.net/api/task"
+            val payload = "{\"ChecklistID\":12,\"Name\":\"" + i_name + "\"}"
+            val r = post(url, data=payload, headers = mapOf("Content-Type" to "application/json"))
+
+            println(r.statusCode)
+
+        }
+    }
+    /*fun removeTask(key: Int)
+    {
+        thread()
+        {
+            val url = "https://api20190207120410.azurewebsites.net/api/task/"
+
+            val r = delete(url + db_key.toString())
+
+            println(r.statusCode)
+
+        }
+    }*/
+
+    /*fun putTask(key : Int)
+    {
         thread()
         {
             val url = "https://api20190207120410.azurewebsites.net/api/task"
             val payload = "{\"ChecklistID\":7,\"Name\":\"" + i_name + "\"}"
-            val r = post(url, data=payload, headers = mapOf("Content-Type" to "application/json"))
-            println(r.text)
-            //println(post1.statusCode)
+            val r = put(url, data = payload, headers = mapOf("Content-Type" to "application/json"))
 
+            r.jsonObject
+            r.statusCode
         }
-    }
+
+    }*/
 }

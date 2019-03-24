@@ -82,7 +82,9 @@ class Checklist( var name: String ) {
     fun deleteTask(arrayIndex : Int, deletedBy: User) {
         if (arrayIndex >= 0 && arrayIndex < tasks.size) {
             logChange(tasks[arrayIndex].name, deletedBy, kAction.DELETE_TASK)
+            //tasks[arrayIndex].removeTask(uID)
             tasks.removeAt(arrayIndex)
+
         }
     }
     /****************************************************************
@@ -93,6 +95,7 @@ class Checklist( var name: String ) {
 
         if (arrayIndex >= 0 && arrayIndex < tasks.size) {
             logChange(tasks[arrayIndex].name, modifiedBy, kAction.DELETE_TASK)
+            //tasks[arrayIndex].putTask(uID)
             tasks[arrayIndex].name = name
         }
     }
