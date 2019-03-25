@@ -24,7 +24,7 @@ import kotlin.concurrent.thread
 class BaseChecklist : AppCompatActivity(){
 
     var inEdit = false
-    var currentChecklist = Checklist("Your Checklist", intent.getIntExtra("ChecklistID", 0) )
+    var currentChecklist = Checklist("Your Checklist", 0 )
 
     //Flag to see if any popups are present
     var popupPresent = false
@@ -198,6 +198,7 @@ class BaseChecklist : AppCompatActivity(){
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_base_checklist)
+        currentChecklist.listID = intent.getIntExtra("ChecklistID", 0)
         var db = Database()
         var currentTasks = db.GetTasks(intent.getIntExtra("ChecklistID", 0))
 

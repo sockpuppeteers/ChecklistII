@@ -35,7 +35,7 @@ class Registration : AppCompatActivity() {
                 //else will be called if there were no errors
                 else {
                     //send the data to the next page
-                    val tempIntent = Intent(this, UserLogin::class.java).apply {
+                    val tempIntent = Intent(this, BaseListofLists::class.java).apply {
                         putExtra("uname", rUserName.text.toString())
                         putExtra("fname", rFName.text.toString())
                         putExtra("lname", rLName.text.toString())
