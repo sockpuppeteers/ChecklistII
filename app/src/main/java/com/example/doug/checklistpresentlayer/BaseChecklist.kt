@@ -104,7 +104,7 @@ class BaseChecklist : AppCompatActivity(){
         }
     }
 
-    fun createNewTask(TaskText: String, IsReaccuring: Boolean) {
+    fun createNewTask(TaskText: String, IsReaccuring: Boolean, taskID: Int?) {
         var new_task_box = TaskBox(
             this,
             TaskText
@@ -116,7 +116,7 @@ class BaseChecklist : AppCompatActivity(){
         val mainView = findViewById<ScrollView>(R.id.TaskScrollView)
 
         //Adds the task to the checklist
-        currentChecklist.createTask(TaskText, "enable Later", User(intent.getIntExtra("UserID", 0)))
+        currentChecklist.createTask(TaskText, "enable Later", User(intent.getIntExtra("UserID", 0)), taskID)
 
         val popupFunctionWindow = PopupWindow(this)
 
@@ -205,7 +205,7 @@ class BaseChecklist : AppCompatActivity(){
         for (Task in currentTasks)
         {
             if (Task.name != "")
-                createNewTask(Task.name, false)
+                createNewTask(Task.name, false, Task.TaskID)
         }
         val addButton = findViewById<Button>(R.id.AddTaskButton)
         val checkoffButton = findViewById<Button>(R.id.CheckoffButton)
@@ -236,7 +236,7 @@ class BaseChecklist : AppCompatActivity(){
 
                         //Retrieves the name of the task if the name is long enough
                         if (popup_edittext.text.toString().length >= 1) {
-                            createNewTask(popup_edittext.text.toString(), false)
+                            createNewTask(popup_edittext.text.toString(), false, 0/*needs to be something later*/)
                             //currentChecklist.createTask(popup_edittext.text.toString(),
                             //   "none", User(intent.getIntExtra("UserID", 0)))
                         }
@@ -294,7 +294,7 @@ class BaseChecklist : AppCompatActivity(){
                         {
                             if(!currentChild.checkCompletion()) {
                                 if (currentChild.checkReccurring()) {
-                                    createNewTask(currentChild.getTaskText(), true)
+                                    createNewTask(currentChild.getTaskText(), true, 0/*needs to be something later*/)
                                     //currentChecklist.createTask(currentChild.getTaskText(), "enable Later", User(1))
                                 }
 

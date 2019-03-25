@@ -33,8 +33,8 @@ class Checklist( var name: String, var cListID : Int? ) : ListClass(cListID, nam
      *  Purpose: Creates an appropriate task with a name and
      *      description, shows who made it, and adds it to a list
      ***************************************************************/
-    fun createTask(name: String, createdBy: User) {
-        val task = Task(name)
+    fun createTask(name: String, createdBy: User, taskID: Int?) {
+        val task = Task(name, "", taskID)
         tasks.add(task)
         logChange(task.TaskID!!, task.name, createdBy, kAction.CREATE_TASK)
     }
@@ -43,8 +43,8 @@ class Checklist( var name: String, var cListID : Int? ) : ListClass(cListID, nam
      *  Purpose: Overloaded function of create task that includes all
      *      previous information and also includes a deadline
      ***************************************************************/
-    fun createTask(name: String, deadline: String, createdBy: User) {
-        val task = Task(name, deadline)
+    fun createTask(name: String, deadline: String, createdBy: User, taskID: Int?) {
+        val task = Task(name, deadline, taskID)
         tasks.add(task)
         logChange(task.TaskID!!, task.name, createdBy, kAction.CREATE_TASK)
     }
