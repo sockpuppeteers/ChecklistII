@@ -17,14 +17,14 @@ import android.provider.MediaStore.Video
 import com.google.gson.reflect.TypeToken
 
 
-class Database( var uName: String ) {
+class Database {
     var user = User(0, "", "", "", "","none")
 
-    fun LogIn(Password: String) : UserPage {
+    fun LogIn(Username: String, Password: String) : UserPage {
         runBlocking {
             //make a login request to the API
             //the result is automatically deserialized into a User object with the gson library
-            val (request, response, result) = Fuel.get("https://sockpuppeteerapi3.azurewebsites.net/Api/Users/login/$uName/$Password").awaitObjectResponseResult(User.deserialize())
+            val (request, response, result) = Fuel.get("https://sockpuppeteerapi3.azurewebsites.net/Api/Users/login/$Username/$Password").awaitObjectResponseResult(User.deserialize())
 
             //if the request is successful, copy the data into our user object
             //otherwise copy the error message
@@ -44,7 +44,7 @@ class Database( var uName: String ) {
 
         runBlocking {
             //Do an api to get a list of all checklists the user is a part of
-            val (request, response, result) = Fuel.get("https://sockpuppeteerapi3.azurewebsites.net/Api/checklist/user/$uName").awaitStringResponseResult()
+            val (request, response, result) = Fuel.get("https://sockpuppeteerapi3.azurewebsites.net/Api/checklist/user/$Username").awaitStringResponseResult()
 
             //if the request is successful, copy the data into our checklists object
             //otherwise copy the error message
@@ -86,11 +86,11 @@ class Database( var uName: String ) {
         return tasks
     }
 
-    fun RegisterUser(Email: String, FName: String, LName: String, PW1: String) : String {
+    fun RegisterUser(Username: String, Email: String, FName: String, LName: String, PW1: String) : String {
         var error = ""
         runBlocking {
             //make a GET request to the api to see if a user with the given username already exists
-            val (request, response, result) = Fuel.get("https://sockpuppeteerapi3.azurewebsites.net/Api/Users/GetString/$uName").awaitStringResponseResult()
+            val (request, response, result) = Fuel.get("https://sockpuppeteerapi3.azurewebsites.net/Api/Users/GetString/$Username").awaitStringResponseResult()
 
             //if the username is taken, set an error message
             //otherwise do nothing
@@ -103,7 +103,7 @@ class Database( var uName: String ) {
         //and we can post the data to the database
         if (error == "") {
             //create a json model of a user object
-            val newUser = User(null, uName, FName, LName, PW1, null)
+            val newUser = User(null, Username, FName, LName, PW1, null)
             val gson = Gson()
             val json = gson.toJson(newUser)
 
@@ -163,5 +163,9 @@ class Database( var uName: String ) {
             .header("Content-Type" to "application/json")
             .body(json.toString())
             .response { req, res, result -> /* you could do something with the response here */ }
+    }
+
+    fun AddUserToList(userID: Int, checklistID: Int){
+        Fuel.get("https://sockpuppeteerapi3.azurewebsites.net/api/checklist/${checklistID}/AddUser/${userID}")
     }
 }
