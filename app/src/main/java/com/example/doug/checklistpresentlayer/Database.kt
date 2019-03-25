@@ -20,8 +20,7 @@ import com.google.gson.reflect.TypeToken
 class Database( var uName: String ) {
     var user = User(0, "", "", "", "","none")
 
-    fun LogIn(Password: String) : UserPage
-    {
+    fun LogIn(Password: String) : UserPage {
         runBlocking {
             //make a login request to the API
             //the result is automatically deserialized into a User object with the gson library
@@ -39,8 +38,8 @@ class Database( var uName: String ) {
         return UserPage(user.UserID, user.Username, user.FName, user.LName, user.Error)
     }
 
-    fun GetListofLists(Username: String) : MutableList<ListClass>//returns all lists user has access to
-    {
+    //returns all lists user has access to
+    fun GetListofLists(Username: String) : MutableList<ListClass> {
         var checklists = mutableListOf<ListClass>()
 
         runBlocking {
@@ -63,8 +62,8 @@ class Database( var uName: String ) {
         return checklists
     }
 
-    fun GetTasks(ID: Int) : MutableList<Task>//returns list of tasks for a list at ID on the database
-    {
+    //returns all tasks within a list
+    fun GetTasks(ID: Int) : MutableList<Task> {
         var tasks = mutableListOf<Task>()
 
         runBlocking {
@@ -87,8 +86,7 @@ class Database( var uName: String ) {
         return tasks
     }
 
-    fun RegisterUser(Email: String, FName: String, LName: String, PW1: String) : String
-    {
+    fun RegisterUser(Email: String, FName: String, LName: String, PW1: String) : String {
         var error = ""
         runBlocking {
             //make a GET request to the api to see if a user with the given username already exists
@@ -117,5 +115,53 @@ class Database( var uName: String ) {
         }
 
         return error
+    }
+
+    fun PostTask(task: Task){
+        //create a json model of task
+        val gson = Gson()
+        val json = gson.toJson(task)
+
+        //post the object to the database
+        Fuel.post("https://sockpuppeteerapi3.azurewebsites.net/api/task/")
+            .header("Content-Type" to "application/json")
+            .body(json.toString())
+            .response { req, res, result -> /* you could do something with the response here */ }
+    }
+
+    fun PostChecklist(checklist: ListClass){
+        //create a json model of checklist
+        val gson = Gson()
+        val json = gson.toJson(checklist)
+
+        //post the object to the database
+        Fuel.post("https://sockpuppeteerapi3.azurewebsites.net/api/checklist/")
+            .header("Content-Type" to "application/json")
+            .body(json.toString())
+            .response { req, res, result -> /* you could do something with the response here */ }
+    }
+
+    fun PutTask(task: Task){
+        //create a json model of task
+        val gson = Gson()
+        val json = gson.toJson(task)
+
+        //make a put request
+        Fuel.put("https://sockpuppeteerapi3.azurewebsites.net/api/task/${task.TaskID}")
+            .header("Content-Type" to "application/json")
+            .body(json.toString())
+            .response { req, res, result -> /* you could do something with the response here */ }
+    }
+
+    fun PutChecklist(checklist: ListClass){
+        //create a json model of checklist
+        val gson = Gson()
+        val json = gson.toJson(checklist)
+
+        //do a put request
+        Fuel.put("https://sockpuppeteerapi3.azurewebsites.net/api/checklist/${checklist.listID}")
+            .header("Content-Type" to "application/json")
+            .body(json.toString())
+            .response { req, res, result -> /* you could do something with the response here */ }
     }
 }
