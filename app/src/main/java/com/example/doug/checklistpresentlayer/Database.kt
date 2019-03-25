@@ -164,4 +164,8 @@ class Database( var uName: String ) {
             .body(json.toString())
             .response { req, res, result -> /* you could do something with the response here */ }
     }
+
+    fun AddUserToList(userID: Int, checklistID: Int){
+        Fuel.get("https://sockpuppeteerapi3.azurewebsites.net/api/checklist/${checklistID}/AddUser/${userID}")
+    }
 }

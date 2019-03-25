@@ -2,8 +2,6 @@ package com.example.doug.checklistpresentlayer
 import java.time.LocalDateTime
 
 class Checklist( var name: String, var cListID : Int? ) : ListClass(cListID, name, "none"){
-
-    var uID = 0
     //List of tasks within a checklist
     var tasks =  mutableListOf<Task>()
 
@@ -120,5 +118,10 @@ class Checklist( var name: String, var cListID : Int? ) : ListClass(cListID, nam
             logChange(tasks[arrayIndex].TaskID!!, tasks[arrayIndex].name, modifiedBy, kAction.REMOVE_TASK_DEADLINE)
             tasks[arrayIndex].Deadline = ""
         }
+    }
+
+    fun addUser(user: User){
+        users.add(user)
+
     }
 }
