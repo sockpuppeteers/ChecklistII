@@ -21,13 +21,13 @@ class Registration : AppCompatActivity() {
         var pwAscii =  Charset.forName("US-ASCII").newEncoder().canEncode(rPW1.text.toString())
         register_button.setOnClickListener {
             //create a database object with the given username
-            val db = Database(rUserName.text.toString())
+            val db = Database()
             //checks to see if passwords match
             if (rPW1.text.toString() != rPW2.text.toString())
                 pwMatch = false
             if (userAscii && pwAscii && pwMatch && pwStrong(rPW1.text.toString())) {
                 //error will be empty if everything was successful
-                var error: String = db.RegisterUser(
+                var error: String = db.RegisterUser(rUserName.text.toString(),
                     rEmail.text.toString(), rFName.text.toString(), rLName.text.toString(),
                     rPW1.text.toString())
                 if (error != "")

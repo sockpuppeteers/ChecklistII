@@ -31,8 +31,8 @@ class MainActivity : AppCompatActivity() {
         var user: UserPage
 
         login_button.setOnClickListener {
-            val db = Database(lUN.text.toString())
-            user = db.LogIn(lPW.text.toString())
+            val db = Database()
+            user = db.LogIn(lUN.text.toString(), lPW.text.toString())
             if (!user.ErrorCheck())
             {
                 if (user.ViewError() == "failed")

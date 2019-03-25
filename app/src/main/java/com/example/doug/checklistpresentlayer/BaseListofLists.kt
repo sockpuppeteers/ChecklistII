@@ -53,7 +53,8 @@ class BaseListofLists : AppCompatActivity(){
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_base_listoflists)
         currentListofLists.setuId(intent.getIntExtra("UserID", 0))
-        var db = Database(intent.getStringExtra("uname"))
+        var db = Database()
+        UName = intent.getStringExtra("uname")
         currentListofLists.lists = db.GetListofLists(UName)
         //Get layout of checklist names
         val taskLayout = findViewById<LinearLayout>(R.id.TaskLayout)

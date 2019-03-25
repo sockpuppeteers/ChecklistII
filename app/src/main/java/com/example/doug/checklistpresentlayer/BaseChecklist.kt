@@ -198,7 +198,7 @@ class BaseChecklist : AppCompatActivity(){
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_base_checklist)
-        var db = Database(intent.getStringExtra("uname"))
+        var db = Database()
         var currentTasks = db.GetTasks(intent.getIntExtra("ChecklistID", 0))
 
         for (Task in currentTasks)
