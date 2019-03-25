@@ -53,15 +53,15 @@ class UserLogin : AppCompatActivity() {
 
         Icon.setImageResource(icon1)
 
-        ToCheckList.setOnClickListener {
-            val tempIntent = Intent(this, BaseListofLists::class.java).apply {
-                putExtra("uname", intent.getStringExtra("uname"))
-                putExtra("fname", intent.getStringExtra("fname"))
-                putExtra("lname", intent.getStringExtra("lname"))
-                putExtra("UserID",intent.getIntExtra("UserID", 0))
-            }
-            startActivity(tempIntent)
-        }
+//        ToCheckList.setOnClickListener {
+//            val tempIntent = Intent(this, BaseListofLists::class.java).apply {
+//                putExtra("uname", intent.getStringExtra("uname"))
+//                putExtra("fname", intent.getStringExtra("fname"))
+//                putExtra("lname", intent.getStringExtra("lname"))
+//                putExtra("UserID",intent.getIntExtra("UserID", 0))
+//            }
+//            startActivity(tempIntent)
+//        }
     }
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {

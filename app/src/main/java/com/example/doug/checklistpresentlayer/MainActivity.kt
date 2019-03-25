@@ -50,7 +50,7 @@ class MainActivity : AppCompatActivity() {
             }
             else
             {
-                val tempIntent = Intent(this, UserLogin::class.java).apply {
+                val tempIntent = Intent(this, BaseListofLists::class.java).apply {
                         putExtra("uname", user.ViewUserName())
                         putExtra("fname", user.ViewFName())
                         putExtra("lname", user.ViewLName())
