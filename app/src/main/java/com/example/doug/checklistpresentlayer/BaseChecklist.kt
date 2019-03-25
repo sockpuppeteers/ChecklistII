@@ -24,7 +24,7 @@ import kotlin.concurrent.thread
 class BaseChecklist : AppCompatActivity(){
 
     var inEdit = false
-    var currentChecklist = Checklist("Your Checklist")
+    var currentChecklist = Checklist("Your Checklist", intent.getIntExtra("ChecklistID", 0) )
 
     //Flag to see if any popups are present
     var popupPresent = false

@@ -1,7 +1,7 @@
 package com.example.doug.checklistpresentlayer
 import java.time.LocalDateTime
 
-class Checklist( var name: String ) {
+class Checklist( var name: String, var cListID : Int? ) : ListClass(cListID, name, "none"){
 
     var uID = 0
     var checkID = 0

@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Your Checklist</string>
+    <string name="app_name">Pontim</string>
     <string name="ADD_BUTTON_STRING">Add</string>
     <string name="CHECKOFF_BUTTON_STRING">Checkoff</string>
     <string name="HISTORY_BUTTON_STRING">History</string>
@@ -12,4 +12,14 @@
     <string name="FUNCTION_POPUP_SETTINGS_TEXT">Settings</string>
     <string name="FUNCTION_POPUP_CLOSE_TEXT">Close</string>
     <string name="RECURSION_TEXT">Task Recursion</string>
+    <string name="USER_TEXT">User</string>
+    <string name="ICON_TEXT">Icon for selected user</string>
+    <string name="EMAIL_TEXT">Email</string>
+    <string name="FIRST_NAME_TEXT">First Name</string>
+    <string name="LAST_NAME_TEXT">Last Name</string>
+    <string name="USERNAME_TEXT">UserName</string>
+    <string name="PASSWORD_TEXT">Password</string>
+    <string name="LOGIN_TEXT">Login</string>
+    <string name="REGISTER_TEXT">Register</string>
+    <string name="FORGOT_TEXT">Forgot UserName or Password?</string>
 </resources>
