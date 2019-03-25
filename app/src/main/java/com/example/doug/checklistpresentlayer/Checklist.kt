@@ -4,7 +4,6 @@ import java.time.LocalDateTime
 class Checklist( var name: String, var cListID : Int? ) : ListClass(cListID, name, "none"){
 
     var uID = 0
-    var checkID = 0
     //List of tasks within a checklist
     var tasks =  mutableListOf<Task>()
 
@@ -19,7 +18,7 @@ class Checklist( var name: String, var cListID : Int? ) : ListClass(cListID, nam
      *      action that was taken, and what the value was changed to
      ***************************************************************/
     fun logChange(taskID: Int, taskName: String, changedBy: User, changeType: kAction, changedTo: String) {
-        val change = Change(checkID, changedBy.UserID!!, taskID, taskName, changedBy.Username, changeType, changedTo)
+        val change = Change(cListID, changedBy.UserID!!, taskID, taskName, changedBy.Username, changeType, changedTo)
         changes.add(change)
     }
 
@@ -28,7 +27,7 @@ class Checklist( var name: String, var cListID : Int? ) : ListClass(cListID, nam
      *      include a "changed to" value.
      ***************************************************************/
     fun logChange(taskID: Int, taskName: String, changedBy: User, changeType: kAction) {
-        val change = Change(checkID, changedBy.UserID!!, taskID, taskName, changedBy.Username, changeType, null)
+        val change = Change(cListID, changedBy.UserID!!, taskID, taskName, changedBy.Username, changeType, null)
         changes.add(change)
     }
 
