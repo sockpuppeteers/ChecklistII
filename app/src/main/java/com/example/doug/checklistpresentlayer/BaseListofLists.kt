@@ -52,7 +52,7 @@ class BaseListofLists : AppCompatActivity(){
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_base_listoflists)
-        currentListofLists.setuId(intent.getIntExtra("UserID", 0))
+        currentListofLists.uID = intent.getIntExtra("UserID", 0)
         var db = Database()
         UName = intent.getStringExtra("uname")
         currentListofLists.lists = db.GetListofLists(UName)

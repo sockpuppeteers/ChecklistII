@@ -2,10 +2,12 @@ package com.example.doug.checklistpresentlayer
 import java.time.LocalDateTime
 import com.microsoft.windowsazure.mobileservices.*
 
-class ListofLists(var name: String, var error: String?, var uID : Int = 0) {
+class ListofLists(var name: String, var error: String?) {
 
     //List of tasks within a checklist
     var lists =  mutableListOf<ListClass>()
+
+    var uID : Int = 0
 
     /****************************************************************
      *  Purpose: Creates an appropriate task with a name and
@@ -32,9 +34,5 @@ class ListofLists(var name: String, var error: String?, var uID : Int = 0) {
     fun changeListName(arrayIndex: Int, modifiedBy: User, name: String) {
         if (arrayIndex >= 0 && arrayIndex < lists.size)
             lists[arrayIndex].i_name = name
-    }
-
-    fun setuId(id : Int) {
-        uID = id
     }
 }
