@@ -6,6 +6,6 @@ import kotlin.concurrent.thread
 import khttp.*
 
 open class ListClass (@SerializedName("ChecklistID") var listID: Int? = null,
-                      @SerializedName("Name")var i_name: String, var error : String?) {
+                      @SerializedName("Name")var i_name: String) {
 
 }

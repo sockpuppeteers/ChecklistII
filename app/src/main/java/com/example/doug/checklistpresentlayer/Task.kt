@@ -18,7 +18,7 @@ data class Task (@SerializedName("Name") var name : String = "") {
         Deadline = deadline
     }
 
-    constructor(_name: String, deadline: String?, key: Int?, checkID: Int) : this(_name){
+    constructor(_name: String, deadline: String?, key: Int?, checkID: Int?) : this(_name){
         Deadline = deadline
         TaskID = key
         ChecklistID = checkID

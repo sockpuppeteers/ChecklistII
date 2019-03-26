@@ -1,5 +1,5 @@
 /***************
- * note: most of this code is Emmetts
+ * note: most of this code is Emmett's
  */
 package com.example.doug.checklistpresentlayer
 

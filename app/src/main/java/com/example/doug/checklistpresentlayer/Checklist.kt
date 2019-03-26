@@ -1,7 +1,7 @@
 package com.example.doug.checklistpresentlayer
 import java.time.LocalDateTime
 
-class Checklist( var name: String, var cListID : Int ) : ListClass(cListID, name, "none"){
+class Checklist( private val name: String, private val cListID : Int? ) : ListClass(cListID, name){
     var dbAccess = Database()
     var tasks =  mutableListOf<Task>()
     var users = mutableListOf<User>()
@@ -12,7 +12,7 @@ class Checklist( var name: String, var cListID : Int ) : ListClass(cListID, name
      *      action that was taken, and what the value was changed to
      ***************************************************************/
     fun logChange(taskID: Int, taskName: String, changedBy: User, changeType: kAction, changedTo: String) {
-        val change = Change(cListID, changedBy.UserID!!, taskID, taskName, changedBy.Username, changeType, changedTo)
+        val change = Change(listID, changedBy.UserID!!, taskID, taskName, changedBy.Username, changeType, changedTo)
         changes.add(change)
     }
 
@@ -21,7 +21,7 @@ class Checklist( var name: String, var cListID : Int ) : ListClass(cListID, name
      *      include a "changed to" value.
      ***************************************************************/
     fun logChange(taskID: Int, taskName: String, changedBy: User, changeType: kAction) {
-        val change = Change(cListID, changedBy.UserID!!, taskID, taskName, changedBy.Username, changeType, null)
+        val change = Change(listID, changedBy.UserID!!, taskID, taskName, changedBy.Username, changeType, null)
         changes.add(change)
     }
 
@@ -29,7 +29,7 @@ class Checklist( var name: String, var cListID : Int ) : ListClass(cListID, name
      *  Purpose: Overloaded function of create task that includes all
      *      previous information and also includes a deadline
      ***************************************************************/
-    fun createTask(name: String, deadline: String?, createdBy: User, taskID: Int?, checklistID: Int) {
+    fun createTask(name: String, deadline: String?, createdBy: User, taskID: Int?, checklistID: Int?) {
         val task = Task(name, deadline, taskID, checklistID)
         tasks.add(task)
         //logChange(task.TaskID!!, task.name, createdBy, kAction.CREATE_TASK)
