@@ -122,8 +122,6 @@ class Database {
         val gson = Gson()
         val json = gson.toJson(task)
 
-        println(json)
-
         //post the object to the database
         Fuel.post("https://sockpuppeteerapi3.azurewebsites.net/api/task/")
             .header("Content-Type" to "application/json")
@@ -131,17 +129,7 @@ class Database {
             .response { req, res, result -> /* you could do something with the response here */ }
     }
 
-    fun PostChecklist(checklist: ListClass){
-        //create a json model of checklist
-        val gson = Gson()
-        val json = gson.toJson(checklist)
 
-        //post the object to the database
-        Fuel.post("https://sockpuppeteerapi3.azurewebsites.net/api/checklist/")
-            .header("Content-Type" to "application/json")
-            .body(json.toString())
-            .response { req, res, result -> /* you could do something with the response here */ }
-    }
 
     fun PutTask(task: Task){
         //create a json model of task

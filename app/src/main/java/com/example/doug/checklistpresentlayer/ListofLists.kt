@@ -1,4 +1,7 @@
 package com.example.doug.checklistpresentlayer
+import com.github.kittinunf.fuel.Fuel
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 import java.time.LocalDateTime
 import com.microsoft.windowsazure.mobileservices.*
 
@@ -16,7 +19,29 @@ class ListofLists(var name: String, var error: String?, var uID : Int = 0) {
      ***************************************************************/
     fun createList(name: String, createdBy: User) {
         val list = ListClass(null, name, null)
-        lists.add(list)
+        PostChecklist(list)
+    }
+
+    fun PostChecklist(checklist: ListClass){
+        //create a json model of checklist
+        val gson = Gson()
+        val json = gson.toJson(checklist)
+
+        //post the object to the database
+        Fuel.post("https://sockpuppeteerapi3.azurewebsites.net/api/checklist/")
+            .header("Content-Type" to "application/json")
+            .body(json.toString())
+            .response { req, res, result ->
+
+                val gson = Gson()
+                var newList = gson.fromJson(result.component1().toString(), ListClass::class.java)
+                lists.add(newList)
+                AddUserToList(uID, newList.listID!!)
+            }
+    }
+
+    fun AddUserToList(userID: Int, checklistID: Int){
+        Fuel.get("https://sockpuppeteerapi3.azurewebsites.net/api/checklist/${checklistID}/AddUser/${userID}")
     }
 
     /****************************************************************
