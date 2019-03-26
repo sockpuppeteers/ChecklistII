@@ -7,15 +7,12 @@ class ListofLists(var name: String, var error: String?, var uID : Int = 0) {
     //List of tasks within a checklist
     var lists =  mutableListOf<ListClass>()
 
-    //Record of changes on a checklist
-    var changes = mutableListOf<Change>()
-
     /****************************************************************
      *  Purpose: Creates an appropriate task with a name and
      *      description, shows who made it, and adds it to a list
      ***************************************************************/
     fun createList(name: String, createdBy: User) {
-        val list = ListClass(null, name, null)
+        val list = ListClass(null, name)
         lists.add(list)
     }
 

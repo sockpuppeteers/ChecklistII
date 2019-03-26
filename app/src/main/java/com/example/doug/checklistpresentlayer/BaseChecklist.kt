@@ -116,7 +116,7 @@ class BaseChecklist : AppCompatActivity(){
         val mainView = findViewById<ScrollView>(R.id.TaskScrollView)
 
         //Adds the task to the checklist
-        currentChecklist.createTask(TaskText, null, User(intent.getIntExtra("UserID", 0)), null, currentChecklist.cListID)
+        currentChecklist.createTask(TaskText, null, User(intent.getIntExtra("UserID", 0)), null, currentChecklist.listID)
 
         val popupFunctionWindow = PopupWindow(this)
 
