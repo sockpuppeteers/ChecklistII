@@ -122,6 +122,8 @@ class Database {
         val gson = Gson()
         val json = gson.toJson(task)
 
+        println(json)
+
         //post the object to the database
         Fuel.post("https://sockpuppeteerapi3.azurewebsites.net/api/task/")
             .header("Content-Type" to "application/json")

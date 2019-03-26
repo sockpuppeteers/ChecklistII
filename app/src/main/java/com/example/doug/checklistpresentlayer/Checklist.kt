@@ -1,14 +1,10 @@
 package com.example.doug.checklistpresentlayer
 import java.time.LocalDateTime
 
-class Checklist( var name: String, var cListID : Int? ) : ListClass(cListID, name, "none"){
-    //List of tasks within a checklist
+class Checklist( var name: String, var cListID : Int ) : ListClass(cListID, name, "none"){
+    var dbAccess = Database()
     var tasks =  mutableListOf<Task>()
-
-    //List of user included in a checklist
     var users = mutableListOf<User>()
-
-    //Record of changes on a checklist
     var changes = mutableListOf<Change>()
 
      /****************************************************************
@@ -30,23 +26,14 @@ class Checklist( var name: String, var cListID : Int? ) : ListClass(cListID, nam
     }
 
     /****************************************************************
-     *  Purpose: Creates an appropriate task with a name and
-     *      description, shows who made it, and adds it to a list
-     ***************************************************************/
-    fun createTask(name: String, createdBy: User, taskID: Int?) {
-        val task = Task(name, "", taskID)
-        tasks.add(task)
-        logChange(task.TaskID!!, task.name, createdBy, kAction.CREATE_TASK)
-    }
-
-    /****************************************************************
      *  Purpose: Overloaded function of create task that includes all
      *      previous information and also includes a deadline
      ***************************************************************/
-    fun createTask(name: String, deadline: String, createdBy: User, taskID: Int?) {
-        val task = Task(name, deadline, taskID)
+    fun createTask(name: String, deadline: String?, createdBy: User, taskID: Int?, checklistID: Int) {
+        val task = Task(name, deadline, taskID, checklistID)
         tasks.add(task)
-        logChange(task.TaskID!!, task.name, createdBy, kAction.CREATE_TASK)
+        //logChange(task.TaskID!!, task.name, createdBy, kAction.CREATE_TASK)
+        dbAccess.PostTask(task)
     }
 
     /****************************************************************

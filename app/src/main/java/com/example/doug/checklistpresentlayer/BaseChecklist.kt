@@ -116,7 +116,7 @@ class BaseChecklist : AppCompatActivity(){
         val mainView = findViewById<ScrollView>(R.id.TaskScrollView)
 
         //Adds the task to the checklist
-        currentChecklist.createTask(TaskText, "enable Later", User(intent.getIntExtra("UserID", 0)), taskID)
+        currentChecklist.createTask(TaskText, null, User(intent.getIntExtra("UserID", 0)), null, currentChecklist.cListID)
 
         val popupFunctionWindow = PopupWindow(this)
 
@@ -194,6 +194,95 @@ class BaseChecklist : AppCompatActivity(){
         taskLayout.addView(new_task_box)
     }
 
+    fun addTask(task: Task) {
+        var new_task_box = TaskBox(
+            this,
+            task.name
+        )
+
+        if(task.isRecurring == 1)
+            new_task_box.toggleReccurringIfNotComplete()
+
+        val mainView = findViewById<ScrollView>(R.id.TaskScrollView)
+
+        //Adds the task to the checklist
+        currentChecklist.tasks.add(task)
+
+        val popupFunctionWindow = PopupWindow(this)
+
+        val taskFunctionLayoutView =
+            layoutInflater.inflate(R.layout.task_functions_layout, null)
+
+        taskFunctionLayoutView.FunctionCloseButton.setOnClickListener {
+            popupFunctionWindow.dismiss()
+
+            popupPresent = false
+        }
+
+        taskFunctionLayoutView.FunctionSettingsButton.setOnClickListener {
+            popupFunctionWindow.dismiss()
+
+            popupPresent = false
+
+            createSettingsPopup()
+        }
+
+        //Sets the delete button to remove the task
+        taskFunctionLayoutView.FunctionDeleteButton.setOnClickListener {
+            for(i in TaskLayout.childCount downTo 0 step 1)
+            {
+                val tempChild = TaskLayout.getChildAt(i)
+                if(tempChild is TaskBox)
+                {
+                    if(tempChild == currentTask)
+                    {
+                        TaskLayout.removeView(TaskLayout.getChildAt(i))
+                        currentChecklist.deleteTask(i, User(1));
+                    }
+                }
+            }
+
+            popupFunctionWindow.dismiss()
+
+            popupPresent = false
+        }
+
+        popupFunctionWindow.contentView = taskFunctionLayoutView
+
+        popupFunctionWindow.setOnDismissListener {
+            PopupWindow.OnDismissListener {
+                popupPresent = false
+            }
+        }
+
+        //Sets the on lick listener for the new task gui element
+        new_task_box.setOnClickListener{
+
+            if(!popupPresent) {
+
+                popupPresent = true
+
+                popupFunctionWindow.isFocusable()
+
+                popupFunctionWindow.showAtLocation(mainView, Gravity.CENTER, 0, 0)
+
+                for(i in TaskLayout.childCount downTo 0 step 1)
+                {
+                    val tempChild = TaskLayout.getChildAt(i)
+                    if(tempChild is TaskBox)
+                    {
+                        if(tempChild == new_task_box) {
+                            currentTask = tempChild
+                        }
+                    }
+                }
+            }
+        }
+
+        val taskLayout = findViewById<LinearLayout>(R.id.TaskLayout)
+
+        taskLayout.addView(new_task_box)
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -205,7 +294,7 @@ class BaseChecklist : AppCompatActivity(){
         for (Task in currentTasks)
         {
             if (Task.name != "")
-                createNewTask(Task.name, false, Task.TaskID)
+                addTask(Task)
         }
         val addButton = findViewById<Button>(R.id.AddTaskButton)
         val checkoffButton = findViewById<Button>(R.id.CheckoffButton)
