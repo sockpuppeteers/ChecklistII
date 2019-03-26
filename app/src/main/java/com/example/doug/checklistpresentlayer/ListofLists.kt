@@ -18,7 +18,7 @@ class ListofLists(var name: String, var error: String?, var uID : Int = 0) {
      *      description, shows who made it, and adds it to a list
      ***************************************************************/
     fun createList(name: String, createdBy: User) {
-        val list = ListClass(null, name, null)
+        val list = ListClass(null, name)
         PostChecklist(list)
     }
 
