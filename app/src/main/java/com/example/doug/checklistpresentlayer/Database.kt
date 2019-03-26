@@ -129,8 +129,6 @@ class Database {
             .response { req, res, result -> /* you could do something with the response here */ }
     }
 
-
-
     fun PutTask(task: Task){
         //create a json model of task
         val gson = Gson()
@@ -140,6 +138,12 @@ class Database {
         Fuel.put("https://sockpuppeteerapi3.azurewebsites.net/api/task/${task.TaskID}")
             .header("Content-Type" to "application/json")
             .body(json.toString())
+            .response { req, res, result -> /* you could do something with the response here */ }
+    }
+
+    fun DeleteTask(task: Task){
+        //make a delete request
+        Fuel.delete("https://sockpuppeteerapi3.azurewebsites.net/api/task/${task.TaskID}")
             .response { req, res, result -> /* you could do something with the response here */ }
     }
 

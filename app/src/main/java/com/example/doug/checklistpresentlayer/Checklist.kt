@@ -65,10 +65,9 @@ class Checklist( private val name: String, private val cListID : Int? ) : ListCl
      ***************************************************************/
     fun deleteTask(arrayIndex : Int, deletedBy: User) {
         if (arrayIndex >= 0 && arrayIndex < tasks.size) {
-            logChange(tasks[arrayIndex].TaskID!!, tasks[arrayIndex].name, deletedBy, kAction.DELETE_TASK)
-            //tasks[arrayIndex].removeTask(uID)
-            tasks.removeAt(arrayIndex)
-
+            //logChange(tasks[arrayIndex].TaskID!!, tasks[arrayIndex].name, deletedBy, kAction.DELETE_TASK)
+            dbAccess.DeleteTask(tasks[arrayIndex]) //remove the task from the database
+            tasks.removeAt(arrayIndex) //remove the task from the app
         }
     }
 

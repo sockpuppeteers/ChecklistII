@@ -12,7 +12,7 @@ data class Task (@SerializedName("Name") var name : String = "") {
     @SerializedName("ChecklistID") var ChecklistID:  Int? = null
     @SerializedName("Deadline") var Deadline : String? = null
     @SerializedName("DateCompleted") var compdatetime : String? =  null
-    @SerializedName("IsRecurring") var isRecurring : Int? = 0
+    @SerializedName("IsRecurring") var isRecurring : Boolean? = false
 
     constructor(_name: String, deadline: String) : this(_name){
         Deadline = deadline
@@ -24,7 +24,7 @@ data class Task (@SerializedName("Name") var name : String = "") {
         ChecklistID = checkID
     }
 
-    constructor(_name: String, taskID: Int?, checklistID: Int?, deadline: String?, completedAt: String?, recurring: Int?) : this(_name){
+    constructor(_name: String, taskID: Int?, checklistID: Int?, deadline: String?, completedAt: String?, recurring: Boolean?) : this(_name){
         TaskID = taskID
         ChecklistID = checklistID
         Deadline = deadline
