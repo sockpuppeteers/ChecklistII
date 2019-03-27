@@ -1,14 +1,10 @@
 package com.example.doug.checklistpresentlayer
 import java.time.LocalDateTime
 
-class Checklist( var name: String, var cListID : Int? ) : ListClass(cListID, name, "none"){
-    //List of tasks within a checklist
+class Checklist( private val name: String, private val cListID : Int? ) : ListClass(cListID, name){
+    var dbAccess = Database()
     var tasks =  mutableListOf<Task>()
-
-    //List of user included in a checklist
     var users = mutableListOf<User>()
-
-    //Record of changes on a checklist
     var changes = mutableListOf<Change>()
 
      /****************************************************************
@@ -16,7 +12,7 @@ class Checklist( var name: String, var cListID : Int? ) : ListClass(cListID, nam
      *      action that was taken, and what the value was changed to
      ***************************************************************/
     fun logChange(taskID: Int, taskName: String, changedBy: User, changeType: kAction, changedTo: String) {
-        val change = Change(cListID, changedBy.UserID!!, taskID, taskName, changedBy.Username, changeType, changedTo)
+        val change = Change(listID, changedBy.UserID!!, taskID, taskName, changedBy.Username, changeType, changedTo)
         changes.add(change)
     }
 
@@ -25,28 +21,19 @@ class Checklist( var name: String, var cListID : Int? ) : ListClass(cListID, nam
      *      include a "changed to" value.
      ***************************************************************/
     fun logChange(taskID: Int, taskName: String, changedBy: User, changeType: kAction) {
-        val change = Change(cListID, changedBy.UserID!!, taskID, taskName, changedBy.Username, changeType, null)
+        val change = Change(listID, changedBy.UserID!!, taskID, taskName, changedBy.Username, changeType, null)
         changes.add(change)
-    }
-
-    /****************************************************************
-     *  Purpose: Creates an appropriate task with a name and
-     *      description, shows who made it, and adds it to a list
-     ***************************************************************/
-    fun createTask(name: String, createdBy: User) {
-        val task = Task(name)
-        tasks.add(task)
-        logChange(task.TaskID!!, task.name, createdBy, kAction.CREATE_TASK)
     }
 
     /****************************************************************
      *  Purpose: Overloaded function of create task that includes all
      *      previous information and also includes a deadline
      ***************************************************************/
-    fun createTask(name: String, deadline: String, createdBy: User) {
-        val task = Task(name, deadline)
+    fun createTask(name: String, deadline: String?, createdBy: User, taskID: Int?, checklistID: Int?) {
+        val task = Task(name, deadline, taskID, checklistID)
         tasks.add(task)
-        logChange(task.TaskID!!, task.name, createdBy, kAction.CREATE_TASK)
+        //logChange(task.TaskID!!, task.name, createdBy, kAction.CREATE_TASK)
+        dbAccess.PostTask(task)
     }
 
     /****************************************************************
@@ -78,10 +65,9 @@ class Checklist( var name: String, var cListID : Int? ) : ListClass(cListID, nam
      ***************************************************************/
     fun deleteTask(arrayIndex : Int, deletedBy: User) {
         if (arrayIndex >= 0 && arrayIndex < tasks.size) {
-            logChange(tasks[arrayIndex].TaskID!!, tasks[arrayIndex].name, deletedBy, kAction.DELETE_TASK)
-            //tasks[arrayIndex].removeTask(uID)
-            tasks.removeAt(arrayIndex)
-
+            //logChange(tasks[arrayIndex].TaskID!!, tasks[arrayIndex].name, deletedBy, kAction.DELETE_TASK)
+            dbAccess.DeleteTask(tasks[arrayIndex]) //remove the task from the database
+            tasks.removeAt(arrayIndex) //remove the task from the app
         }
     }
 

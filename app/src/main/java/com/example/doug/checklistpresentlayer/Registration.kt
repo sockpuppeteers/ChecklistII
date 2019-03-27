@@ -35,7 +35,7 @@ class Registration : AppCompatActivity() {
                 //else will be called if there were no errors
                 else {
                     //send the data to the next page
-                    val tempIntent = Intent(this, UserLogin::class.java).apply {
+                    val tempIntent = Intent(this, BaseListofLists::class.java).apply {
                         putExtra("uname", rUserName.text.toString())
                         putExtra("fname", rFName.text.toString())
                         putExtra("lname", rLName.text.toString())
@@ -45,9 +45,9 @@ class Registration : AppCompatActivity() {
             }
         }
     }
+
     //For a pw to be strong it has to contain a special character and a number, both checks are done here
-    fun pwStrong(str : String) : Boolean
-    {
+    fun pwStrong(str : String) : Boolean {
         var hasSp = false
         var hasNum = false
         //makes sure the string isn't empty, blank passwords cannot be checked
@@ -60,8 +60,7 @@ class Registration : AppCompatActivity() {
         var m = p.matcher(str)
         hasSp = m.find()
         //only needs to look for numbers if it found a special character
-        if (hasSp)
-        {
+        if (hasSp) {
             //looks for anything followed by an integer followed by anything
             var temp = "(.)*(\\d)(.)*"
             var p1 = Pattern.compile(temp)
@@ -70,5 +69,4 @@ class Registration : AppCompatActivity() {
         //checks to see if both are true
         return (hasSp && hasNum)
     }
-
 }

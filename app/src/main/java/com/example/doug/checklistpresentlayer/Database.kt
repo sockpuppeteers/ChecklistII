@@ -31,7 +31,8 @@ class Database {
             result.fold(
                 { data -> user = data
                   user.Error = "none"},
-                { error -> user.Error = error.message }
+                { error -> user.Error = error.response.statusCode.toString()
+                println(user.Error)}
             )
         }
 
@@ -129,18 +130,6 @@ class Database {
             .response { req, res, result -> /* you could do something with the response here */ }
     }
 
-    fun PostChecklist(checklist: ListClass){
-        //create a json model of checklist
-        val gson = Gson()
-        val json = gson.toJson(checklist)
-
-        //post the object to the database
-        Fuel.post("https://sockpuppeteerapi3.azurewebsites.net/api/checklist/")
-            .header("Content-Type" to "application/json")
-            .body(json.toString())
-            .response { req, res, result -> /* you could do something with the response here */ }
-    }
-
     fun PutTask(task: Task){
         //create a json model of task
         val gson = Gson()
@@ -150,6 +139,12 @@ class Database {
         Fuel.put("https://sockpuppeteerapi3.azurewebsites.net/api/task/${task.TaskID}")
             .header("Content-Type" to "application/json")
             .body(json.toString())
+            .response { req, res, result -> /* you could do something with the response here */ }
+    }
+
+    fun DeleteTask(task: Task){
+        //make a delete request
+        Fuel.delete("https://sockpuppeteerapi3.azurewebsites.net/api/task/${task.TaskID}")
             .response { req, res, result -> /* you could do something with the response here */ }
     }
 
