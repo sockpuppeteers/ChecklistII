@@ -67,7 +67,7 @@ class ListofLists(var name: String, var error: String?, var uID : Int = 0) {
      *  Purpose: Deletes a task from the list of tasks. Deletes
      *      through an index in the table and logs who deleted what
      ***************************************************************/
-    fun deleteList(arrayIndex : Int, deletedBy: User) {
+    fun deleteList(arrayIndex : Int, deletedBy: UserPage) {
         if (arrayIndex >= 0 && arrayIndex < lists.size)
             lists.removeAt(arrayIndex)
     }

@@ -130,91 +130,117 @@ class BaseListofLists : AppCompatActivity(){
 
                 //Creates and adds the on click action to the add button
                 acceptButton.setOnClickListener{
+                    val popup_edittext = popupView.PopupMainView.PopupEditText
 
+                    val taskLayout = findViewById<LinearLayout>(R.id.TaskLayout)
 
-                        val popup_edittext = popupView.PopupMainView.PopupEditText
+                    if (popup_edittext.text.toString().length >= 1) {
+                        var new_list_box = ListBox(
+                            this,
+                            popup_edittext.text.toString()
+                        )
 
-                        val taskLayout = findViewById<LinearLayout>(R.id.TaskLayout)
+                        currentListofLists.createList(popup_edittext.text.toString(),
+                            User(intent.getIntExtra("UserID", 0)))/*, intent.getStringExtra("uname"),
+                                 intent.getStringExtra("fname"), intent.getStringExtra("lname")))*/
+                        val popupFunctionWindow = PopupWindow(this)
 
-                        if (popup_edittext.text.toString().length >= 1) {
-                            var new_list_box = ListBox(
-                                this,
-                                popup_edittext.text.toString()
-                            )
+                        val taskFunctionLayoutView =
+                            layoutInflater.inflate(R.layout.task_functions_layout, null)
 
-                            currentListofLists.createList(popup_edittext.text.toString(),
-                                User(intent.getIntExtra("UserID", 0)))/*, intent.getStringExtra("uname"),
-                                     intent.getStringExtra("fname"), intent.getStringExtra("lname")))*/
+                        taskFunctionLayoutView.FunctionCloseButton.setOnClickListener {
+                            popupFunctionWindow.dismiss()
 
-                            popupWindow.dismiss()
+                            popupPresent = false
+                        }
 
-                            popupWindow.setOnDismissListener { PopupWindow.OnDismissListener {
-                                popupPresent = false
-                            } }
+                        taskFunctionLayoutView.FunctionSettingsButton.setOnClickListener {
+                            popupFunctionWindow.dismiss()
 
-                            val popupFunctionWindow = PopupWindow(this)
+                            popupPresent = false
+                        }
 
-                            val taskFunctionLayoutView =
-                                layoutInflater.inflate(R.layout.task_functions_layout, null)
-
-                            popupFunctionWindow.contentView = taskFunctionLayoutView
-
-                            val DeleteButton = taskFunctionLayoutView.FunctionDeleteButton
-
-                            val CloseButton = taskFunctionLayoutView.FunctionCloseButton
-
-                            val CloseListener = View.OnClickListener {
-                                popupFunctionWindow.dismiss()
-
-                                popupPresent = false
+                        //Sets the delete button to remove the task
+                        taskFunctionLayoutView.FunctionDeleteButton.setOnClickListener {
+                            for(i in TaskLayout.childCount downTo 0 step 1)
+                            {
+                                val tempChild = TaskLayout.getChildAt(i)
+                                if(tempChild is TaskBox)
+                                {
+                                    if(tempChild == currentTask)
+                                    {
+                                        TaskLayout.removeView(TaskLayout.getChildAt(i))
+                                        currentListofLists.deleteList(i,
+                                            UserPage(currentListofLists.uID, UName, FName, LName, "none"))
+                                    }
+                                }
                             }
 
-                            val DeleteListener = View.OnClickListener {
+                            popupFunctionWindow.dismiss()
+
+                            popupPresent = false
+
+                        }
+
+                        popupFunctionWindow.contentView = taskFunctionLayoutView
+
+                        popupFunctionWindow.setOnDismissListener {
+                            PopupWindow.OnDismissListener {
+                                popupPresent = false
+                            }
+                        }
+
+//                        new_list_box.setOnTouchListener(object : View.OnTouchListener {
+//                            override fun onTouch(v: View?, event: MotionEvent?): Boolean {
+//                                when (event?.action) {
+//                                    MotionEvent.ACTION_DOWN -> //Do Something
+//                                }
+//
+//                                return v?.onTouchEvent(event) ?: true
+//                            }
+//                        })
+
+                        new_list_box.isLongClickable = true
+                        new_list_box.isClickable = true
+
+                        new_list_box.setOnLongClickListener{
+
+                            if(!popupPresent) {
+
+                                popupPresent = true
+
+                                popupFunctionWindow.isFocusable()
+
+                                popupFunctionWindow.showAtLocation(mainView, Gravity.CENTER, 0, 0)
+
                                 for(i in TaskLayout.childCount downTo 0 step 1)
                                 {
                                     val tempChild = TaskLayout.getChildAt(i)
                                     if(tempChild is TaskBox)
                                     {
-                                        if(tempChild.getTaskText() == currentTask?.getTaskText())
-                                        {
-                                            TaskLayout.removeView(TaskLayout.getChildAt(i))
-                                            currentListofLists.deleteList(i, User(1));
+                                        if(tempChild == new_list_box) {
+                                            currentTask = tempChild
                                         }
                                     }
                                 }
-
-                                popupFunctionWindow.dismiss()
-
-                                popupPresent = false
                             }
-
-                            popupFunctionWindow.contentView = taskFunctionLayoutView
-
-                            DeleteButton.setOnClickListener(DeleteListener)
-
-                            CloseButton.setOnClickListener(CloseListener)
-
-                            popupFunctionWindow.setOnDismissListener {
-                                PopupWindow.OnDismissListener {
-                                    popupPresent = false
-                                }
-                            }
-
-                            new_list_box.setOnClickListener{
-                                val tempIntent = Intent(this, BaseChecklist::class.java).apply {
-                                    putExtra("ListName", popup_edittext.text.toString())
-                                    putExtra("UserName", UName)
-                                    putExtra("ChecklistID", currentListofLists.lists.last().listID)
-                                    putExtra("uname", intent.getStringExtra("uname"))
-                                    putExtra("fname", intent.getStringExtra("fname"))
-                                    putExtra("lname", intent.getStringExtra("lname"))
-                                    putExtra("UserID",intent.getIntExtra("UserID", 0))
-                                }
-                                startActivity(tempIntent)
-                            }
-
-                            taskLayout.addView(new_list_box)
+                            return@setOnLongClickListener true
                         }
+                        new_list_box.setOnClickListener{
+                            val tempIntent = Intent(this, BaseChecklist::class.java).apply {
+                                putExtra("ListName", popup_edittext.text.toString())
+                                putExtra("UserName", UName)
+                                putExtra("ChecklistID", currentListofLists.lists.last().listID)
+                                putExtra("uname", intent.getStringExtra("uname"))
+                                putExtra("fname", intent.getStringExtra("fname"))
+                                putExtra("lname", intent.getStringExtra("lname"))
+                                putExtra("UserID",intent.getIntExtra("UserID", 0))
+                            }
+                            startActivity(tempIntent)
+                        }
+
+                        taskLayout.addView(new_list_box)
+                    }
                 }
 
                 val cancelButton = popupView.PopupMainView.CancelButton
