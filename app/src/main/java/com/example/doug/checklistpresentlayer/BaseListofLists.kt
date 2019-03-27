@@ -162,10 +162,11 @@ class BaseListofLists : AppCompatActivity(){
                                 popup_edittext.text.toString()
                             )
 
-                            //Create the new list and post it to the database
-                            currentListofLists.createList(popup_edittext.text.toString(),
-                                User(intent.getIntExtra("UserID", 0)))/*, intent.getStringExtra("uname"),
-                                     intent.getStringExtra("fname"), intent.getStringExtra("lname")))*/
+                            GlobalScope.launch {
+                                //Create the new list and post it to the database
+                                currentListofLists.createList(popup_edittext.text.toString(),
+                                    User(intent.getIntExtra("UserID", 0)))
+                            }
 
                             popupWindow.dismiss()
 
