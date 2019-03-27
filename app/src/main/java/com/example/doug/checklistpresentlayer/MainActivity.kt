@@ -31,6 +31,7 @@ class MainActivity : AppCompatActivity() {
                 putExtra("lname", user.ViewLName())
                 putExtra("UserID",user.ViewID())
             }
+
             startActivity(tempIntent)
         }
 
@@ -96,6 +97,9 @@ class MainActivity : AppCompatActivity() {
         return File(applicationContext.filesDir, "USERDATA").exists()
     }
 
+    //we don't have to check if the file exists in this function
+    //because we call userFileExists() before calling this
+    //however, we might need some other error checking in here
     fun getUserFromFile() : UserPage {
         //context will give us access to our local files directory
         var context = applicationContext

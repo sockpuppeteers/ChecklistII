@@ -15,6 +15,7 @@ import android.support.v7.app.ActionBar
 import android.support.v7.widget.Toolbar
 import android.view.MenuItem
 import android.view.View
+import java.io.File
 
 class UserLogin : AppCompatActivity() {
 
@@ -52,16 +53,6 @@ class UserLogin : AppCompatActivity() {
         UserName.text = "(" + UName + ")"
 
         Icon.setImageResource(icon1)
-
-//        ToCheckList.setOnClickListener {
-//            val tempIntent = Intent(this, BaseListofLists::class.java).apply {
-//                putExtra("uname", intent.getStringExtra("uname"))
-//                putExtra("fname", intent.getStringExtra("fname"))
-//                putExtra("lname", intent.getStringExtra("lname"))
-//                putExtra("UserID",intent.getIntExtra("UserID", 0))
-//            }
-//            startActivity(tempIntent)
-//        }
     }
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
@@ -76,11 +67,23 @@ class UserLogin : AppCompatActivity() {
                 true
             }
             R.id.dLogOut -> {
+                deleteUserDataFile()
                 val tempIntent = Intent(this, MainActivity::class.java)
                 startActivity(tempIntent)
                 true
             }
             else -> super.onOptionsItemSelected(item)
         }
+    }
+
+    fun deleteUserDataFile(){
+        //context will give us access to our local files directory
+        var context = applicationContext
+
+        val filename = "USERDATA"
+        val directory = context.filesDir
+
+        //delete the USERDATA file
+        File(directory, filename).delete()
     }
 }
