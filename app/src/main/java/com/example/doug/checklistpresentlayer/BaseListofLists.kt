@@ -24,10 +24,14 @@ import android.support.v4.view.GravityCompat
 import android.support.v7.widget.RecyclerView
 import android.view.MenuItem
 import android.widget.*
+import com.google.gson.Gson
 import kotlinx.android.synthetic.main.activity_base_checklist.*
 import kotlinx.android.synthetic.main.history_popup.view.*
 import kotlinx.android.synthetic.main.popup_layout.view.*
 import kotlinx.android.synthetic.main.task_functions_layout.view.*
+import java.io.File
+import java.io.FileInputStream
+import java.io.FileOutputStream
 
 
 class BaseListofLists : AppCompatActivity(){
@@ -44,18 +48,32 @@ class BaseListofLists : AppCompatActivity(){
     private lateinit var drawerLayout: DrawerLayout
 
     //Intialize things here
-    init {
-
-
-    }
+    init { }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_base_listoflists)
         currentListofLists.uID = intent.getIntExtra("UserID", 0)
-        var db = Database()
-        UName = intent.getStringExtra("uname")
-        currentListofLists.lists = db.GetListofLists(UName)
+
+        //if the lists are stored locally in the db
+        //then we can load it from there
+        if (listsFileExists()){
+            currentListofLists = getListFromFile()
+            println("from local file")
+        }
+        //otherwise query the api for our data
+        else{
+            //get the user's lists from the database
+            var db = Database()
+            UName = intent.getStringExtra("uname")
+            currentListofLists.lists = db.GetListofLists(UName)
+
+            //put those lists in a local file
+            createListsFile(currentListofLists)
+            println("from db")
+        }
+
+
         //Get layout of checklist names
         val taskLayout = findViewById<LinearLayout>(R.id.TaskLayout)
         var tempBox: ListBox
@@ -244,6 +262,7 @@ class BaseListofLists : AppCompatActivity(){
 
         addButton.setOnClickListener(addListener)
     }
+
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
             android.R.id.home -> {
@@ -267,5 +286,46 @@ class BaseListofLists : AppCompatActivity(){
             }
             else -> super.onOptionsItemSelected(item)
         }
+    }
+
+    fun createListsFile(lists: ListofLists) {
+        //convert lists to a JSON string
+        val gson = Gson()
+        val userJson = gson.toJson(lists)
+
+        //context will give us access to our local files directory
+        var context = applicationContext
+
+        val filename = "LISTS"
+        val directory = context.filesDir
+
+        //write the file LISTS to local directory
+        val file = File(directory, filename)
+        FileOutputStream(file).use {
+            it.write(userJson.toByteArray())
+        }
+    }
+
+    fun listsFileExists() : Boolean {
+        return File(applicationContext.filesDir, "LISTS").exists()
+    }
+
+    //we don't have to check if the file exists in this function
+    //because we call listFileExists() before calling this
+    //however, we might need some other error checking in here
+    fun getListFromFile() : ListofLists {
+        //context will give us access to our local files directory
+        var context = applicationContext
+
+        val filename = "LISTS"
+        val directory = context.filesDir
+
+        //read from LISTS and store it as a string
+        val file = File(directory, filename)
+        val fileData = FileInputStream(file).bufferedReader().use { it.readText() }
+
+        //create a UserPage object based on the JSON from the file
+        val gson = Gson()
+        return gson.fromJson(fileData, ListofLists::class.java)
     }
 }

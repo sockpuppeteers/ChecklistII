@@ -88,9 +88,6 @@ class MainActivity : AppCompatActivity() {
         FileOutputStream(file).use {
             it.write(userJson.toByteArray())
         }
-
-        //val inputAsString = FileInputStream(file).bufferedReader().use { it.readText() }
-        //println(inputAsString)
     }
 
     fun userFileExists() : Boolean {
