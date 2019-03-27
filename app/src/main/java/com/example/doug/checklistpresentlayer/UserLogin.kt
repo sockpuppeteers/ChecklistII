@@ -67,7 +67,11 @@ class UserLogin : AppCompatActivity() {
                 true
             }
             R.id.dLogOut -> {
+                //delete local data files
                 deleteUserDataFile()
+                deleteListsDataFile()
+
+                //redirect to the login page
                 val tempIntent = Intent(this, MainActivity::class.java)
                 startActivity(tempIntent)
                 true
@@ -81,6 +85,17 @@ class UserLogin : AppCompatActivity() {
         var context = applicationContext
 
         val filename = "USERDATA"
+        val directory = context.filesDir
+
+        //delete the USERDATA file
+        File(directory, filename).delete()
+    }
+
+    fun deleteListsDataFile(){
+        //context will give us access to our local files directory
+        var context = applicationContext
+
+        val filename = "LISTS"
         val directory = context.filesDir
 
         //delete the USERDATA file
