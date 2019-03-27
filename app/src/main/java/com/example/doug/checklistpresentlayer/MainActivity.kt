@@ -31,25 +31,21 @@ class MainActivity : AppCompatActivity() {
         var user: UserPage
 
         login_button.setOnClickListener {
+            //establish a database connection
             val db = Database()
+            //try to login
             user = db.LogIn(lUN.text.toString(), lPW.text.toString())
-            if (!user.ErrorCheck())
-            {
-                if (user.ViewError() == "failed")
-                {
-                    ErrorText.text = "Failed to connect to server"
-                }
-                else if (user.ViewError() == "{\"Message\":\"username or password is wrong dude\"}")
-                {
-                    ErrorText.text = "Wrong username or password"
-                }
-                else if (user.ViewError() == "{\"Message\":\"An error has occurred.\"}")
-                {
-                    ErrorText.text = "Something weird went wrong"
-                }
+
+            //if there was an error, display it
+            if (user.HasError()) {
+                if (user.ViewError() == "404")
+                    ErrorText.text = "Incorrect username or password"
+                else
+                    ErrorText.text = "Something went wrong"
             }
-            else
-            {
+
+            //otherwise, log the user in and transfer to the list of lists page
+            else {
                 val tempIntent = Intent(this, BaseListofLists::class.java).apply {
                         putExtra("uname", user.ViewUserName())
                         putExtra("fname", user.ViewFName())
@@ -59,19 +55,10 @@ class MainActivity : AppCompatActivity() {
                 startActivity(tempIntent)
             }
         }
+
         register_text_button.setOnClickListener {
             val tempIntent = Intent(this, Registration::class.java)
             startActivity(tempIntent)
         }
     }
 }
-
-//class AllUsers(val users: List<UserPage>)
-//{
-//
-//}
-//
-//class UserTemp(val UserID: Int, val Username: String, val Fname: String, val Lname: String, private val pw: String)
-//{
-//
-//}

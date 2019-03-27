@@ -31,7 +31,8 @@ class Database {
             result.fold(
                 { data -> user = data
                   user.Error = "none"},
-                { error -> user.Error = error.message }
+                { error -> user.Error = error.response.statusCode.toString()
+                println(user.Error)}
             )
         }
 

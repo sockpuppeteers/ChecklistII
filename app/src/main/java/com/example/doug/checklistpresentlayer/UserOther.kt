@@ -16,40 +16,23 @@ data class User(@SerializedName("UserID") var UserID: Int?, @SerializedName("Use
 
 class UserPage(mUID: Int?, mUserName: String, mFName: String, mLName: String, mError: String?)
 {
-    private val h_User: User = User(mUID,mUserName,mFName,mLName,null,mError)
+    private val h_User: User = User(mUID, mUserName, mFName, mLName, null, mError)
 
-    fun ViewID() : Int?
-    {
-        return h_User.UserID
-    }
+    /************************************
+    * View functions are all just getters
+    * ***********************************/
 
-    fun ViewUserName() : String
-    {
-        return h_User.Username
-    }
+    fun ViewID() : Int? = h_User.UserID
 
-    fun ViewFName() : String
-    {
-        return h_User.FName
-    }
+    fun ViewUserName() : String = h_User.Username
 
-    fun ViewLName() : String
-    {
-        return h_User.LName
-    }
+    fun ViewFName() : String = h_User.FName
 
-    fun ViewError() : String?
-    {
-        return h_User.Error
-    }
+    fun ViewLName() : String = h_User.LName
 
-    fun ErrorCheck() : Boolean
-    {
-        var success = false
-        if ( h_User.Error == "none")
-        {
-            success = true
-        }
-        return success
-    }
+    fun ViewError() : String? = h_User.Error
+
+    //returns true if there's an error
+    //or false if there's none
+    fun HasError() : Boolean = h_User.Error != "none"
 }
