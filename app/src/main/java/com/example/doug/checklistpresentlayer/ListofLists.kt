@@ -7,6 +7,8 @@ import com.google.gson.reflect.TypeToken
 import java.time.LocalDateTime
 import com.microsoft.windowsazure.mobileservices.*
 import kotlinx.coroutines.runBlocking
+import java.io.File
+import java.io.FileOutputStream
 
 class ListofLists(var name: String, var error: String?, var uID : Int = 0) {
 
@@ -16,10 +18,6 @@ class ListofLists(var name: String, var error: String?, var uID : Int = 0) {
     //Record of changes on a checklist
     var changes = mutableListOf<Change>()
 
-    /****************************************************************
-     *  Purpose: Creates an appropriate task with a name and
-     *      description, shows who made it, and adds it to a list
-     ***************************************************************/
     fun createList(name: String, createdBy: User) {
         val list = ListClass(null, name)
         PostChecklist(list)
@@ -63,25 +61,13 @@ class ListofLists(var name: String, var error: String?, var uID : Int = 0) {
                                                      but this function doesn't work without this line*/}
     }
 
-    /****************************************************************
-     *  Purpose: Deletes a task from the list of tasks. Deletes
-     *      through an index in the table and logs who deleted what
-     ***************************************************************/
     fun deleteList(arrayIndex : Int, deletedBy: User) {
         if (arrayIndex >= 0 && arrayIndex < lists.size)
             lists.removeAt(arrayIndex)
     }
 
-    /****************************************************************
-     *  Purpose: Changes the name of a task to a user-specified new
-     *      value. Shows which user modified it for logs.
-     ***************************************************************/
     fun changeListName(arrayIndex: Int, modifiedBy: User, name: String) {
         if (arrayIndex >= 0 && arrayIndex < lists.size)
             lists[arrayIndex].i_name = name
-    }
-
-    fun setuId(id : Int) {
-        uID = id
     }
 }
