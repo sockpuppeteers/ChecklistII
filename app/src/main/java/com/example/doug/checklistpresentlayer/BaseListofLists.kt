@@ -25,10 +25,13 @@ import android.support.v7.widget.RecyclerView
 import android.view.MenuItem
 import android.widget.*
 import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 import kotlinx.android.synthetic.main.activity_base_checklist.*
 import kotlinx.android.synthetic.main.history_popup.view.*
 import kotlinx.android.synthetic.main.popup_layout.view.*
 import kotlinx.android.synthetic.main.task_functions_layout.view.*
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
@@ -58,7 +61,7 @@ class BaseListofLists : AppCompatActivity(){
         //if the lists are stored locally in the db
         //then we can load it from there
         if (listsFileExists()){
-            currentListofLists = getListFromFile()
+            currentListofLists.lists = getListFromFile()
             println("from local file")
         }
         //otherwise query the api for our data
@@ -72,7 +75,6 @@ class BaseListofLists : AppCompatActivity(){
             createListsFile(currentListofLists)
             println("from db")
         }
-
 
         //Get layout of checklist names
         val taskLayout = findViewById<LinearLayout>(R.id.TaskLayout)
@@ -160,11 +162,19 @@ class BaseListofLists : AppCompatActivity(){
                                 popup_edittext.text.toString()
                             )
 
+                            //Create the new list and post it to the database
                             currentListofLists.createList(popup_edittext.text.toString(),
                                 User(intent.getIntExtra("UserID", 0)))/*, intent.getStringExtra("uname"),
                                      intent.getStringExtra("fname"), intent.getStringExtra("lname")))*/
 
                             popupWindow.dismiss()
+
+                            //create a new coroutine that will
+                            //update the local LIST file to be current
+                            GlobalScope.launch {
+                                deleteListsDataFile()
+                                createListsFile(currentListofLists)
+                            }
 
                             popupWindow.setOnDismissListener { PopupWindow.OnDismissListener {
                                 popupPresent = false
@@ -291,7 +301,7 @@ class BaseListofLists : AppCompatActivity(){
     fun createListsFile(lists: ListofLists) {
         //convert lists to a JSON string
         val gson = Gson()
-        val userJson = gson.toJson(lists)
+        val userJson = gson.toJson(lists.lists)
 
         //context will give us access to our local files directory
         var context = applicationContext
@@ -313,7 +323,7 @@ class BaseListofLists : AppCompatActivity(){
     //we don't have to check if the file exists in this function
     //because we call listFileExists() before calling this
     //however, we might need some other error checking in here
-    fun getListFromFile() : ListofLists {
+    fun getListFromFile() : MutableList<ListClass> {
         //context will give us access to our local files directory
         var context = applicationContext
 
@@ -326,6 +336,17 @@ class BaseListofLists : AppCompatActivity(){
 
         //create a UserPage object based on the JSON from the file
         val gson = Gson()
-        return gson.fromJson(fileData, ListofLists::class.java)
+        return gson.fromJson(fileData, object : TypeToken<MutableList<ListClass>>() {}.type)
+    }
+
+    fun deleteListsDataFile(){
+        //context will give us access to our local files directory
+        var context = applicationContext
+
+        val filename = "LISTS"
+        val directory = context.filesDir
+
+        //delete the USERDATA file
+        File(directory, filename).delete()
     }
 }
