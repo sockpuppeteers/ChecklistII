@@ -335,7 +335,7 @@ class BaseListofLists : AppCompatActivity(){
         val file = File(directory, filename)
         val fileData = FileInputStream(file).bufferedReader().use { it.readText() }
 
-        //create a UserPage object based on the JSON from the file
+        //create a MutableList<ListClass> object based on the JSON from the file
         val gson = Gson()
         return gson.fromJson(fileData, object : TypeToken<MutableList<ListClass>>() {}.type)
     }
@@ -347,7 +347,7 @@ class BaseListofLists : AppCompatActivity(){
         val filename = "LISTS"
         val directory = context.filesDir
 
-        //delete the USERDATA file
+        //delete the LISTS file
         File(directory, filename).delete()
     }
 }

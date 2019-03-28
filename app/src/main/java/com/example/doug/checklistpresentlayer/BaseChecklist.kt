@@ -10,11 +10,18 @@ import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 import kotlinx.android.synthetic.main.activity_base_checklist.*
 import kotlinx.android.synthetic.main.history_popup.view.*
 import kotlinx.android.synthetic.main.popup_layout.view.*
 import kotlinx.android.synthetic.main.task_functions_layout.view.*
 import kotlinx.android.synthetic.main.task_settings_popup.view.*
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import java.io.File
+import java.io.FileInputStream
+import java.io.FileOutputStream
 import kotlin.concurrent.thread
 
 
@@ -117,6 +124,12 @@ class BaseChecklist : AppCompatActivity(){
 
         //Adds the task to the checklist
         currentChecklist.createTask(TaskText, null, User(intent.getIntExtra("UserID", 0)), null, currentChecklist.listID!!)
+
+        //rebuild the local file with the updated checklist
+        GlobalScope.launch {
+            deleteListDataFile()
+            createListFile(currentChecklist)
+        }
 
         val popupFunctionWindow = PopupWindow(this)
 
@@ -284,18 +297,128 @@ class BaseChecklist : AppCompatActivity(){
         taskLayout.addView(new_task_box)
     }
 
+    fun addTaskFromList(task: Task) {
+        var new_task_box = TaskBox(
+            this,
+            task.name
+        )
+
+        if(task.isRecurring == true)
+            new_task_box.toggleReccurringIfNotComplete()
+
+        val mainView = findViewById<ScrollView>(R.id.TaskScrollView)
+
+        val popupFunctionWindow = PopupWindow(this)
+
+        val taskFunctionLayoutView =
+            layoutInflater.inflate(R.layout.task_functions_layout, null)
+
+        taskFunctionLayoutView.FunctionCloseButton.setOnClickListener {
+            popupFunctionWindow.dismiss()
+
+            popupPresent = false
+        }
+
+        taskFunctionLayoutView.FunctionSettingsButton.setOnClickListener {
+            popupFunctionWindow.dismiss()
+
+            popupPresent = false
+
+            createSettingsPopup()
+        }
+
+        //Sets the delete button to remove the task
+        taskFunctionLayoutView.FunctionDeleteButton.setOnClickListener {
+            for(i in TaskLayout.childCount downTo 0 step 1)
+            {
+                val tempChild = TaskLayout.getChildAt(i)
+                if(tempChild is TaskBox)
+                {
+                    if(tempChild == currentTask)
+                    {
+                        TaskLayout.removeView(TaskLayout.getChildAt(i))
+                        currentChecklist.deleteTask(i, User(1));
+                    }
+                }
+            }
+
+            popupFunctionWindow.dismiss()
+
+            popupPresent = false
+        }
+
+        popupFunctionWindow.contentView = taskFunctionLayoutView
+
+        popupFunctionWindow.setOnDismissListener {
+            PopupWindow.OnDismissListener {
+                popupPresent = false
+            }
+        }
+
+        //Sets the on lick listener for the new task gui element
+        new_task_box.setOnClickListener{
+
+            if(!popupPresent) {
+
+                popupPresent = true
+
+                popupFunctionWindow.isFocusable()
+
+                popupFunctionWindow.showAtLocation(mainView, Gravity.CENTER, 0, 0)
+
+                for(i in TaskLayout.childCount downTo 0 step 1)
+                {
+                    val tempChild = TaskLayout.getChildAt(i)
+                    if(tempChild is TaskBox)
+                    {
+                        if(tempChild == new_task_box) {
+                            currentTask = tempChild
+                        }
+                    }
+                }
+            }
+        }
+
+        val taskLayout = findViewById<LinearLayout>(R.id.TaskLayout)
+
+        taskLayout.addView(new_task_box)
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_base_checklist)
         currentChecklist.listID = intent.getIntExtra("ChecklistID", 0)
-        var db = Database()
-        var currentTasks = db.GetTasks(intent.getIntExtra("ChecklistID", 0))
 
-        for (Task in currentTasks)
-        {
-            if (Task.name != "")
-                addTask(Task)
+        //if there's a local file, populate our list from that
+        if (listFileExists()){
+            //deleteListDataFile()
+            currentChecklist = getListFromFile()
+
+            //add each task in currentChecklist to the page
+            for (Task in currentChecklist.tasks){
+                addTaskFromList(Task)
+            }
+            println("loaded list from local file")
         }
+
+        //if no local file exists, populate our list from the database
+        else{
+            println("loaded list from database")
+            var db = Database()
+            var currentTasks = db.GetTasks(intent.getIntExtra("ChecklistID", 0))
+
+            for (Task in currentTasks)
+            {
+                if (Task.name != "")
+                    addTask(Task)
+            }
+
+            //create a local file with the data
+            GlobalScope.launch {
+                createListFile(currentChecklist)
+            }
+        }
+
         val addButton = findViewById<Button>(R.id.AddTaskButton)
         val checkoffButton = findViewById<Button>(R.id.CheckoffButton)
         val historyButton = findViewById<Button>(R.id.HistoryButton)
@@ -497,5 +620,58 @@ class BaseChecklist : AppCompatActivity(){
 
         editButton.setOnClickListener(edit_listener)
 
+    }
+
+    fun createListFile(list: Checklist) {
+        //convert list to a JSON string
+        val gson = Gson()
+        val userJson = gson.toJson(list)
+
+        //context will give us access to our local files directory
+        var context = applicationContext
+
+        val filename = list.i_name
+        val directory = context.filesDir
+
+        //write the file to local directory
+        //the filename will be the name of the list
+        val file = File(directory, filename)
+        FileOutputStream(file).use {
+            it.write(userJson.toByteArray())
+        }
+    }
+
+    fun listFileExists() : Boolean {
+        return File(applicationContext.filesDir, currentChecklist.i_name).exists()
+    }
+
+    //we don't have to check if the file exists in this function
+    //because we call listFileExists() before calling this
+    //however, we might need some other error checking in here
+    fun getListFromFile() : Checklist {
+        //context will give us access to our local files directory
+        var context = applicationContext
+
+        val filename = currentChecklist.i_name
+        val directory = context.filesDir
+
+        //read from the file and store it as a string
+        val file = File(directory, filename)
+        val fileData = FileInputStream(file).bufferedReader().use { it.readText() }
+
+        //create a Checklist object based on the JSON from the file
+        val gson = Gson()
+        return gson.fromJson(fileData, Checklist::class.java)
+    }
+
+    fun deleteListDataFile(){
+        //context will give us access to our local files directory
+        var context = applicationContext
+
+        val filename = currentChecklist.i_name
+        val directory = context.filesDir
+
+        //delete the file
+        File(directory, filename).delete()
     }
 }
