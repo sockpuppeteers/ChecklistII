@@ -160,7 +160,14 @@ class BaseChecklist : AppCompatActivity(){
                     if(tempChild == currentTask)
                     {
                         TaskLayout.removeView(TaskLayout.getChildAt(i))
-                        currentChecklist.deleteTask(i, User(1));
+                        //remove the task from the list, and delete it from the database
+                        currentChecklist.deleteTask(i, User(1))
+
+                        //update the local file
+                        GlobalScope.launch {
+                            deleteListDataFile()
+                            createListFile(currentChecklist)
+                        }
                     }
                 }
             }

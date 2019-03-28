@@ -41,7 +41,6 @@ class Checklist( private val name: String, private val cListID : Int? ) : ListCl
      *      the list of tasks. This is so it can be a recurring task
      ***************************************************************/
     fun completeTask(arrayIndex: Int, completedBy: User) {
-
         if (arrayIndex >= 0 && arrayIndex < tasks.size) {
             logChange(tasks[arrayIndex].TaskID!!, tasks[arrayIndex].name, completedBy, kAction.COMPLETE_TASK)
             tasks[arrayIndex].compdatetime = LocalDateTime.now().toString()
