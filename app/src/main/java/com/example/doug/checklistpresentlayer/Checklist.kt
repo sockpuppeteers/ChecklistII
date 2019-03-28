@@ -31,9 +31,9 @@ class Checklist( private val name: String, private val cListID : Int? ) : ListCl
      ***************************************************************/
     fun createTask(name: String, deadline: String?, createdBy: User, taskID: Int?, checklistID: Int?) {
         val task = Task(name, deadline, taskID, checklistID)
+        task.TaskID = dbAccess.PostTask(task)
         tasks.add(task)
         //logChange(task.TaskID!!, task.name, createdBy, kAction.CREATE_TASK)
-        dbAccess.PostTask(task)
     }
 
     /****************************************************************

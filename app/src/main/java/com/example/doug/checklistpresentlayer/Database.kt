@@ -118,16 +118,33 @@ class Database {
         return error
     }
 
-    fun PostTask(task: Task){
+    fun PostTask(task: Task) : Int {
         //create a json model of task
         val gson = Gson()
         val json = gson.toJson(task)
+        var listID = 0
 
-        //post the object to the database
-        Fuel.post("https://sockpuppeteerapi3.azurewebsites.net/api/task/")
-            .header("Content-Type" to "application/json")
-            .body(json.toString())
-            .response { req, res, result -> /* you could do something with the response here */ }
+        //this block will do a POST but it will also block the main thread while it waits for the
+        //return data. The only reason we're doing this is because we NEED to get the taskID of the
+        //newly created task. This is a temporary fix because we don't want to be blocking the main
+        //thread if possible.
+        runBlocking{
+            //Make a post request
+            val (request, response, result) = Fuel.post("https://sockpuppeteerapi3.azurewebsites.net/api/task/")
+                .header("Content-Type" to "application/json")
+                .body(json.toString()).awaitStringResponseResult()
+
+            //if the post is successful we'll get the taskID and return that
+            result.fold(
+                { data ->
+                    var newTask = gson.fromJson(data, Task::class.java)
+                    listID = newTask.TaskID!!
+                },
+                { error -> println("Error in PostChecklist function: ${error.message}") }
+            )
+        }
+
+        return listID
     }
 
     fun PutTask(task: Task){

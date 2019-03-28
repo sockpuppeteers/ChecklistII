@@ -42,12 +42,7 @@ class ListofLists(var name: String, var error: String?, var uID : Int = 0) {
                 { data ->
                     var newList = gson.fromJson(data, ListClass::class.java)
                     lists.add(newList)
-
-                    println("User ID: $uID")
-                    println("newList.listID: ${newList.listID}")
-
                     AddUserToList(uID, newList.listID!!)
-                    println("listID ${newList.listID}")
                 },
                 { error -> println("Error in PostChecklist function: ${error.message}") }
             )
