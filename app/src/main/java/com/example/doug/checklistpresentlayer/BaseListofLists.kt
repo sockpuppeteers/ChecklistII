@@ -27,6 +27,7 @@ import android.widget.*
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import kotlinx.android.synthetic.main.activity_base_checklist.*
+import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.history_popup.view.*
 import kotlinx.android.synthetic.main.popup_layout.view.*
 import kotlinx.android.synthetic.main.task_functions_layout.view.*
@@ -57,6 +58,9 @@ class BaseListofLists : AppCompatActivity(){
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_base_listoflists)
         currentListofLists.uID = intent.getIntExtra("UserID", 0)
+        UName = intent.getStringExtra("uname")
+        FName = intent.getStringExtra("fname")
+        LName = intent.getStringExtra("lname")
 
         //if the lists are stored locally in the db
         //then we can load it from there
@@ -68,7 +72,6 @@ class BaseListofLists : AppCompatActivity(){
         else{
             //get the user's lists from the database
             var db = Database()
-            UName = intent.getStringExtra("uname")
             currentListofLists.lists = db.GetListofLists(UName)
 
             //put those lists in a local file
@@ -90,10 +93,12 @@ class BaseListofLists : AppCompatActivity(){
             //Set The action to be executed when the list in clicked
             tempBox.setOnClickListener{
                 val tempIntent = Intent(this, BaseChecklist::class.java).apply {
+                    putExtra("ListName", ListClass.i_name)
+                    putExtra("UserName", UName)
                     putExtra("ChecklistID", ListClass.listID)
-                    putExtra("uname", intent.getStringExtra("uname"))
-                    putExtra("fname", intent.getStringExtra("fname"))
-                    putExtra("lname", intent.getStringExtra("lname"))
+                    putExtra("uname", UName)
+                    putExtra("fname", FName)
+                    putExtra("lname", LName)
                     putExtra("UserID",intent.getIntExtra("UserID", 0))
                 }
 
@@ -104,9 +109,6 @@ class BaseListofLists : AppCompatActivity(){
             //Add box to page
             taskLayout.addView(tempBox)
         }
-        UName = intent.getStringExtra("uname")
-        FName = intent.getStringExtra("fname")
-        LName = intent.getStringExtra("lname")
 
         drawerLayout = findViewById(R.id.drawer_layout)
 
@@ -234,9 +236,9 @@ class BaseListofLists : AppCompatActivity(){
                                     putExtra("ListName", popup_edittext.text.toString())
                                     putExtra("UserName", UName)
                                     putExtra("ChecklistID", currentListofLists.lists.last().listID)
-                                    putExtra("uname", intent.getStringExtra("uname"))
-                                    putExtra("fname", intent.getStringExtra("fname"))
-                                    putExtra("lname", intent.getStringExtra("lname"))
+                                    putExtra("uname", UName)
+                                    putExtra("fname", FName)
+                                    putExtra("lname", LName)
                                     putExtra("UserID",intent.getIntExtra("UserID", 0))
                                 }
                                 startActivity(tempIntent)
