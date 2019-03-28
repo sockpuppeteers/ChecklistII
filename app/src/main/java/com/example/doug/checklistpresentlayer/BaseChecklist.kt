@@ -344,7 +344,13 @@ class BaseChecklist : AppCompatActivity(){
                     if(tempChild == currentTask)
                     {
                         TaskLayout.removeView(TaskLayout.getChildAt(i))
-                        currentChecklist.deleteTask(i, User(1));
+                        currentChecklist.deleteTask(i, User(1))
+
+                        //remake the local file
+                        GlobalScope.launch {
+                            deleteListDataFile()
+                            createListFile(currentChecklist)
+                        }
                     }
                 }
             }

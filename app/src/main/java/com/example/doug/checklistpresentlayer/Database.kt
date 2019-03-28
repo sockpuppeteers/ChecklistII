@@ -160,10 +160,9 @@ class Database {
     }
 
     fun DeleteTask(task: Task){
-        println("taskID: ${task.TaskID}")
         //make a delete request
         Fuel.delete("https://sockpuppeteerapi3.azurewebsites.net/api/task/${task.TaskID}")
-            .response { req, res, result -> /* you could do something with the response here */ println("Delete task: ${res.statusCode}")}
+            .response { req, res, result -> /* you could do something with the response here */}
     }
 
     fun PutChecklist(checklist: ListClass){
