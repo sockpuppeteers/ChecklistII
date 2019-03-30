@@ -106,6 +106,8 @@ class BaseListofLists : AppCompatActivity(){
                 startActivity(tempIntent)
             }
 
+            tempBox.gravity = Gravity.LEFT
+
             //Add box to page
             taskLayout.addView(tempBox)
         }
@@ -244,6 +246,7 @@ class BaseListofLists : AppCompatActivity(){
                                 startActivity(tempIntent)
                             }
 
+                            new_list_box.gravity = Gravity.LEFT
                             taskLayout.addView(new_list_box)
                         }
                 }
