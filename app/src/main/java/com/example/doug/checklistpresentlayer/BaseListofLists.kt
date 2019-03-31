@@ -51,7 +51,7 @@ class BaseListofLists : AppCompatActivity(){
 
     private lateinit var drawerLayout: DrawerLayout
 
-    //Intialize things here
+    //Initialize things here
     init { }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -106,6 +106,7 @@ class BaseListofLists : AppCompatActivity(){
                 startActivity(tempIntent)
             }
 
+            //this line may do nothing actually, will double check later
             tempBox.gravity = Gravity.LEFT
 
             //Add box to page
@@ -246,6 +247,7 @@ class BaseListofLists : AppCompatActivity(){
                                 startActivity(tempIntent)
                             }
 
+                            //this line may do nothing actually, will double check later
                             new_list_box.gravity = Gravity.LEFT
                             taskLayout.addView(new_list_box)
                         }

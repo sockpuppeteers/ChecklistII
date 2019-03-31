@@ -47,7 +47,7 @@
                             android:orientation="vertical"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content" android:id="@+id/TaskLayout"
-                            android:gravity="center_horizontal"/>
+                            android:gravity="start"/>
                 </ScrollView>
                 <LinearLayout
                         android:orientation="horizontal"
