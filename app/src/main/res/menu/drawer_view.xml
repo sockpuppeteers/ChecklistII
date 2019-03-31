@@ -9,6 +9,6 @@
                 android:title="Settings" />
         <item
                 android:id="@+id/dLogOut"
-                android:title="Log Out" />
+                android:title="@string/LOGOUT_TEXT"/>
     </group>
 </menu>

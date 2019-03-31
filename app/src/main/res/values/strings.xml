@@ -22,4 +22,6 @@
     <string name="LOGIN_TEXT">Login</string>
     <string name="REGISTER_TEXT">Register</string>
     <string name="FORGOT_TEXT">Forgot UserName or Password?</string>
+    <!-- This allows the string text to be colored, this may have issues with 2.x or 4.x android systems-->
+    <string name="LOGOUT_TEXT"><font fgcolor='#FF0000'>Log out</font></string>
 </resources>
