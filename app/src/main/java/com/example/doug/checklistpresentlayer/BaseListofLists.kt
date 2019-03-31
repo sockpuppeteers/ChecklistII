@@ -295,6 +295,13 @@ class BaseListofLists : AppCompatActivity(){
                 true
             }
             R.id.dLogOut -> {
+                //delete local data files
+                deleteUserDataFile()
+                deleteListsDataFile()
+
+                //redirect to the login page
+                val tempIntent = Intent(this, MainActivity::class.java)
+                startActivity(tempIntent)
                 true
             }
             else -> super.onOptionsItemSelected(item)
@@ -340,6 +347,17 @@ class BaseListofLists : AppCompatActivity(){
         //create a MutableList<ListClass> object based on the JSON from the file
         val gson = Gson()
         return gson.fromJson(fileData, object : TypeToken<MutableList<ListClass>>() {}.type)
+    }
+
+    fun deleteUserDataFile(){
+        //context will give us access to our local files directory
+        var context = applicationContext
+
+        val filename = "USERDATA"
+        val directory = context.filesDir
+
+        //delete the USERDATA file
+        File(directory, filename).delete()
     }
 
     fun deleteListsDataFile(){
