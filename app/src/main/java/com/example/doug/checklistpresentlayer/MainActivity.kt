@@ -11,7 +11,7 @@ import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
 
-
+//This is actually the user login page functionality
 class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
