@@ -401,6 +401,9 @@ class BaseChecklist : AppCompatActivity(){
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_base_checklist)
         currentChecklist.listID = intent.getIntExtra("ChecklistID", 0)
+        //line below gets the checklist name so that each checklist correctly
+        //displays their own tasks and no other checklist's tasks
+        currentChecklist.i_name = intent.getStringExtra("ListName")
 
         //if there's a local file, populate our list from that
         if (listFileExists()){
