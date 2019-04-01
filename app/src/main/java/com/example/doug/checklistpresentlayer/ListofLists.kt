@@ -59,6 +59,7 @@ class ListofLists(var name: String, var error: String?, var uID : Int = 0) {
     fun deleteList(arrayIndex : Int, deletedBy: User) {
         if (arrayIndex >= 0 && arrayIndex < lists.size)
             lists.removeAt(arrayIndex)
+        //add delete from database here
     }
 
     fun changeListName(arrayIndex: Int, modifiedBy: User, name: String) {

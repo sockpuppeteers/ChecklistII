@@ -27,8 +27,10 @@ import android.widget.*
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import kotlinx.android.synthetic.main.activity_base_checklist.*
+import kotlinx.android.synthetic.main.activity_base_listoflists.*
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.history_popup.view.*
+import kotlinx.android.synthetic.main.popup_delete_layout.view.*
 import kotlinx.android.synthetic.main.popup_layout.view.*
 import kotlinx.android.synthetic.main.task_functions_layout.view.*
 import kotlinx.coroutines.GlobalScope
@@ -47,11 +49,9 @@ class BaseListofLists : AppCompatActivity(){
     //Flag to see if any popups are present
     var popupPresent = false
 
-    var currentTask: TaskBox? = null
-
     private lateinit var drawerLayout: DrawerLayout
 
-    //Intialize things here
+    //Initialize things here
     init { }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -183,53 +183,54 @@ class BaseListofLists : AppCompatActivity(){
                                 popupPresent = false
                             } }
 
-                            val popupFunctionWindow = PopupWindow(this)
-
-                            val taskFunctionLayoutView =
-                                layoutInflater.inflate(R.layout.task_functions_layout, null)
-
-                            popupFunctionWindow.contentView = taskFunctionLayoutView
-
-                            val DeleteButton = taskFunctionLayoutView.FunctionDeleteButton
-
-                            val CloseButton = taskFunctionLayoutView.FunctionCloseButton
-
-                            val CloseListener = View.OnClickListener {
-                                popupFunctionWindow.dismiss()
-
-                                popupPresent = false
-                            }
-
-                            val DeleteListener = View.OnClickListener {
-                                for(i in TaskLayout.childCount downTo 0 step 1)
-                                {
-                                    val tempChild = TaskLayout.getChildAt(i)
-                                    if(tempChild is TaskBox)
-                                    {
-                                        if(tempChild.getTaskText() == currentTask?.getTaskText())
-                                        {
-                                            TaskLayout.removeView(TaskLayout.getChildAt(i))
-                                            currentListofLists.deleteList(i, User(1));
-                                        }
-                                    }
-                                }
-
-                                popupFunctionWindow.dismiss()
-
-                                popupPresent = false
-                            }
-
-                            popupFunctionWindow.contentView = taskFunctionLayoutView
-
-                            DeleteButton.setOnClickListener(DeleteListener)
-
-                            CloseButton.setOnClickListener(CloseListener)
-
-                            popupFunctionWindow.setOnDismissListener {
-                                PopupWindow.OnDismissListener {
-                                    popupPresent = false
-                                }
-                            }
+                            //don't delete this, it will be useful later
+//                            val popupFunctionWindow = PopupWindow(this)
+//
+//                            val taskFunctionLayoutView =
+//                                layoutInflater.inflate(R.layout.task_functions_layout, null)
+//
+//                            popupFunctionWindow.contentView = taskFunctionLayoutView
+//
+//                            val DeleteButton = taskFunctionLayoutView.FunctionDeleteButton
+//
+//                            val CloseButton = taskFunctionLayoutView.FunctionCloseButton
+//
+//                            val CloseListener = View.OnClickListener {
+//                                popupFunctionWindow.dismiss()
+//
+//                                popupPresent = false
+//                            }
+//
+//                            val DeleteListener = View.OnClickListener {
+//                                for(i in TaskLayout.childCount downTo 0 step 1)
+//                                {
+//                                    val tempChild = TaskLayout.getChildAt(i)
+//                                    if(tempChild is TaskBox)
+//                                    {
+//                                        if(tempChild.getTaskText() == currentTask?.getTaskText())
+//                                        {
+//                                            TaskLayout.removeView(TaskLayout.getChildAt(i))
+//                                            currentListofLists.deleteList(i, User(1))
+//                                        }
+//                                    }
+//                                }
+//
+//                                popupFunctionWindow.dismiss()
+//
+//                                popupPresent = false
+//                            }
+//
+//                            popupFunctionWindow.contentView = taskFunctionLayoutView
+//
+//                            DeleteButton.setOnClickListener(DeleteListener)
+//
+//                            CloseButton.setOnClickListener(CloseListener)
+//
+//                            popupFunctionWindow.setOnDismissListener {
+//                                PopupWindow.OnDismissListener {
+//                                    popupPresent = false
+//                                }
+//                            }
 
                             new_list_box.setOnClickListener{
                                 val tempIntent = Intent(this, BaseChecklist::class.java).apply {
@@ -273,7 +274,66 @@ class BaseListofLists : AppCompatActivity(){
             }
         }
 
+        val DeleteListener = View.OnClickListener {
+            if(!popupPresent) {
+                val mainView = findViewById<ScrollView>(R.id.TaskScrollView)
+
+                val popupWindow = PopupWindow(this)
+
+                val popupView = layoutInflater.inflate(R.layout.popup_delete_layout, null)
+
+                popupWindow.contentView = popupView
+
+                for (ListClass in currentListofLists.lists) {
+                    var tempBox2 = ListBox(
+                        this,
+                        ListClass.i_name
+                    )
+
+                    //Set The action to be executed when the list is clicked
+                    tempBox2.setOnClickListener{
+                        for(i in popupView.DeleteLayout.childCount downTo 0 step 1)
+                        {
+                            val tempChild = popupView.DeleteLayout.getChildAt(i)
+                            if (tempChild is ListBox)
+                            {
+                                if (tempChild == tempBox2)
+                                {
+                                    taskLayout.removeView(taskLayout.getChildAt(i))
+                                    //remove the task from the list, and delete it from the database
+                                    currentListofLists.deleteList(i, User(1))
+                                }
+                            }
+                        }
+
+                        popupPresent = false
+                        popupWindow.dismiss()
+                    }
+
+                    //Add box to page
+                    popupView.DeleteLayout.addView(tempBox2)
+                }
+
+                val closeButton = popupView.CloseButton
+
+                closeButton.setOnClickListener{
+                    popupWindow.dismiss()
+                }
+
+                popupWindow.setOnDismissListener{
+                    popupPresent = false
+                }
+
+                popupWindow.isFocusable = true
+
+                popupWindow.showAtLocation(mainView, Gravity.CENTER, 0, 0)
+
+                popupPresent = true
+            }
+        }
+
         addButton.setOnClickListener(addListener)
+        DeleteListButton.setOnClickListener(DeleteListener)
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
@@ -295,6 +355,13 @@ class BaseListofLists : AppCompatActivity(){
                 true
             }
             R.id.dLogOut -> {
+                //delete local data files
+                deleteUserDataFile()
+                deleteListsDataFile()
+
+                //redirect to the login page
+                val tempIntent = Intent(this, MainActivity::class.java)
+                startActivity(tempIntent)
                 true
             }
             else -> super.onOptionsItemSelected(item)
@@ -340,6 +407,17 @@ class BaseListofLists : AppCompatActivity(){
         //create a MutableList<ListClass> object based on the JSON from the file
         val gson = Gson()
         return gson.fromJson(fileData, object : TypeToken<MutableList<ListClass>>() {}.type)
+    }
+
+    fun deleteUserDataFile(){
+        //context will give us access to our local files directory
+        var context = applicationContext
+
+        val filename = "USERDATA"
+        val directory = context.filesDir
+
+        //delete the USERDATA file
+        File(directory, filename).delete()
     }
 
     fun deleteListsDataFile(){
