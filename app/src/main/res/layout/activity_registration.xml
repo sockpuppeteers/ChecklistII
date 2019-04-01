@@ -14,7 +14,9 @@
             app:layout_constraintStart_toStartOf="parent" android:layout_marginEnd="8dp"
             app:layout_constraintEnd_toEndOf="parent"
             android:layout_marginTop="8dp" app:layout_constraintTop_toBottomOf="@+id/rErrorText"
-            android:hint="@string/EMAIL_TEXT"/>
+            android:hint="@string/EMAIL_TEXT" />       <!-- > -->
+        <!-- <requestFocus /> This "focuses" on this specific editText at the start of the page
+    </EditText> -->
     <EditText
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -43,7 +45,7 @@
             android:id="@+id/rUserName"
             android:layout_marginStart="8dp"
             app:layout_constraintStart_toStartOf="parent" android:layout_marginEnd="8dp"
-            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" android:inputType="textPersonName"
             android:layout_marginTop="24dp" app:layout_constraintTop_toBottomOf="@+id/rEmail"
             android:hint="@string/USERNAME_TEXT"/>
     <EditText
@@ -54,7 +56,8 @@
             android:layout_marginStart="8dp"
             app:layout_constraintStart_toStartOf="parent" android:layout_marginEnd="8dp"
             app:layout_constraintEnd_toEndOf="parent" android:hint="@string/LAST_NAME_TEXT"
-            android:layout_marginTop="24dp" app:layout_constraintTop_toBottomOf="@+id/rFName"/>
+            android:layout_marginTop="24dp" app:layout_constraintTop_toBottomOf="@+id/rFName"
+            android:inputType="textPersonName"/>
     <EditText
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
