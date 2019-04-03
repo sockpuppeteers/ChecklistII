@@ -16,7 +16,9 @@ import kotlinx.android.synthetic.main.activity_base_checklist.*
 import kotlinx.android.synthetic.main.history_popup.view.*
 import kotlinx.android.synthetic.main.popup_layout.view.*
 import kotlinx.android.synthetic.main.task_functions_layout.view.*
+import kotlinx.android.synthetic.main.task_settings_deadline_popup.view.*
 import kotlinx.android.synthetic.main.task_settings_popup.view.*
+import kotlinx.android.synthetic.main.task_settings_recursion_popup.view.*
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import java.io.File
@@ -30,7 +32,6 @@ import kotlin.concurrent.thread
  ********************************************/
 class BaseChecklist : AppCompatActivity(){
 
-    var inEdit = false
     var currentChecklist = Checklist("Your Checklist", 0 )
 
     //Flag to see if any popups are present
@@ -41,37 +42,6 @@ class BaseChecklist : AppCompatActivity(){
     //Intialize things here
     init {
 
-    }
-
-    /********************************************
-     *Purpose: Click Listener for the edit button
-     *
-     * DO NOT USE
-     ********************************************/
-    val edit_listener = View.OnClickListener {
-
-        /*var taskCount = TaskLayout.childCount - 1
-
-        while (taskCount >= 0)
-        {
-            val currentChild = TaskLayout.getChildAt(taskCount)
-
-            if(currentChild is TaskBox)
-            {
-                val taskSwitch = currentChild.getChildAt(1)
-
-                if(taskSwitch is Switch)
-                {
-                    if(taskSwitch.isChecked)
-                    {
-                        TaskLayout.removeView(TaskLayout.getChildAt(taskCount))
-                    }
-                }
-            }
-
-            taskCount--
-        }
-        */
     }
 
     private fun createSettingsPopup() {
@@ -87,23 +57,71 @@ class BaseChecklist : AppCompatActivity(){
 
             popupSettingsWindow.contentView = taskSettingsLayoutView
 
-            //This is the weirdest statement I have ever written but it yells at me otherwise
-            taskSettingsLayoutView.RecursionSwitch.isChecked =
-                currentTask?.checkReccurring() != null && currentTask?.checkReccurring() == true
+            /**************
+             *   Deadline Button Displays Deadline popup
+             ***************/
+            taskSettingsLayoutView.DeadlineButton.setOnClickListener {
 
-            taskSettingsLayoutView.RecursionSwitch.setOnClickListener {
-                currentTask?.toggleReccurringIfNotComplete()
+                popupSettingsWindow.dismiss()
+
+                val popupSettingsDeadlineWindow = PopupWindow(this)
+
+                val taskSettingsDeadlineLayoutView =
+                    layoutInflater.inflate(R.layout.task_settings_deadline_popup, null)
+
+                popupSettingsDeadlineWindow.contentView = taskSettingsDeadlineLayoutView
+
+                taskSettingsDeadlineLayoutView.closeDeadlineButton.setOnClickListener{
+
+                    popupSettingsDeadlineWindow.dismiss()
+
+                    popupPresent = false
+                }
+
+                popupSettingsDeadlineWindow.isFocusable = true
+
+                popupSettingsDeadlineWindow.showAtLocation(mainView, Gravity.CENTER, 0, 0)
+            }
+
+            /**************
+             *   Recursion Button Displays Task Recursion popup
+             ***************/
+            taskSettingsLayoutView.RecursionButton.setOnClickListener {
+
+                popupSettingsWindow.dismiss()
+
+                val popupSettingsRecurringWindow = PopupWindow(this)
+
+                val taskSettingsRecurringLayoutView =
+                    layoutInflater.inflate(R.layout.task_settings_recursion_popup, null)
+
+                popupSettingsRecurringWindow.contentView = taskSettingsRecurringLayoutView
+
+                taskSettingsRecurringLayoutView.CloseRecurringButton.setOnClickListener{
+
+                    popupSettingsRecurringWindow.dismiss()
+
+                    popupPresent = false
+                }
+
+                taskSettingsRecurringLayoutView.RecursionSwitch.isChecked =
+                    currentTask?.checkReccurring() != null && currentTask?.checkReccurring() == true
+
+                taskSettingsRecurringLayoutView.RecursionSwitch.setOnClickListener {
+                    currentTask?.toggleReccurringIfNotComplete()
+                }
+
+                popupSettingsRecurringWindow.isFocusable = true
+
+                popupSettingsRecurringWindow.showAtLocation(mainView, Gravity.CENTER, 0, 0)
             }
 
             taskSettingsLayoutView.CloseButton.setOnClickListener {
                 popupSettingsWindow.dismiss()
+                popupPresent = false
             }
 
             taskSettingsLayoutView.taskNameView.text = currentTask?.getTaskText()
-
-            popupSettingsWindow.setOnDismissListener {
-                popupPresent = false
-            }
 
             popupSettingsWindow.isFocusable = true
 
@@ -435,7 +453,6 @@ class BaseChecklist : AppCompatActivity(){
         val addButton = findViewById<Button>(R.id.AddTaskButton)
         val checkoffButton = findViewById<Button>(R.id.CheckoffButton)
         val historyButton = findViewById<Button>(R.id.HistoryButton)
-        val editButton = findViewById<Button>(R.id.EditTaskButton)
 
         //Creates the clikc listener for the add button
         val addListener = View.OnClickListener {
@@ -630,9 +647,6 @@ class BaseChecklist : AppCompatActivity(){
         }
 
         historyButton.setOnClickListener(historyListener)
-
-        editButton.setOnClickListener(edit_listener)
-
     }
 
     fun createListFile(list: Checklist) {

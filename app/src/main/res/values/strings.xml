@@ -22,4 +22,47 @@
     <string name="LOGIN_TEXT">Login</string>
     <string name="REGISTER_TEXT">Register</string>
     <string name="FORGOT_TEXT">Forgot UserName or Password?</string>
+    <string name="DEADLINE_TEXT">Deadline</string>
+    <string name="SUNDAY_TEXT">Sunday</string>
+    <string name="MONDAY_TEXT">Monday</string>
+    <string name="TUESDAY_TEXT">Tuesday</string>
+    <string name="WEDNESDAY_TEXT">Wednesday</string>
+    <string name="THURSDAY_TEXT">Thursday</string>
+    <string name="FRIDAY_TEXT">Friday</string>
+    <string name="SATURDAY_TEXT">Saturday</string>
+    <string name="DATE_SELECTION_TEXT">Recurring Days</string>
+    <string-array name="MINUTES_TEXT">
+        <item>00</item>
+        <item>05</item>
+        <item>10</item>
+        <item>15</item>
+        <item>20</item>
+        <item>25</item>
+        <item>30</item>
+        <item>35</item>
+        <item>40</item>
+        <item>45</item>
+        <item>50</item>
+        <item>55</item>
+    </string-array>
+    <string-array name="HOUR_TEXT">
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+        <item>4</item>
+        <item>5</item>
+        <item>6</item>
+        <item>7</item>
+        <item>8</item>
+        <item>9</item>
+        <item>10</item>
+        <item>11</item>
+        <item>12</item>
+    </string-array>
+    <string-array name="AM_PM_TEXT">
+        <item>AM</item>
+        <item>PM</item>
+    </string-array>
+    <string name="DAILY_DEADLINE_TEXT">Daily Deadline</string>
+    <string name="CLEAR_DEADLINE_TEXT">Clear Deadline</string>
 </resources>
