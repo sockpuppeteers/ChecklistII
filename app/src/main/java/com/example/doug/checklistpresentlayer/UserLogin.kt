@@ -17,6 +17,7 @@ import android.view.MenuItem
 import android.view.View
 import java.io.File
 
+//This is actually the nav drawer functionality from user profile page
 class UserLogin : AppCompatActivity() {
 
     private lateinit var drawerLayout: DrawerLayout

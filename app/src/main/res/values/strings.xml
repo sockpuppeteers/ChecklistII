@@ -65,4 +65,6 @@
     </string-array>
     <string name="DAILY_DEADLINE_TEXT">Daily Deadline</string>
     <string name="CLEAR_DEADLINE_TEXT">Clear Deadline</string>
+    <!-- This allows the string text to be colored, this may have issues with 2.x or 4.x android systems-->
+    <string name="LOGOUT_TEXT"><font fgcolor='#FF0000'>Log out</font></string>
 </resources>
