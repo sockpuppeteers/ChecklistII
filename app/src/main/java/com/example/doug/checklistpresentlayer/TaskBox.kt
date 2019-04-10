@@ -27,7 +27,7 @@ class TaskBox @JvmOverloads constructor(
     defStyle: Int = 0): LinearLayout(context, attrs, defStyle) {
 
 
-    private val taskText = text
+    private var taskText = text
 
     private var taskTextView: TextView? = null
 
@@ -36,8 +36,7 @@ class TaskBox @JvmOverloads constructor(
 
     init
     {
-            //setBackgroundColor(ContextCompat.getColor(context, R.color.colorTaskBackground))
-
+            //setBackgroundColor(ContextCompat.getColor(context, R.color.colorTaskBackground)
             orientation = LinearLayout.HORIZONTAL
 
             taskTextView = TextView(context)
@@ -63,6 +62,14 @@ class TaskBox @JvmOverloads constructor(
         addView(taskTextView)
         addView(taskSwitch)
     }
+
+    fun ChangeName(name: String)
+    {
+        taskText = name
+
+        taskTextView?.text = taskText
+    }
+
 
     fun toggleReccurringIfNotComplete() {
         if(!isComplete) {

@@ -1,22 +1,19 @@
 package com.example.doug.checklistpresentlayer
 
-import android.content.Intent
-import khttp.*
 import android.graphics.Color
 import android.os.Bundle
-import android.support.constraint.ConstraintLayout
 import android.support.v7.app.AppCompatActivity
 import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
 import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
 import kotlinx.android.synthetic.main.activity_base_checklist.*
 import kotlinx.android.synthetic.main.history_popup.view.*
 import kotlinx.android.synthetic.main.popup_layout.view.*
 import kotlinx.android.synthetic.main.task_functions_layout.view.*
 import kotlinx.android.synthetic.main.task_settings_deadline_popup.view.*
+import kotlinx.android.synthetic.main.task_settings_name_change_popup.view.*
 import kotlinx.android.synthetic.main.task_settings_popup.view.*
 import kotlinx.android.synthetic.main.task_settings_recursion_popup.view.*
 import kotlinx.coroutines.GlobalScope
@@ -24,8 +21,6 @@ import kotlinx.coroutines.launch
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
-import kotlin.concurrent.thread
-
 
 /********************************************
  *TO DO: Move listener assignments to functions
@@ -55,6 +50,21 @@ class BaseChecklist : AppCompatActivity(){
             val taskSettingsLayoutView =
                 layoutInflater.inflate(R.layout.task_settings_popup, null)
 
+            var taskCount = TaskLayout.childCount
+            var found = false
+            //Checks all current gui elements to see if they are checked
+            while (taskCount >= 0 && ! found) {
+                taskCount--
+
+                val currentChild = TaskLayout.getChildAt(taskCount)
+
+                if (currentChild is TaskBox) {
+                        if(currentChild == currentTask) {
+                        found = true
+                    }
+                }
+            }
+
             popupSettingsWindow.contentView = taskSettingsLayoutView
 
             /**************
@@ -69,12 +79,43 @@ class BaseChecklist : AppCompatActivity(){
                 val taskSettingsDeadlineLayoutView =
                     layoutInflater.inflate(R.layout.task_settings_deadline_popup, null)
 
+                var tempString = ""
+
                 popupSettingsDeadlineWindow.contentView = taskSettingsDeadlineLayoutView
+
+                if(currentChecklist.tasks[taskCount].Deadline != null) {
+                    tempString =
+                        getString(R.string.CURRENT_DEADLINE_TEXT) + " " + currentChecklist.tasks[taskCount].Deadline.toString()
+
+                    taskSettingsDeadlineLayoutView.CurrentDeadlineTextView.text = tempString
+                }
+                else {
+                    taskSettingsDeadlineLayoutView.CurrentDeadlineTextView.text = getString(R.string.NO_DEADLINE_TEXT)
+                }
+
+                taskSettingsDeadlineLayoutView.ClearDeadlineButton.setOnClickListener {
+                    taskSettingsDeadlineLayoutView.CurrentDeadlineTextView.text = getString(R.string.NO_DEADLINE_TEXT)
+
+                    currentChecklist.removeDeadline(taskCount, User(1))
+                }
+
+                taskSettingsDeadlineLayoutView.DeadlineCalendarView.setOnDateChangeListener{_, year, month, day ->
+                    tempString =
+                        getString(R.string.CURRENT_DEADLINE_TEXT) + " " + day + "/" + month + "/" + year
+
+                    taskSettingsDeadlineLayoutView.CurrentDeadlineTextView.text = tempString
+
+                    currentChecklist.changeTaskDeadline(taskCount,User(1),"$day/$month/$year")
+                }
 
                 taskSettingsDeadlineLayoutView.closeDeadlineButton.setOnClickListener{
 
                     popupSettingsDeadlineWindow.dismiss()
 
+                    popupPresent = false
+                }
+
+                popupSettingsDeadlineWindow.setOnDismissListener {
                     popupPresent = false
                 }
 
@@ -111,13 +152,60 @@ class BaseChecklist : AppCompatActivity(){
                     currentTask?.toggleReccurringIfNotComplete()
                 }
 
+                popupSettingsRecurringWindow.setOnDismissListener {
+                    popupPresent = false
+                }
+
                 popupSettingsRecurringWindow.isFocusable = true
 
                 popupSettingsRecurringWindow.showAtLocation(mainView, Gravity.CENTER, 0, 0)
             }
 
+            taskSettingsLayoutView.ChangeNameSettingsButton.setOnClickListener {
+
+                popupSettingsWindow.dismiss()
+
+                val popupSettingsChangeNameWindow = PopupWindow(this)
+
+                val taskSettingsChangeNameLayoutView =
+                    layoutInflater.inflate(R.layout.task_settings_name_change_popup, null)
+
+                popupSettingsChangeNameWindow.contentView = taskSettingsChangeNameLayoutView
+
+                taskSettingsChangeNameLayoutView.ChangeNameButton.setOnClickListener {
+
+                    val newName = taskSettingsChangeNameLayoutView.NewNameText.text.toString()
+
+                    currentTask?.ChangeName(newName)
+
+                    currentChecklist.changeTaskName(taskCount, User(1), newName)
+
+                    popupPresent = false
+
+                    popupSettingsChangeNameWindow.dismiss()
+                }
+
+                popupSettingsChangeNameWindow.setOnDismissListener {
+                    popupPresent = false
+                }
+
+                taskSettingsChangeNameLayoutView.ChangeNameCancelButton.setOnClickListener {
+                    popupPresent = false
+
+                    popupSettingsChangeNameWindow.dismiss()
+                }
+
+                popupSettingsChangeNameWindow.isFocusable = true
+
+                popupSettingsChangeNameWindow.showAtLocation(mainView, Gravity.CENTER, 0, 0)
+            }
+
             taskSettingsLayoutView.CloseButton.setOnClickListener {
                 popupSettingsWindow.dismiss()
+                popupPresent = false
+            }
+
+            popupSettingsWindow.setOnDismissListener {
                 popupPresent = false
             }
 

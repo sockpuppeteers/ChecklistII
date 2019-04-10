@@ -29,7 +29,18 @@
                     android:layout_height="wrap_content">
                 <CalendarView
                         android:layout_width="wrap_content"
-                        android:layout_height="wrap_content" android:id="@+id/calendarView" android:layout_weight="1"/>
+                        android:layout_height="wrap_content" android:id="@+id/DeadlineCalendarView"
+                        android:layout_weight="1"/>
+            </LinearLayout>
+            <LinearLayout
+                    android:orientation="horizontal"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+                <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content" android:id="@+id/CurrentDeadlineTextView"
+                        android:layout_weight="1" android:textColor="@android:color/white" android:gravity="center"
+                        android:textSize="14sp"/>
             </LinearLayout>
             <LinearLayout
                     android:orientation="horizontal"
