@@ -51,9 +51,7 @@ class BaseChecklist : AppCompatActivity(){
     var currentTask: TaskBox? = null
 
     private lateinit var userLayout: DrawerLayout
-    private var mDrawerList: ListView = ListView(this)
     private val mUserList = ArrayList<UserPage>()
-    private var mDrawerPane: RelativeLayout? = null
 
     //Intialize things here
     init {
@@ -439,11 +437,12 @@ class BaseChecklist : AppCompatActivity(){
         //displays their own tasks and no other checklist's tasks
         currentChecklist.i_name = intent.getStringExtra("ListName")
 
-        //test code. remove later
+        //test code. replace with database/local storage call.
         mUserList.add(UserPage(1,"Sally123","Suzan","McPoyle", "none"))
         mUserList.add(UserPage(2,"Roger123","Roger","McPoyle", "none"))
         mUserList.add(UserPage(3,"Rufus123","Rufus","McPoyle", "none"))
         mUserList.add(UserPage(4,"Gorgina123","Gorgina","McPoyle", "none"))
+        //test code. replace with database/local storage call.
 
 
         //if there's a local file, populate our list from that
@@ -475,10 +474,10 @@ class BaseChecklist : AppCompatActivity(){
                 createListFile(currentChecklist)
             }
         }
+
+        //allows the opening and closing of a nav drawer on the right side of the screen.
         userLayout = findViewById(R.id.user_drawer_layout)
-
         val menuRight = findViewById<View>(R.id.menuRight) as ImageButton
-
         menuRight.setOnClickListener {
             if (userLayout.isDrawerOpen(GravityCompat.END)) {
                 userLayout.closeDrawer(GravityCompat.END)
@@ -486,26 +485,42 @@ class BaseChecklist : AppCompatActivity(){
                 userLayout.openDrawer(GravityCompat.END)
             }
         }
+        //creates a submenu named user
         val subMenu: SubMenu
-
         val navigationView: NavigationView = findViewById(R.id.nav_view)
+        val menu = navigationView.menu
+        subMenu = menu.addSubMenu(getString(R.string.SUB_MENU_TITLE))
+
+        //populates the submenu with the usernames of everyone on the list (stored in mUserList
+        //Menu.FIRST + i gives each a unique ID, used later in the program.
+        for ((i, up) in mUserList.withIndex()) {
+            subMenu.add(0, Menu.FIRST + i, Menu.FIRST, up.ViewUserName())
+        }
+
+        //gets called whenever any item is selected in the nav menu
         navigationView.setNavigationItemSelectedListener { menuItem ->
-            // set item as selected to persist highlight
-//            menuItem.isChecked = true
-//            onOptionsItemSelected(menuItem)
+            //handles all items in nav drawer that are created at compile time
+            if (!onOptionsItemSelected(menuItem))
+            {
+                //handles all items in nav drawer that are created at run time
+                val id = menuItem.itemId - Menu.FIRST
+                if (id < mUserList.size && id >= 0) {
+                    val up = mUserList[id]
+                    val tempIntent = Intent(this, UserLogin::class.java).apply {
+                        putExtra("id", up.ViewID())
+                        putExtra("uname", up.ViewUserName())
+                        putExtra("fname", up.ViewFName())
+                        putExtra("lname", up.ViewLName())
+                    }
+                    startActivity(tempIntent)
+                }
+            }
             // close drawer when item is tapped
             userLayout.closeDrawers()
             // Add code here to update the UI based on the item selected
             // For example, swap UI fragments here
 
             true
-        }
-        val menu = navigationView.menu
-        mDrawerList = findViewById<View>(R.id.nav_view) as ListView
-        userLayout = findViewById(R.id.user_drawer_layout)
-        subMenu = menu.addSubMenu(getString(R.string.SUB_MENU_TITLE))
-        for ((i, up) in mUserList.withIndex()) {
-            subMenu.add(0, Menu.FIRST + i, Menu.FIRST, up.ViewFName())
         }
 
         val addButton = findViewById<Button>(R.id.AddTaskButton)
@@ -760,47 +775,17 @@ class BaseChecklist : AppCompatActivity(){
         File(directory, filename).delete()
     }
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        //handles all nav drawer activity that was added at run time.
         return when (item.itemId) {
             android.R.id.home -> {
                 userLayout.openDrawer(GravityCompat.START)
                 true
             }
+            R.id.dAddUser -> {
+                //addusercodehere
+                true
+            }
             else -> super.onOptionsItemSelected(item)
         }
-    }
-    fun onNavigationItemSelected(position: Int) {
-        // Assign menus to link to data usage activity in drawer menu
-        try {
-
-	        switch (position) {
-                case 0:
-                    Intent listIntent0 = new Intent(getApplicationContext(), MainActivity.class);
-                    startActivity(listIntent0);
-                    break;
-                case 1:
-                    Intent listIntent1 = new Intent(getApplicationContext(), DatausageActivity.class);
-                    startActivity(listIntent1);
-                    break;
-                case 2:
-                    Intent listIntent2 = new Intent(getApplicationContext(), MonthlydatausageActivity.class);
-                    startActivity(listIntent2);
-                    break;
-                case 3:
-                    Intent listIntent3 = new Intent(getApplicationContext(), ChartActivity.class);
-                    startActivity(listIntent3);
-                    break;
-                case 4:
-                    break;
-                case 5:
-                    break;
-             }
-
-        // Close the drawer
-            userLayout.closeDrawers()
-
-        }
-        catch (Exception e)  {Toast.makeText(getApplicationContext(), e.toString(),
-                Toast.LENGTH_LONG).show(); }
-
     }
 }
