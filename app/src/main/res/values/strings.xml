@@ -69,4 +69,9 @@
     <string name="CLEAR_DEADLINE_TEXT">Clear Deadline</string>
     <!-- This allows the string text to be colored, this may have issues with 2.x or 4.x android systems-->
     <string name="LOGOUT_TEXT"><font fgcolor='#FF0000'>Log out</font></string>
+    <string name="CURRENT_DEADLINE_TEXT">Current Deadline: </string>
+    <string name="NO_DEADLINE_TEXT">No Deadline</string>
+    <string name="NAME_CHANGE_TEXT">Change Task Name</string>
+    <string name="CANCEL_TEXT">Cancel</string>
+    <string name="NEW_TEASK_NAME_TEXT">New Task Name</string>
 </resources>

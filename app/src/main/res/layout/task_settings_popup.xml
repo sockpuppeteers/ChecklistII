@@ -37,6 +37,10 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content" android:id="@+id/DeadlineButton"
             />
+            <Button
+                    android:text="@string/NAME_CHANGE_TEXT"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" android:id="@+id/ChangeNameSettingsButton"/>
         </LinearLayout>
         <Button
                 android:text="@string/CANCEL_BUTTON_STRING"
