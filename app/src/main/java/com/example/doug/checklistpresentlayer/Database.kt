@@ -180,4 +180,27 @@ class Database {
     fun AddUserToList(userID: Int, checklistID: Int){
         Fuel.get("https://sockpuppeteerapi3.azurewebsites.net/api/checklist/${checklistID}/AddUser/${userID}")
     }
+
+    fun GetChecklist(checklistID: Int) : Checklist {
+        var list = Checklist("error", -1)
+
+        runBlocking {
+            //Do an api to get a list of all tasks in a checklist
+            val (request, response, result) = Fuel.get("https://sockpuppeteerapi3.azurewebsites.net/Api/checklist/$checklistID").awaitStringResponseResult()
+
+            //if the request is successful, copy the data into our tasks object
+            //otherwise copy the error message
+            result.fold(
+                {
+                    //create a json model of the return body
+                    //the code is funky because the object is wrapped in a list, idk exactly how it works
+                    val gson = Gson()
+                    list = gson.fromJson(result.component1(), Checklist::class.java)},
+                //print a message if the api call fails
+                { println("api call failure in GetChecklist function") }
+            )
+        }
+
+        return list
+    }
 }

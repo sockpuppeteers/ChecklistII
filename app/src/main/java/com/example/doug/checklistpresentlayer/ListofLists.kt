@@ -6,6 +6,8 @@ import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import java.time.LocalDateTime
 import com.microsoft.windowsazure.mobileservices.*
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import java.io.File
 import java.io.FileOutputStream
@@ -57,9 +59,14 @@ class ListofLists(var name: String, var error: String?, var uID : Int = 0) {
     }
 
     fun deleteList(arrayIndex : Int, deletedBy: User) {
+        println("listID: ${lists[arrayIndex].listID}")
+
+        //make a delete request
+        Fuel.delete("https://sockpuppeteerapi3.azurewebsites.net/api/checklist/${lists[arrayIndex].listID}")
+            .response { req, res, result -> println(res.statusCode)}
+
         if (arrayIndex >= 0 && arrayIndex < lists.size)
             lists.removeAt(arrayIndex)
-        //add delete from database here
     }
 
     fun changeListName(arrayIndex: Int, modifiedBy: User, name: String) {

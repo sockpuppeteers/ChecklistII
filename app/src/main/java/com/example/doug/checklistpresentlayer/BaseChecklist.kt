@@ -524,6 +524,9 @@ class BaseChecklist : AppCompatActivity(){
         //displays their own tasks and no other checklist's tasks
         currentChecklist.i_name = intent.getStringExtra("ListName")
 
+        //create a database access object
+        var db = Database()
+
         //test code. replace with database/local storage call.
         currentChecklist.addUser(User(1,"Sally123","Suzan","McPoyle", "none"))
         currentChecklist.addUser(User(2,"Roger123","Roger","McPoyle", "none"))
@@ -541,13 +544,34 @@ class BaseChecklist : AppCompatActivity(){
             for (Task in currentChecklist.tasks){
                 addTaskFromList(Task)
             }
+
             println("loaded list from local file")
+
+            //in a new thread, get checklist data from the database to see if any changes
+            //have happened since last opened.
+            //if there's only one user on the list, don't do anything
+            if (!currentChecklist.users.isEmpty()) {
+                //THIS COMMENT BLOCK IS FOR MATT TODO
+                //globalscope.launch starts a new thread, where all this will happen.
+                //we DO NOT want the user to be able to change anything in their list while this thread is active.
+                //we need code that will check if this thread is active in the thread pool.
+                //on the surface, the app will look exactly the same, but there will be some sort of "wait" that happens
+                //if the user tries to change something and this is still going on
+                GlobalScope.launch {
+                    /*Right here start up a loading swirly*/
+                    var list = db.GetChecklist(currentChecklist.cListID!!)
+
+                    if (list != currentChecklist){
+                        /*have a popup or something telling the user that the list has been updated*/
+                        currentChecklist = list
+                    }
+                }
+            }
         }
 
         //if no local file exists, populate our list from the database
         else{
             println("loaded list from database")
-            var db = Database()
             var currentTasks = db.GetTasks(intent.getIntExtra("ChecklistID", 0))
 
             for (Task in currentTasks)

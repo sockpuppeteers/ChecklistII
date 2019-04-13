@@ -1,11 +1,12 @@
 package com.example.doug.checklistpresentlayer
+import com.google.gson.annotations.SerializedName
 import java.time.LocalDateTime
 
-class Checklist( private val name: String, private val cListID : Int? ) : ListClass(cListID, name){
-    var dbAccess = Database()
-    var tasks =  mutableListOf<Task>()
-    var users = mutableListOf<User>()
-    var changes = mutableListOf<Change>()
+class Checklist( @SerializedName("Name") var name: String, @SerializedName("ChecklistID") var cListID : Int? ) : ListClass(cListID, name){
+    private var dbAccess = Database()
+    @SerializedName("Tasks") var tasks =  mutableListOf<Task>()
+    @SerializedName("Users") var users = mutableListOf<User>()
+    @SerializedName("Changes") var changes = mutableListOf<Change>()
 
      /****************************************************************
      *  Purpose: Logs change, the user who changed it, the type of
@@ -107,6 +108,5 @@ class Checklist( private val name: String, private val cListID : Int? ) : ListCl
 
     fun addUser(user: User){
         users.add(user)
-
     }
 }

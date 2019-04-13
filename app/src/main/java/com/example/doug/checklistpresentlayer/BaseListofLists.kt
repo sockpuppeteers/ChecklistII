@@ -300,8 +300,20 @@ class BaseListofLists : AppCompatActivity(){
                                 if (tempChild == tempBox2)
                                 {
                                     taskLayout.removeView(taskLayout.getChildAt(i))
+
+                                    //delete the list's local file
+                                    GlobalScope.launch {
+                                        deleteListDataFile(currentListofLists.lists[i].i_name)
+                                    }
+
                                     //remove the task from the list, and delete it from the database
                                     currentListofLists.deleteList(i, User(1))
+
+                                    //update the list of lists local file to be current
+                                    GlobalScope.launch {
+                                        deleteListsDataFile()
+                                        createListsFile(currentListofLists)
+                                    }
                                 }
                             }
                         }
@@ -420,6 +432,7 @@ class BaseListofLists : AppCompatActivity(){
         File(directory, filename).delete()
     }
 
+    //deletes the file that contains list of lists data
     fun deleteListsDataFile(){
         //context will give us access to our local files directory
         var context = applicationContext
@@ -428,6 +441,19 @@ class BaseListofLists : AppCompatActivity(){
         val directory = context.filesDir
 
         //delete the LISTS file
+        File(directory, filename).delete()
+    }
+
+    //deletes the file with the given name.
+    //this should be an individual checklist's file, which is filled
+    //with task/change data
+    fun deleteListDataFile(filename: String){
+        //context will give us access to our local files directory
+        var context = applicationContext
+
+        val directory = context.filesDir
+
+        //delete the file
         File(directory, filename).delete()
     }
 }
