@@ -38,11 +38,11 @@ class ListBox @JvmOverloads constructor(
               LinearLayout.LayoutParams.WRAP_CONTENT,
                 ViewGroup.LayoutParams.WRAP_CONTENT)
 
-            gravity = right
+            gravity = left
 
             taskTextView.text = listText
-        taskTextView.textSize = 30f
-        taskTextView.layoutParams = LinearLayout.LayoutParams(
+            taskTextView.textSize = 30f
+            taskTextView.layoutParams = LinearLayout.LayoutParams(
             LinearLayout.LayoutParams.WRAP_CONTENT,
             ViewGroup.LayoutParams.WRAP_CONTENT)
 
