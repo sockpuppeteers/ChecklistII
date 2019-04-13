@@ -6,10 +6,7 @@ import android.graphics.Paint
 import android.util.AttributeSet
 import android.view.View
 import android.view.ViewGroup
-import android.widget.LinearLayout
-import android.widget.PopupWindow
-import android.widget.Switch
-import android.widget.TextView
+import android.widget.*
 import kotlinx.android.synthetic.main.activity_base_checklist.*
 import kotlinx.android.synthetic.main.task_functions_layout.view.*
 
@@ -53,7 +50,7 @@ class TaskBox @JvmOverloads constructor(
             LinearLayout.LayoutParams.WRAP_CONTENT,
             ViewGroup.LayoutParams.WRAP_CONTENT)
 
-        val taskSwitch = Switch(context)
+        val taskSwitch = CheckBox(context)
 
         taskSwitch.layoutParams = LinearLayout.LayoutParams(
             LinearLayout.LayoutParams.WRAP_CONTENT,
