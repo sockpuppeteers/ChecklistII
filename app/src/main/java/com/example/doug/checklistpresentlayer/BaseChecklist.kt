@@ -1,5 +1,6 @@
 package com.example.doug.checklistpresentlayer
 
+import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
 import android.support.constraint.ConstraintLayout
@@ -44,7 +45,7 @@ class BaseChecklist : AppCompatActivity(){
     var currentTask: TaskBox? = null
 
     private lateinit var userLayout: DrawerLayout
-    private val mUserList = ArrayList<UserPage>()
+    //private val mUserList = ArrayList<UserPage>()
 
     //Intialize things here
     init {
@@ -524,10 +525,10 @@ class BaseChecklist : AppCompatActivity(){
         currentChecklist.i_name = intent.getStringExtra("ListName")
 
         //test code. replace with database/local storage call.
-        mUserList.add(UserPage(1,"Sally123","Suzan","McPoyle", "none"))
-        mUserList.add(UserPage(2,"Roger123","Roger","McPoyle", "none"))
-        mUserList.add(UserPage(3,"Rufus123","Rufus","McPoyle", "none"))
-        mUserList.add(UserPage(4,"Gorgina123","Gorgina","McPoyle", "none"))
+        currentChecklist.addUser(User(1,"Sally123","Suzan","McPoyle", "none"))
+        currentChecklist.addUser(User(2,"Roger123","Roger","McPoyle", "none"))
+        currentChecklist.addUser(User(3,"Rufus123","Rufus","McPoyle", "none"))
+        currentChecklist.addUser(User(4,"Gorgina123","Gorgina","McPoyle", "none"))
         //test code. replace with database/local storage call.
 
 
@@ -579,8 +580,8 @@ class BaseChecklist : AppCompatActivity(){
 
         //populates the submenu with the usernames of everyone on the list (stored in mUserList
         //Menu.FIRST + i gives each a unique ID, used later in the program.
-        for ((i, up) in mUserList.withIndex()) {
-            subMenu.add(0, Menu.FIRST + i, Menu.FIRST, up.ViewUserName())
+        for ((i, up) in currentChecklist.users.withIndex()) {
+            subMenu.add(0, Menu.FIRST + i, Menu.FIRST, up.Username)
         }
 
         //gets called whenever any item is selected in the nav menu
@@ -590,13 +591,13 @@ class BaseChecklist : AppCompatActivity(){
             {
                 //handles all items in nav drawer that are created at run time
                 val id = menuItem.itemId - Menu.FIRST
-                if (id < mUserList.size && id >= 0) {
-                    val up = mUserList[id]
+                if (id < currentChecklist.users.size && id >= 0) {
+                    val up = currentChecklist.users[id]
                     val tempIntent = Intent(this, UserLogin::class.java).apply {
-                        putExtra("id", up.ViewID())
-                        putExtra("uname", up.ViewUserName())
-                        putExtra("fname", up.ViewFName())
-                        putExtra("lname", up.ViewLName())
+                        putExtra("id", up.UserID)
+                        putExtra("uname", up.Username)
+                        putExtra("fname", up.FName)
+                        putExtra("lname", up.LName)
                     }
                     startActivity(tempIntent)
                 }
@@ -869,6 +870,7 @@ class BaseChecklist : AppCompatActivity(){
             }
             R.id.dAddUser -> {
                 //addusercodehere
+
                 true
             }
             else -> super.onOptionsItemSelected(item)
