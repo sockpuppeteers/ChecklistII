@@ -2,11 +2,11 @@ package com.example.doug.checklistpresentlayer
 import com.google.gson.annotations.SerializedName
 import java.time.LocalDateTime
 
-class Checklist( @SerializedName("Name") var name: String, @SerializedName("ChecklistID") var cListID : Int? ) : ListClass(cListID, name){
+class Checklist( var name: String, var cListID : Int? ) : ListClass(cListID, name){
     private var dbAccess = Database()
-    @SerializedName("Tasks") var tasks =  mutableListOf<Task>()
-    @SerializedName("Users") var users = mutableListOf<User>()
-    @SerializedName("Changes") var changes = mutableListOf<Change>()
+    var tasks =  mutableListOf<Task>()
+    var users = mutableListOf<User>()
+    var changes = mutableListOf<Change>()
 
      /****************************************************************
      *  Purpose: Logs change, the user who changed it, the type of

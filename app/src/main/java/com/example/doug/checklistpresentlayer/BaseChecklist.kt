@@ -527,14 +527,6 @@ class BaseChecklist : AppCompatActivity(){
         //create a database access object
         var db = Database()
 
-        //test code. replace with database/local storage call.
-        currentChecklist.addUser(User(1,"Sally123","Suzan","McPoyle", "none"))
-        currentChecklist.addUser(User(2,"Roger123","Roger","McPoyle", "none"))
-        currentChecklist.addUser(User(3,"Rufus123","Rufus","McPoyle", "none"))
-        currentChecklist.addUser(User(4,"Gorgina123","Gorgina","McPoyle", "none"))
-        //test code. replace with database/local storage call.
-
-
         //if there's a local file, populate our list from that
         if (listFileExists()){
             //deleteListDataFile()
@@ -550,23 +542,23 @@ class BaseChecklist : AppCompatActivity(){
             //in a new thread, get checklist data from the database to see if any changes
             //have happened since last opened.
             //if there's only one user on the list, don't do anything
-            if (!currentChecklist.users.isEmpty()) {
-                //THIS COMMENT BLOCK IS FOR MATT TODO
-                //globalscope.launch starts a new thread, where all this will happen.
-                //we DO NOT want the user to be able to change anything in their list while this thread is active.
-                //we need code that will check if this thread is active in the thread pool.
-                //on the surface, the app will look exactly the same, but there will be some sort of "wait" that happens
-                //if the user tries to change something and this is still going on
-                GlobalScope.launch {
-                    /*Right here start up a loading swirly*/
-                    var list = db.GetChecklist(currentChecklist.cListID!!)
-
-                    if (list != currentChecklist){
-                        /*have a popup or something telling the user that the list has been updated*/
-                        currentChecklist = list
-                    }
-                }
-            }
+//            if (!currentChecklist.users.isEmpty()) {
+//                //THIS COMMENT BLOCK IS FOR MATT TODO
+//                //globalscope.launch starts a new thread, where all this will happen.
+//                //we DO NOT want the user to be able to change anything in their list while this thread is active.
+//                //we need code that will check if this thread is active in the thread pool.
+//                //on the surface, the app will look exactly the same, but there will be some sort of "wait" that happens
+//                //if the user tries to change something and this is still going on
+//                GlobalScope.launch {
+//                    /*Right here start up a loading swirly*/
+//                    var list = db.GetChecklist(currentChecklist.cListID!!)
+//
+//                    if (list != currentChecklist){
+//                        /*have a popup or something telling the user that the list has been updated*/
+//                        currentChecklist = list
+//                    }
+//                }
+//            }
         }
 
         //if no local file exists, populate our list from the database
@@ -585,6 +577,12 @@ class BaseChecklist : AppCompatActivity(){
                 createListFile(currentChecklist)
             }
         }
+        //test code. replace with database/local storage call.
+        currentChecklist.addUser(User(1,"Sally123","Suzan","McPoyle", "none"))
+        currentChecklist.addUser(User(2,"Roger123","Roger","McPoyle", "none"))
+        currentChecklist.addUser(User(3,"Rufus123","Rufus","McPoyle", "none"))
+        currentChecklist.addUser(User(4,"Gorgina123","Gorgina","McPoyle", "none"))
+        //test code. replace with database/local storage call.
 
         //allows the opening and closing of a nav drawer on the right side of the screen.
         userLayout = findViewById(R.id.user_drawer_layout)
