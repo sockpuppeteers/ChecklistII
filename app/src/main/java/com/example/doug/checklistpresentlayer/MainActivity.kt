@@ -10,11 +10,14 @@ import kotlinx.android.synthetic.main.activity_login.*
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
+import net.danlew.android.joda.JodaTimeAndroid
 
 //This is actually the user login page functionality
 class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
+
         super.onCreate(savedInstanceState)
+        JodaTimeAndroid.init(this)
         setContentView(R.layout.activity_login)
 
         var user: UserPage

@@ -28,6 +28,7 @@ android {
 }
 
 dependencies {
+    implementation 'net.danlew:android.joda:2.10.1.2'
     implementation fileTree(include: ['*.jar'], dir: 'libs')
     implementation 'io.karn:khttp-android:0.1.0'
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"

@@ -26,11 +26,16 @@ import kotlinx.coroutines.launch
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
+import net.danlew.android.joda.DateUtils
+
+import org.joda.time.DateTime
+import org.joda.time.Duration
+import org.joda.time.LocalDate
 import kotlin.concurrent.thread
 import android.widget.ImageButton
-import android.widget.AdapterView
-import android.widget.ListAdapter
-import android.widget.RelativeLayout
+import org.joda.time.format.DateTimeFormat
+import java.text.SimpleDateFormat
+import java.time.format.DateTimeFormatter
 
 /********************************************
  *TO DO: Move listener assignments to functions
@@ -531,10 +536,29 @@ class BaseChecklist : AppCompatActivity(){
         if (listFileExists()){
             //deleteListDataFile()
             currentChecklist = getListFromFile()
-
+            //Need to do things with this information TODO
+            //Currently this function recognizes if the completed
+            //time is 2 days old, but the compared string is never set
+            //and nothing is done
             //add each task in currentChecklist to the page
             for (Task in currentChecklist.tasks){
-                addTaskFromList(Task)
+                if (Task.compdatetime != null)
+                {
+                    val now = LocalDate.now()
+                    val formatter = DateTimeFormat.forPattern("yyyy-MM-dd")
+                    val dt = formatter.parseDateTime(Task.compdatetime)
+                    val dead = dt.plusDays(2)
+                    if (now.isEqual(dead.toLocalDate()))
+                    {
+                        //we don't want the task
+                    }
+                    else
+                    {
+                        addTaskFromList(Task)
+                    }
+                }
+                else
+                    addTaskFromList(Task)
             }
 
             println("loaded list from local file")
@@ -542,34 +566,53 @@ class BaseChecklist : AppCompatActivity(){
             //in a new thread, get checklist data from the database to see if any changes
             //have happened since last opened.
             //if there's only one user on the list, don't do anything
-//            if (!currentChecklist.users.isEmpty()) {
+
+            if (!currentChecklist.users.isEmpty()) {
 //                //THIS COMMENT BLOCK IS FOR MATT TODO
 //                //globalscope.launch starts a new thread, where all this will happen.
 //                //we DO NOT want the user to be able to change anything in their list while this thread is active.
 //                //we need code that will check if this thread is active in the thread pool.
 //                //on the surface, the app will look exactly the same, but there will be some sort of "wait" that happens
 //                //if the user tries to change something and this is still going on
-//                GlobalScope.launch {
-//                    /*Right here start up a loading swirly*/
-//                    var list = db.GetChecklist(currentChecklist.cListID!!)
-//
+                GlobalScope.launch {
+                    /*Right here start up a loading swirly*/
+                    //var list = db.GetChecklist(currentChecklist.cListID!!)
+                    turnOnButtons()
+                    turnOffButtons()
 //                    if (list != currentChecklist){
-//                        /*have a popup or something telling the user that the list has been updated*/
-//                        currentChecklist = list
-//                    }
-//                }
-//            }
+                    /*have a popup or something telling the user that the list has been updated*/
+                    //currentChecklist = list
+//                  turnOnButtons()
+
+                }
+            }
         }
 
         //if no local file exists, populate our list from the database
         else{
             println("loaded list from database")
             var currentTasks = db.GetTasks(intent.getIntExtra("ChecklistID", 0))
-
+            //Same issue as "Need to do things with this information" TODO
             for (Task in currentTasks)
             {
-                if (Task.name != "")
+                if (Task.compdatetime != null)
+                {
+                    val now = LocalDate.now()
+                    val formatter = DateTimeFormat.forPattern("yyyy-MM-dd")
+                    val dt = formatter.parseDateTime(Task.compdatetime)
+                    val dead = dt.plusDays(2)
+                    if (now.isEqual(dead.toLocalDate()))
+                    {
+                        //we don't want the task
+                    }
+                    else
+                    {
+                        addTask(Task)
+                    }
+                }
+                else if (Task.name != "")
                     addTask(Task)
+
             }
 
             //create a local file with the data
@@ -897,5 +940,22 @@ class BaseChecklist : AppCompatActivity(){
             }
             else -> super.onOptionsItemSelected(item)
         }
+    }
+    private fun turnOffButtons() {
+        val turnOff: Button = findViewById(R.id.AddTaskButton)
+        turnOff.isClickable = false
+        val turnOff2 : Button = findViewById(R.id.CheckoffButton)
+        turnOff2.isClickable = false
+        val turnOff3 : Button = findViewById(R.id.EditTaskButton)
+        turnOff3.isClickable = false
+    }
+    private fun turnOnButtons() {
+
+        var turnOn : Button = findViewById(R.id.AddTaskButton)
+        turnOn.isClickable = true
+        turnOn = findViewById(R.id.CheckoffButton)
+        turnOn.isClickable = true
+        turnOn = findViewById(R.id.EditTaskButton)
+        turnOn.isClickable = true
     }
 }
