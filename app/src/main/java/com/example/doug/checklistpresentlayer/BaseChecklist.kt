@@ -528,12 +528,12 @@ class BaseChecklist : AppCompatActivity(){
         var db = Database()
 
         //if there's a local file, populate our list from that
-        if (listFileExists()){
+        if (listFileExists()) {
             //deleteListDataFile()
             currentChecklist = getListFromFile()
 
             //add each task in currentChecklist to the page
-            for (Task in currentChecklist.tasks){
+            for (Task in currentChecklist.tasks) {
                 addTaskFromList(Task)
             }
 
@@ -542,7 +542,7 @@ class BaseChecklist : AppCompatActivity(){
             //in a new thread, get checklist data from the database to see if any changes
             //have happened since last opened.
             //if there's only one user on the list, don't do anything
-//            if (!currentChecklist.users.isEmpty()) {
+            if (currentChecklist.users.size > 1) {
 //                //THIS COMMENT BLOCK IS FOR MATT TODO
 //                //globalscope.launch starts a new thread, where all this will happen.
 //                //we DO NOT want the user to be able to change anything in their list while this thread is active.
@@ -559,15 +559,15 @@ class BaseChecklist : AppCompatActivity(){
 //                    }
 //                }
 //            }
+            }
         }
 
         //if no local file exists, populate our list from the database
-        else{
+        else {
             println("loaded list from database")
             var currentTasks = db.GetTasks(intent.getIntExtra("ChecklistID", 0))
 
-            for (Task in currentTasks)
-            {
+            for (Task in currentTasks) {
                 if (Task.name != "")
                     addTask(Task)
             }
@@ -578,10 +578,10 @@ class BaseChecklist : AppCompatActivity(){
             }
         }
         //test code. replace with database/local storage call.
-        currentChecklist.addUser(User(1,"Sally123","Suzan","McPoyle", "none"))
-        currentChecklist.addUser(User(2,"Roger123","Roger","McPoyle", "none"))
-        currentChecklist.addUser(User(3,"Rufus123","Rufus","McPoyle", "none"))
-        currentChecklist.addUser(User(4,"Gorgina123","Gorgina","McPoyle", "none"))
+        currentChecklist.addUser(User(1, "Sally123", "Suzan", "McPoyle", "none"))
+        currentChecklist.addUser(User(2, "Roger123", "Roger", "McPoyle", "none"))
+        currentChecklist.addUser(User(3, "Rufus123", "Rufus", "McPoyle", "none"))
+        currentChecklist.addUser(User(4, "Gorgina123", "Gorgina", "McPoyle", "none"))
         //test code. replace with database/local storage call.
 
         //allows the opening and closing of a nav drawer on the right side of the screen.
@@ -609,8 +609,7 @@ class BaseChecklist : AppCompatActivity(){
         //gets called whenever any item is selected in the nav menu
         navigationView.setNavigationItemSelectedListener { menuItem ->
             //handles all items in nav drawer that are created at compile time
-            if (!onOptionsItemSelected(menuItem))
-            {
+            if (!onOptionsItemSelected(menuItem)) {
                 //handles all items in nav drawer that are created at run time
                 val id = menuItem.itemId - Menu.FIRST
                 if (id < currentChecklist.users.size && id >= 0) {
@@ -639,8 +638,8 @@ class BaseChecklist : AppCompatActivity(){
         //Creates the click listener for the add button
         val addListener = View.OnClickListener {
 
-                //If there is not a popup already [resent
-            if(!popupPresent) {
+            //If there is not a popup already [resent
+            if (!popupPresent) {
 
                 //Get the view containing all the tasks
                 val mainView = findViewById<ScrollView>(R.id.TaskScrollView)
@@ -654,16 +653,16 @@ class BaseChecklist : AppCompatActivity(){
                 val acceptButton = popupView.PopupMainView.AcceptButton
 
                 //Creates and adds the on click action to the add button
-                acceptButton.setOnClickListener{
+                acceptButton.setOnClickListener {
 
-                        val popup_edittext = popupView.PopupMainView.PopupEditText
+                    val popup_edittext = popupView.PopupMainView.PopupEditText
 
-                        //Retrieves the name of the task if the name is long enough
-                        if (popup_edittext.text.toString().length >= 1) {
-                            createNewTask(popup_edittext.text.toString(), false, 0/*needs to be something later*/)
-                            //currentChecklist.createTask(popup_edittext.text.toString(),
-                            //   "none", User(intent.getIntExtra("UserID", 0)))
-                        }
+                    //Retrieves the name of the task if the name is long enough
+                    if (popup_edittext.text.toString().length >= 1) {
+                        createNewTask(popup_edittext.text.toString(), false, 0/*needs to be something later*/)
+                        //currentChecklist.createTask(popup_edittext.text.toString(),
+                        //   "none", User(intent.getIntExtra("UserID", 0)))
+                    }
 
                     //Set dismiss listener
                     popupWindow.setOnDismissListener {
@@ -704,21 +703,21 @@ class BaseChecklist : AppCompatActivity(){
 
             var taskCount = TaskLayout.childCount - 1
             //Checks all current gui elements to see if they are checked
-            while (taskCount >= 0)
-            {
+            while (taskCount >= 0) {
                 val currentChild = TaskLayout.getChildAt(taskCount)
 
-                if(currentChild is TaskBox)
-                {
+                if (currentChild is TaskBox) {
                     val taskSwitch = currentChild.getChildAt(1)
 
-                    if(taskSwitch is Switch)
-                    {
-                        if(taskSwitch.isChecked)
-                        {
-                            if(!currentChild.checkCompletion()) {
+                    if (taskSwitch is Switch) {
+                        if (taskSwitch.isChecked) {
+                            if (!currentChild.checkCompletion()) {
                                 if (currentChild.checkReccurring()) {
-                                    createNewTask(currentChild.getTaskText(), true, 0/*needs to be something later*/)
+                                    createNewTask(
+                                        currentChild.getTaskText(),
+                                        true,
+                                        0/*needs to be something later*/
+                                    )
                                     //currentChecklist.createTask(currentChild.getTaskText(), "enable Later", User(1))
                                 }
 
@@ -743,7 +742,7 @@ class BaseChecklist : AppCompatActivity(){
         val historyListener = View.OnClickListener {
             //Toast.makeText(this, "General Kenobi!", Toast.LENGTH_SHORT).show()
 
-            if(!popupPresent) {
+            if (!popupPresent) {
 
                 val mainViewHistory = findViewById<ScrollView>(R.id.TaskScrollView)
 
@@ -776,7 +775,7 @@ class BaseChecklist : AppCompatActivity(){
 
                 //Check to see if not changes have happened
                 //Displays a message for each change that has occurred
-                if(currentChecklist.changes.isEmpty()) {
+                if (currentChecklist.changes.isEmpty()) {
                     val checklistChangeTextView = TextView(this)
 
                     var toAddString = "No Changes in this checklist!"
@@ -792,15 +791,14 @@ class BaseChecklist : AppCompatActivity(){
                     )
 
                     historyLayout.addView(checklistChangeTextView)
-                }
-                else {
+                } else {
                     historyIterator.forEach {
 
                         val checklistChangeTextView = TextView(this)
 
                         var toAddString = "Default"
 
-                        when(it.changeType) {
+                        when (it.changeType) {
 
                             kAction.CREATE_TASK -> toAddString = "--- Task Added: " + it.taskName +
                                     "\n    Added By: Current User\n"
@@ -829,6 +827,7 @@ class BaseChecklist : AppCompatActivity(){
         }
 
         historyButton.setOnClickListener(historyListener)
+
     }
 
     fun createListFile(list: Checklist) {

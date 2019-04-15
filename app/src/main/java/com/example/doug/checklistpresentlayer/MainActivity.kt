@@ -1,12 +1,15 @@
 package com.example.doug.checklistpresentlayer
 
-import android.content.Context
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.content.Intent
+import android.view.View
+import android.widget.ProgressBar
+import android.widget.TextView
 import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
 import kotlinx.android.synthetic.main.activity_login.*
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
@@ -18,6 +21,11 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_login)
 
         var user: UserPage
+
+        val spinner : ProgressBar = findViewById(R.id.progress_bar)
+        val error1 : TextView = findViewById(R.id.WrongText)
+        val error2 : TextView = findViewById(R.id.ErrorText)
+
 
         //if the USERDATA file exists already, the user doesn't
         //have to go through the login process
@@ -38,32 +46,50 @@ class MainActivity : AppCompatActivity() {
         login_button.setOnClickListener {
             //establish a database connection
             val db = Database()
+            val ctext = this
+
+            //sets the loading spinner to visible and to not fill as it goes, just to spin
+            spinner.visibility = View.VISIBLE
+            spinner.isIndeterminate = true
+            //turns off any errors that were set
+            error1.visibility = View.INVISIBLE
+            error2.visibility = View.INVISIBLE
+
             //try to login
-            user = db.LogIn(lUN.text.toString(), lPW.text.toString())
+            GlobalScope.launch {
+                user = db.LogIn(lUN.text.toString(), lPW.text.toString())
 
-            //if there was an error, display it
-            if (user.HasError()) {
-                if (user.ViewError() == "404")
-                    ErrorText.text = "Incorrect username or password"
-                else
-                    ErrorText.text = "Something went wrong"
-            }
+                //runs this code on the gui thread so we can set errors, this code is fast so shouldn't effect runtime
+                this@MainActivity.runOnUiThread{
+                    //if there was an error, display it
+                    if (user.HasError()) {
+                        if (user.ViewError() == "404")
+                            error1.visibility = View.VISIBLE
+                        else
+                            error2.visibility = View.VISIBLE
+                    }
 
-            //otherwise, log the user in and transfer to the list of lists page
-            else {
-                //save a local file with the user's data
-                //so that they won't have to login next time
-                saveLoginLocally(user)
+                    //otherwise, log the user in and transfer to the list of lists page
+                    else {
+                        //save a local file with the user's data
+                        //so that they won't have to login next time
+                        saveLoginLocally(user)
 
-                //Go to the list of lists page
-                val tempIntent = Intent(this, BaseListofLists::class.java).apply {
-                        putExtra("uname", user.ViewUserName())
-                        putExtra("fname", user.ViewFName())
-                        putExtra("lname", user.ViewLName())
-                        putExtra("UserID",user.ViewID())
+                        //Go to the list of lists page
+                        val tempIntent = Intent(ctext, BaseListofLists::class.java).apply {
+                            putExtra("uname", user.ViewUserName())
+                            putExtra("fname", user.ViewFName())
+                            putExtra("lname", user.ViewLName())
+                            putExtra("UserID",user.ViewID())
+                        }
+                        startActivity(tempIntent)
+                    }
+
+                    //turns of loading spinner
+                    spinner.visibility = View.INVISIBLE
                 }
-                startActivity(tempIntent)
             }
+
         }
 
         register_text_button.setOnClickListener {

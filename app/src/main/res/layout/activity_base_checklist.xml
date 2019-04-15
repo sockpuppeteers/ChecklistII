@@ -33,15 +33,21 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content" app:layout_constraintTop_toTopOf="parent"
                             app:layout_constraintStart_toStartOf="parent" app:layout_constraintEnd_toEndOf="parent">
+                        <ProgressBar
+                                android:id="@+id/progressBar1"
+                                style="?android:attr/progressBarStyleLarge"
+                                android:layout_width="35dp"
+                                android:layout_height="43dp"
+                                android:layout_toStartOf="@+id/menuRight" android:layout_marginEnd="13dp"/>
                         <ImageButton
                                 android:id="@+id/menuRight"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:layout_alignParentRight="true"
                                 android:layout_alignParentEnd="true"
                                 android:backgroundTint="@android:color/transparent"
                                 android:src="@drawable/ic_group_black_24dp"
-                                android:tint="@color/colorDefaultButton" android:layout_marginEnd="-1dp"/>
+                                android:tint="@color/colorDefaultButton" android:layout_marginEnd="-2dp"
+                                android:layout_marginTop="0dp" android:layout_alignParentTop="true"/>
                     </RelativeLayout>
                 </android.support.v7.widget.Toolbar>
                 <ScrollView
