@@ -34,6 +34,9 @@
     <string name="ADD_USER_TEXT">Add User</string>
     <string name="SUB_MENU_TITLE">Users</string>
     <string name="SEARCH_TEXT">Search Users</string>
+    <string name="LOGO_TEXT">Logo</string>
+    <string name="INCORRECT_TEXT">Incorrect username or password</string>
+    <string name="SOMETHING_TEXT">Something went wrong</string>
     <string-array name="MINUTES_TEXT">
         <item>00</item>
         <item>05</item>
