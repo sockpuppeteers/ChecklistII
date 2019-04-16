@@ -619,13 +619,14 @@ class BaseChecklist : AppCompatActivity(){
             GlobalScope.launch {
                 createListFile(currentChecklist)
             }
+            //test code. replace with database/local storage call.
+            currentChecklist.addUser(User(1,"Sally123","Suzan","McPoyle", "none"))
+            currentChecklist.addUser(User(2,"Roger123","Roger","McPoyle", "none"))
+            currentChecklist.addUser(User(3,"Rufus123","Rufus","McPoyle", "none"))
+            currentChecklist.addUser(User(4,"Gorgina123","Gorgina","McPoyle", "none"))
+            //test code. replace with database/local storage call.
         }
-        //test code. replace with database/local storage call.
-        currentChecklist.addUser(User(1,"Sally123","Suzan","McPoyle", "none"))
-        currentChecklist.addUser(User(2,"Roger123","Roger","McPoyle", "none"))
-        currentChecklist.addUser(User(3,"Rufus123","Rufus","McPoyle", "none"))
-        currentChecklist.addUser(User(4,"Gorgina123","Gorgina","McPoyle", "none"))
-        //test code. replace with database/local storage call.
+
 
         //allows the opening and closing of a nav drawer on the right side of the screen.
         userLayout = findViewById(R.id.user_drawer_layout)
@@ -931,11 +932,6 @@ class BaseChecklist : AppCompatActivity(){
         return when (item.itemId) {
             android.R.id.home -> {
                 userLayout.openDrawer(GravityCompat.START)
-                true
-            }
-            R.id.dAddUser -> {
-                //addusercodehere
-
                 true
             }
             else -> super.onOptionsItemSelected(item)
