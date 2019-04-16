@@ -47,6 +47,7 @@ class BaseChecklist : AppCompatActivity(){
     //Flag to see if any popups are present
     var popupPresent = false
 
+    var currentUser = User(1)
     var currentTask: TaskBox? = null
 
     private lateinit var userLayout: DrawerLayout
@@ -54,7 +55,6 @@ class BaseChecklist : AppCompatActivity(){
 
     //Intialize things here
     init {
-
     }
 
     private fun createSettingsPopup() {
@@ -114,7 +114,7 @@ class BaseChecklist : AppCompatActivity(){
                 taskSettingsDeadlineLayoutView.ClearDeadlineButton.setOnClickListener {
                     taskSettingsDeadlineLayoutView.CurrentDeadlineTextView.text = getString(R.string.NO_DEADLINE_TEXT)
 
-                    currentChecklist.removeDeadline(taskCount, User(1))
+                    currentChecklist.removeDeadline(taskCount, currentUser)
                 }
 
                 taskSettingsDeadlineLayoutView.DeadlineCalendarView.setOnDateChangeListener{_, year, month, day ->
@@ -123,7 +123,7 @@ class BaseChecklist : AppCompatActivity(){
 
                     taskSettingsDeadlineLayoutView.CurrentDeadlineTextView.text = tempString
 
-                    currentChecklist.changeTaskDeadline(taskCount,User(1),"$day/$month/$year")
+                    currentChecklist.changeTaskDeadline(taskCount, currentUser,"$day/$month/$year")
                 }
 
                 taskSettingsDeadlineLayoutView.closeDeadlineButton.setOnClickListener{
@@ -196,7 +196,7 @@ class BaseChecklist : AppCompatActivity(){
 
                     currentTask?.ChangeName(newName)
 
-                    currentChecklist.changeTaskName(taskCount, User(1), newName)
+                    currentChecklist.changeTaskName(taskCount, currentUser, newName)
 
                     popupPresent = false
 
@@ -247,7 +247,7 @@ class BaseChecklist : AppCompatActivity(){
         val mainView = findViewById<ScrollView>(R.id.TaskScrollView)
 
         //Adds the task to the checklist
-        currentChecklist.createTask(TaskText, null, User(intent.getIntExtra("UserID", 0)), null, currentChecklist.listID!!)
+        currentChecklist.createTask(TaskText, null, currentUser, null, currentChecklist.listID!!)
 
         //rebuild the local file with the updated checklist
         GlobalScope.launch {
@@ -285,7 +285,7 @@ class BaseChecklist : AppCompatActivity(){
                     {
                         TaskLayout.removeView(TaskLayout.getChildAt(i))
                         //remove the task from the list, and delete it from the database
-                        currentChecklist.deleteTask(i, User(1))
+                        currentChecklist.deleteTask(i, currentUser)
 
                         //update the local file
                         GlobalScope.launch {
@@ -381,7 +381,7 @@ class BaseChecklist : AppCompatActivity(){
                     if(tempChild == currentTask)
                     {
                         TaskLayout.removeView(TaskLayout.getChildAt(i))
-                        currentChecklist.deleteTask(i, User(1));
+                        currentChecklist.deleteTask(i, currentUser)
                     }
                 }
             }
@@ -468,7 +468,7 @@ class BaseChecklist : AppCompatActivity(){
                     if(tempChild == currentTask)
                     {
                         TaskLayout.removeView(TaskLayout.getChildAt(i))
-                        currentChecklist.deleteTask(i, User(1))
+                        currentChecklist.deleteTask(i, currentUser)
 
                         //remake the local file
                         GlobalScope.launch {
@@ -522,6 +522,7 @@ class BaseChecklist : AppCompatActivity(){
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        currentUser = User(intent.getIntExtra("UserID", 0), intent.getStringExtra("UserName"))
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_base_checklist)
         currentChecklist.listID = intent.getIntExtra("ChecklistID", 0)
@@ -769,7 +770,7 @@ class BaseChecklist : AppCompatActivity(){
 
                                 //TaskLayout.removeView(TaskLayout.getChildAt(taskCount))
 
-                                currentChecklist.completeTask(taskCount, User(1))
+                                currentChecklist.completeTask(taskCount, currentUser)
                             }
                         }
                     }

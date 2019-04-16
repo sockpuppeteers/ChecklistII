@@ -1,6 +1,7 @@
 package com.example.doug.checklistpresentlayer
 import com.google.gson.annotations.SerializedName
-import java.time.LocalDateTime
+import org.joda.time.LocalDate
+import org.joda.time.format.DateTimeFormat
 
 class Checklist( var name: String, var cListID : Int? ) : ListClass(cListID, name){
     private var dbAccess = Database()
@@ -44,18 +45,7 @@ class Checklist( var name: String, var cListID : Int? ) : ListClass(cListID, nam
     fun completeTask(arrayIndex: Int, completedBy: User) {
         if (arrayIndex >= 0 && arrayIndex < tasks.size) {
             logChange(tasks[arrayIndex].TaskID!!, tasks[arrayIndex].name, completedBy, kAction.COMPLETE_TASK)
-            tasks[arrayIndex].compdatetime = LocalDateTime.now().toString()
-        }
-    }
-
-    /****************************************************************
-     *  Purpose: Overloaded completeTask function that allows a user
-     *      to manually enter the time that a task was completed.
-     ***************************************************************/
-    fun completeTask(arrayIndex: Int, completedBy: User, datetimeWhenCompleted: String) {
-        if (arrayIndex >= 0 && arrayIndex < tasks.size) {
-            logChange(tasks[arrayIndex].TaskID!!, tasks[arrayIndex].name, completedBy, kAction.COMPLETE_TASK)
-            tasks[arrayIndex].compdatetime = datetimeWhenCompleted
+            tasks[arrayIndex].compdatetime = LocalDate.now().toString()
         }
     }
 
