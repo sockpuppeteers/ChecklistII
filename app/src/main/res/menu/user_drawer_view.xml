@@ -5,8 +5,5 @@
             android:icon="@drawable/ic_search_black_24dp"
             android:title="@string/SEARCH_TEXT" app:actionViewClass="android.widget.SearchView"/>
     <group android:checkableBehavior="single">
-        <item
-                android:id="@+id/dAddUser"
-                android:title="@string/ADD_USER_TEXT"/>
     </group>
 </menu>
