@@ -33,6 +33,7 @@ import org.joda.time.Duration
 import org.joda.time.LocalDate
 import kotlin.concurrent.thread
 import android.widget.ImageButton
+import com.google.gson.reflect.TypeToken
 import org.joda.time.format.DateTimeFormat
 import java.text.SimpleDateFormat
 import java.time.format.DateTimeFormatter
@@ -544,7 +545,7 @@ class BaseChecklist : AppCompatActivity(){
         //if there's a local file, populate our list from that
         if (listFileExists()){
             //deleteListDataFile()
-            currentChecklist = getListFromFile()
+            currentChecklist.tasks = getListFromFile()
             //Need to do things with this information TODO
             //Currently this function recognizes if the completed
             //time is 2 days old, but the compared string is never set
@@ -891,7 +892,7 @@ class BaseChecklist : AppCompatActivity(){
     fun createListFile(list: Checklist) {
         //convert list to a JSON string
         val gson = Gson()
-        val userJson = gson.toJson(list)
+        val userJson = gson.toJson(list.tasks)
 
         //context will give us access to our local files directory
         var context = applicationContext
@@ -914,7 +915,7 @@ class BaseChecklist : AppCompatActivity(){
     //we don't have to check if the file exists in this function
     //because we call listFileExists() before calling this
     //however, we might need some other error checking in here
-    fun getListFromFile() : Checklist {
+    fun getListFromFile() : MutableList<Task> {
         //context will give us access to our local files directory
         var context = applicationContext
 
@@ -927,7 +928,7 @@ class BaseChecklist : AppCompatActivity(){
 
         //create a Checklist object based on the JSON from the file
         val gson = Gson()
-        return gson.fromJson(fileData, Checklist::class.java)
+        return gson.fromJson(fileData, object : TypeToken<MutableList<Task>>() {}.type)
     }
 
     fun deleteListDataFile(){
