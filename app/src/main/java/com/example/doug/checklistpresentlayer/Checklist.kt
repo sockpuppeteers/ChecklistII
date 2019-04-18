@@ -1,4 +1,7 @@
 package com.example.doug.checklistpresentlayer
+import android.provider.Settings
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import org.joda.time.LocalDate
 
 
@@ -78,7 +81,9 @@ class Checklist( var name: String, var cListID : Int? ) : ListClass(cListID, nam
 
         if (arrayIndex >= 0 && arrayIndex < tasks.size) {
             logChange(tasks[arrayIndex].TaskID!!, tasks[arrayIndex].name, modifiedBy, kAction.CHANGE_TASK_NAME, name)
-            //tasks[arrayIndex].putTask(uID)
+            GlobalScope.launch {
+                dbAccess.PutTask(tasks[arrayIndex])
+            }
             tasks[arrayIndex].name = name
         }
     }
