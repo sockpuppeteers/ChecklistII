@@ -583,15 +583,18 @@ class BaseChecklist : AppCompatActivity(){
                 GlobalScope.launch {
                     /*Right here start up a loading swirly*/
 
+                    //disable certain actions while data is being loaded from database
                     turnOnButtons()
                     turnOffButtons()
+
                     var list = currentChecklist
                     list.tasks = db.GetTasks(currentChecklist.listID!!)
                     list.users = db.GetUsers(currentChecklist.listID!!)
-
-                    println(list.users)
+                    list.changes = db.GetChanges(currentChecklist.listID!!)
 
                     currentChecklist.users = list.users
+                    currentChecklist.tasks = list.tasks
+                    currentChecklist.changes = list.changes
 
                     this@BaseChecklist.runOnUiThread {
                         subMenu.clear()

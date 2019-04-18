@@ -18,6 +18,10 @@ class Checklist( var name: String, var cListID : Int? ) : ListClass(cListID, nam
     fun logChange(taskID: Int, taskName: String, changedBy: User, changeType: kAction, changedTo: String) {
         val change = Change(listID, changedBy.UserID!!, taskID, taskName, changedBy.Username, changeType, changedTo)
         changes.add(change)
+
+        GlobalScope.launch{
+            dbAccess.PostChange(change)
+        }
     }
 
     /****************************************************************
@@ -27,6 +31,10 @@ class Checklist( var name: String, var cListID : Int? ) : ListClass(cListID, nam
     fun logChange(taskID: Int, taskName: String, changedBy: User, changeType: kAction) {
         val change = Change(listID, changedBy.UserID!!, taskID, taskName, changedBy.Username, changeType, null)
         changes.add(change)
+
+        GlobalScope.launch{
+            dbAccess.PostChange(change)
+        }
     }
     /****************************************************************
      *  Purpose: Overloaded log change function specifically for user
@@ -36,6 +44,10 @@ class Checklist( var name: String, var cListID : Int? ) : ListClass(cListID, nam
     {
         val change = Change(listID, changedBy.UserID!!, -1, "", changedBy.Username, changeType, changedTo)
         changes.add(change)
+
+        GlobalScope.launch{
+            dbAccess.PostChange(change)
+        }
     }
 
 

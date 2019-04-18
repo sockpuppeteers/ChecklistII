@@ -222,4 +222,28 @@ class Database {
             )
         }
     }
+
+    //returns a list of changes within a checklist
+    fun GetChanges(checklistID: Int) : MutableList<Change>{
+        var changes = mutableListOf<Change>()
+
+        runBlocking {
+            //Do an api to get a list of all users in a checklist
+            val (request, response, result) = Fuel.get("https://sockpuppeteerapi3.azurewebsites.net/Api/change/$checklistID").awaitStringResponseResult()
+
+            //if the request is successful, copy the data into our users object
+            //otherwise copy the error message
+            result.fold(
+                {
+                    //create a json model of the return body
+                    //the code is funky because the object is wrapped in a list, idk exactly how it works
+                    val gson = Gson()
+                    changes = gson.fromJson(result.component1(), object : TypeToken<MutableList<Change>>() {}.type)},
+                //print a message if the api call fails
+                { println("api call failure in GetChanges function") }
+            )
+        }
+
+        return changes
+    }
 }
