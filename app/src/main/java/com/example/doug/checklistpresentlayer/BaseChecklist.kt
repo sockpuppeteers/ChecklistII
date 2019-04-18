@@ -91,7 +91,7 @@ class BaseChecklist : AppCompatActivity(){
             taskSettingsLayoutView.DeadlineButton.setOnClickListener {
 
                 popupSettingsWindow.dismiss()
-
+                var curDeadline = LocalDate.now().toString()
                 val popupSettingsDeadlineWindow = PopupWindow(this)
 
                 val taskSettingsDeadlineLayoutView =
@@ -115,15 +115,16 @@ class BaseChecklist : AppCompatActivity(){
                     taskSettingsDeadlineLayoutView.CurrentDeadlineTextView.text = getString(R.string.NO_DEADLINE_TEXT)
 
                     currentChecklist.removeDeadline(taskCount, currentUser)
+                    curDeadline = LocalDate.now().minusDays(1).toString()
                 }
 
                 taskSettingsDeadlineLayoutView.DeadlineCalendarView.setOnDateChangeListener{_, year, month, day ->
                     tempString =
-                        getString(R.string.CURRENT_DEADLINE_TEXT) + " " + day + "/" + month + "/" + year
+                        getString(R.string.CURRENT_DEADLINE_TEXT) + " " + year + "-" + month + "-" + day
 
                     taskSettingsDeadlineLayoutView.CurrentDeadlineTextView.text = tempString
 
-                    currentChecklist.changeTaskDeadline(taskCount, currentUser,"$day/$month/$year")
+                    curDeadline = "$year-$month-$day"
                 }
 
                 taskSettingsDeadlineLayoutView.closeDeadlineButton.setOnClickListener{
@@ -134,6 +135,8 @@ class BaseChecklist : AppCompatActivity(){
                 }
 
                 popupSettingsDeadlineWindow.setOnDismissListener {
+                    if (curDeadline != LocalDate.now().minusDays(1).toString())
+                        currentChecklist.changeTaskDeadline(taskCount, currentUser, curDeadline)
                     popupPresent = false
                 }
 
@@ -571,6 +574,8 @@ class BaseChecklist : AppCompatActivity(){
                 GlobalScope.launch {
                     /*Right here start up a loading swirly*/
 
+                    turnOnButtons()
+                    turnOffButtons()
                     var list = currentChecklist
                     list.tasks = db.GetTasks(currentChecklist.listID!!)
                     list.users = db.GetUsers(currentChecklist.listID!!)
@@ -579,12 +584,10 @@ class BaseChecklist : AppCompatActivity(){
 
                     currentChecklist.users = list.users
 
-                    turnOnButtons()
-                    turnOffButtons()
 //                    if (list != currentChecklist){
                     /*have a popup or something telling the user that the list has been updated*/
                     //currentChecklist = list
-//                  turnOnButtons()
+                    turnOnButtons()
 
                 }
             //}
@@ -858,6 +861,8 @@ class BaseChecklist : AppCompatActivity(){
                                     "\n\tChanged To: " + it.changedTo + "\n\tEdited By: " + it.changedBy + "\n"
                             kAction.CHANGE_TASK_DEADLINE -> toAddString = "--- Deadline Changed: " + it.taskName +
                                     "\n\tChanged to: " + it.changedTo + "\n\tEdited By: " + it.changedBy + "\n"
+                            kAction.REMOVE_TASK_DEADLINE -> toAddString + "--- Deadline Removed: " + it.taskName +
+                                    "\n\tRemoved By: " + it.changedBy  + "\n"
                             kAction.ADD_USER -> toAddString = "--- User Added: " + it.changedTo +
                                     "\n\tAdded by: " + it.changedBy + "\n"
                         }
