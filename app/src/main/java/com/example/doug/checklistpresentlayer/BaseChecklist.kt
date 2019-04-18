@@ -567,17 +567,18 @@ class BaseChecklist : AppCompatActivity(){
             //in a new thread, get checklist data from the database to see if any changes
             //have happened since last opened.
             //if there's only one user on the list, don't do anything
-
-            if (!currentChecklist.users.isEmpty()) {
-//                //THIS COMMENT BLOCK IS FOR MATT TODO
-//                //globalscope.launch starts a new thread, where all this will happen.
-//                //we DO NOT want the user to be able to change anything in their list while this thread is active.
-//                //we need code that will check if this thread is active in the thread pool.
-//                //on the surface, the app will look exactly the same, but there will be some sort of "wait" that happens
-//                //if the user tries to change something and this is still going on
+            //if (currentChecklist.users.size > 1) {
                 GlobalScope.launch {
                     /*Right here start up a loading swirly*/
-                    //var list = db.GetChecklist(currentChecklist.cListID!!)
+
+                    var list = currentChecklist
+                    list.tasks = db.GetTasks(currentChecklist.listID!!)
+                    list.users = db.GetUsers(currentChecklist.listID!!)
+
+                    println(list.users)
+
+                    currentChecklist.users = list.users
+
                     turnOnButtons()
                     turnOffButtons()
 //                    if (list != currentChecklist){
@@ -586,7 +587,7 @@ class BaseChecklist : AppCompatActivity(){
 //                  turnOnButtons()
 
                 }
-            }
+            //}
         }
 
         //if no local file exists, populate our list from the database

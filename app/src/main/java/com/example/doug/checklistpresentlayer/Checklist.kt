@@ -1,6 +1,5 @@
 package com.example.doug.checklistpresentlayer
 import com.google.gson.annotations.SerializedName
-import org.joda.time.format.DateTimeFormat
 import net.danlew.android.joda.DateUtils
 import org.joda.time.DateTime
 import org.joda.time.Duration
