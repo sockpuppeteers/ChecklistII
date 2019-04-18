@@ -204,4 +204,22 @@ class Database {
 
         return users
     }
+
+    fun PostChange(change: Change) {
+        //create a json model of change
+        val gson = Gson()
+        val json = gson.toJson(change)
+
+        runBlocking{
+            //Make a post request
+            val (request, response, result) = Fuel.post("https://sockpuppeteerapi3.azurewebsites.net/api/change/")
+                .header("Content-Type" to "application/json")
+                .body(json.toString()).awaitStringResponseResult()
+
+            //we don't do anything with the result
+            result.fold(
+                {/* if its successful */}, { /* if it fails */ }
+            )
+        }
+    }
 }
