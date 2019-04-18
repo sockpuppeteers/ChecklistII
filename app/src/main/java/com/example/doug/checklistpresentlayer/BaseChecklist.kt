@@ -51,6 +51,9 @@ class BaseChecklist : AppCompatActivity(){
     var currentTask: TaskBox? = null
 
     private lateinit var userLayout: DrawerLayout
+    private lateinit var navigationView: NavigationView
+    private lateinit var menu: Menu
+    private lateinit var subMenu: SubMenu
     //private val mUserList = ArrayList<UserPage>()
 
     //Intialize things here
@@ -533,6 +536,11 @@ class BaseChecklist : AppCompatActivity(){
         //displays their own tasks and no other checklist's tasks
         currentChecklist.i_name = intent.getStringExtra("ListName")
 
+        //creates a submenu named user
+        navigationView = findViewById(R.id.nav_view)
+        menu = navigationView.menu
+        subMenu = menu.addSubMenu(getString(R.string.SUB_MENU_TITLE))
+
         //create a database access object
         var db = Database()
 
@@ -584,6 +592,13 @@ class BaseChecklist : AppCompatActivity(){
 
                     currentChecklist.users = list.users
 
+                    this@BaseChecklist.runOnUiThread {
+                        subMenu.clear()
+                        for ((i, up) in currentChecklist.users.withIndex()) {
+                            subMenu.add(0, Menu.FIRST + i, Menu.FIRST, up.Username)
+                        }
+                    }
+
 //                    if (list != currentChecklist){
                     /*have a popup or something telling the user that the list has been updated*/
                     //currentChecklist = list
@@ -624,12 +639,7 @@ class BaseChecklist : AppCompatActivity(){
             GlobalScope.launch {
                 createListFile(currentChecklist)
             }
-            //test code. replace with database/local storage call.
-            currentChecklist.addUser(currentUser, User(1,"Sally123","Suzan","McPoyle", "none"))
-            currentChecklist.addUser(currentUser, User(2,"Roger123","Roger","McPoyle", "none"))
-            currentChecklist.addUser(currentUser, User(3,"Rufus123","Rufus","McPoyle", "none"))
-            currentChecklist.addUser(currentUser, User(4,"Gorgina123","Gorgina","McPoyle", "none"))
-            //test code. replace with database/local storage call.
+
         }
 
 
@@ -643,11 +653,6 @@ class BaseChecklist : AppCompatActivity(){
                 userLayout.openDrawer(GravityCompat.END)
             }
         }
-        //creates a submenu named user
-        val subMenu: SubMenu
-        val navigationView: NavigationView = findViewById(R.id.nav_view)
-        val menu = navigationView.menu
-        subMenu = menu.addSubMenu(getString(R.string.SUB_MENU_TITLE))
 
         //populates the submenu with the usernames of everyone on the list (stored in mUserList
         //Menu.FIRST + i gives each a unique ID, used later in the program.
