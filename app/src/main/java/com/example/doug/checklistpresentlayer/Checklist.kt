@@ -1,13 +1,5 @@
 package com.example.doug.checklistpresentlayer
-import com.google.gson.annotations.SerializedName
-import net.danlew.android.joda.DateUtils
-import org.joda.time.DateTime
-import org.joda.time.Duration
 import org.joda.time.LocalDate
-import org.joda.time.LocalDateTime
-import kotlin.concurrent.thread
-import android.widget.ImageButton
-import org.joda.time.format.DateTimeFormat
 
 
 class Checklist( var name: String, var cListID : Int? ) : ListClass(cListID, name){
@@ -33,6 +25,16 @@ class Checklist( var name: String, var cListID : Int? ) : ListClass(cListID, nam
         val change = Change(listID, changedBy.UserID!!, taskID, taskName, changedBy.Username, changeType, null)
         changes.add(change)
     }
+    /****************************************************************
+     *  Purpose: Overloaded log change function specifically for user
+     *      changes to the checklist
+     ***************************************************************/
+    fun logChange(changeType: kAction, changedBy: User, changedTo: String)
+    {
+        val change = Change(listID, changedBy.UserID!!, -1, "", changedBy.Username, changeType, changedTo)
+        changes.add(change)
+    }
+
 
     /****************************************************************
      *  Purpose: Overloaded function of create task that includes all
@@ -42,7 +44,7 @@ class Checklist( var name: String, var cListID : Int? ) : ListClass(cListID, nam
         val task = Task(name, deadline, taskID, checklistID)
         task.TaskID = dbAccess.PostTask(task)
         tasks.add(task)
-        //logChange(task.TaskID!!, task.name, createdBy, kAction.CREATE_TASK)
+        logChange(task.TaskID!!, task.name, createdBy, kAction.CREATE_TASK)
     }
 
     /****************************************************************
@@ -62,7 +64,7 @@ class Checklist( var name: String, var cListID : Int? ) : ListClass(cListID, nam
      ***************************************************************/
     fun deleteTask(arrayIndex : Int, deletedBy: User) {
         if (arrayIndex >= 0 && arrayIndex < tasks.size) {
-            //logChange(tasks[arrayIndex].TaskID!!, tasks[arrayIndex].name, deletedBy, kAction.DELETE_TASK)
+            logChange(tasks[arrayIndex].TaskID!!, tasks[arrayIndex].name, deletedBy, kAction.DELETE_TASK)
             dbAccess.DeleteTask(tasks[arrayIndex]) //remove the task from the database
             tasks.removeAt(arrayIndex) //remove the task from the app
         }
@@ -103,7 +105,8 @@ class Checklist( var name: String, var cListID : Int? ) : ListClass(cListID, nam
         }
     }
 
-    fun addUser(user: User){
-        users.add(user)
+    fun addUser(currentUser: User, newUser: User){
+        users.add(newUser)
+        logChange(kAction.ADD_USER, currentUser, newUser.Username)
     }
 }

@@ -636,6 +636,7 @@ class BaseChecklist : AppCompatActivity(){
             GlobalScope.launch {
                 createListFile(currentChecklist)
             }
+
         }
 
 
@@ -853,11 +854,17 @@ class BaseChecklist : AppCompatActivity(){
                         when(it.changeType) {
 
                             kAction.CREATE_TASK -> toAddString = "--- Task Added: " + it.taskName +
-                                    "\n    Added By: Current User\n"
+                                    "\n\tAdded By: " +  it.changedBy + "\n"
                             kAction.DELETE_TASK -> toAddString = "--- Task Deleted: " + it.taskName +
-                                    "\n    Deleted By: Current User\n"
+                                    "\n\tDeleted By: " + it.changedBy + "\n"
                             kAction.COMPLETE_TASK -> toAddString = "--- Task Completed: " + it.taskName +
-                                    "\n    Completed By: Current User\n"
+                                    "\n\tCompleted By: " + it.changedBy + "\n"
+                            kAction.CHANGE_TASK_NAME -> toAddString = "--- Task Edited: " + it.taskName +
+                                    "\n\tChanged To: " + it.changedTo + "\n\tEdited By: " + it.changedBy + "\n"
+                            kAction.CHANGE_TASK_DEADLINE -> toAddString = "--- Deadline Changed: " + it.taskName +
+                                    "\n\tChanged to: " + it.changedTo + "\n\tEdited By: " + it.changedBy + "\n"
+                            kAction.ADD_USER -> toAddString = "--- User Added: " + it.changedTo +
+                                    "\n\tAdded by: " + it.changedBy + "\n"
                         }
 
                         checklistChangeTextView.text = toAddString
