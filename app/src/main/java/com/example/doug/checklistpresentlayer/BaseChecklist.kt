@@ -39,7 +39,7 @@ import java.text.SimpleDateFormat
 import java.time.format.DateTimeFormatter
 
 /********************************************
- *TO DO: Move listener assignments to functions
+ *TODO: Move listener assignments to functions
  ********************************************/
 class BaseChecklist : AppCompatActivity(){
 
