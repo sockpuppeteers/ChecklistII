@@ -78,4 +78,7 @@
     <string name="NAME_CHANGE_TEXT">Change Task Name</string>
     <string name="CANCEL_TEXT">Cancel</string>
     <string name="NEW_TEASK_NAME_TEXT">New Task Name</string>
+    <string name="SAVE_RECURSION_SETTINGS_TEXT">Save</string>
+    <string name="CURRENT_RECURRING_DAYS_TEXT">Current Recurring Days: </string>
+    <string name="CURRENT_RECURRING_TIME_TEXT">Current Recurring Time: </string>
 </resources>

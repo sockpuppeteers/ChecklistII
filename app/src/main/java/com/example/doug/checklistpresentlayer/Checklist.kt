@@ -11,6 +11,8 @@ class Checklist( var name: String, var cListID : Int? ) : ListClass(cListID, nam
     var users = mutableListOf<User>()
     var changes = mutableListOf<Change>()
 
+
+
      /****************************************************************
      *  Purpose: Logs change, the user who changed it, the type of
      *      action that was taken, and what the value was changed to
@@ -50,6 +52,21 @@ class Checklist( var name: String, var cListID : Int? ) : ListClass(cListID, nam
         }
     }
 
+    fun updateTaskRecurringDays(arrayIndex: Int, modifiedBy: User, dateString: String){
+        if (arrayIndex >= 0 && arrayIndex < tasks.size) {
+            logChange(tasks[arrayIndex].TaskID!!, tasks[arrayIndex].name, modifiedBy, kAction.CHANGE_RECURRING_DAYS)
+            // Add proper api calls //TODO
+            tasks[arrayIndex].reccuringDays = dateString
+        }
+    }
+
+    fun updateTaskRecurringTime(arrayIndex: Int, modifiedBy: User, timeString: String){
+        if (arrayIndex >= 0 && arrayIndex < tasks.size) {
+            logChange(tasks[arrayIndex].TaskID!!, tasks[arrayIndex].name, modifiedBy, kAction.CHANGE_RECURRING_TIME)
+            // Add proper api calls //TODO
+            tasks[arrayIndex].reccuringTime = timeString
+        }
+    }
 
     /****************************************************************
      *  Purpose: Overloaded function of create task that includes all
