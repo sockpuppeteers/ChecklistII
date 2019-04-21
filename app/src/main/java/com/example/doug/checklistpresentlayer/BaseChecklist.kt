@@ -419,6 +419,8 @@ class BaseChecklist : AppCompatActivity(){
 
         if(task.isRecurring == true)
             new_task_box.setRecurringIfNotComplete(true)
+        if (task.compdatetime != null)
+            new_task_box.completeTask()
 
         val mainView = findViewById<ScrollView>(R.id.TaskScrollView)
 
