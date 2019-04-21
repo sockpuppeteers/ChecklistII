@@ -658,7 +658,7 @@ class BaseChecklist : AppCompatActivity(){
                     list.users = db.GetUsers(currentChecklist.listID!!)
                     list.changes = db.GetChanges(currentChecklist.listID!!)
 
-                    //currentChecklist.users = list.users
+                    currentChecklist.users = list.users
                     //currentChecklist.tasks = list.tasks
                     //currentChecklist.changes = list.changes
 
@@ -682,6 +682,8 @@ class BaseChecklist : AppCompatActivity(){
         else{
             println("loaded list from database")
             var currentTasks = db.GetTasks(intent.getIntExtra("ChecklistID", 0))
+            currentChecklist.users = db.GetUsers(intent.getIntExtra("ChecklistID", 0))
+            currentChecklist.changes = db.GetChanges(intent.getIntExtra("ChecklistID", 0))
             //Same issue as "Need to do things with this information" TODO
             for (Task in currentTasks)
             {
