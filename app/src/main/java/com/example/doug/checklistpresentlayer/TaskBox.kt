@@ -9,6 +9,7 @@ import android.view.ViewGroup
 import android.widget.*
 import kotlinx.android.synthetic.main.activity_base_checklist.*
 import kotlinx.android.synthetic.main.task_functions_layout.view.*
+import org.jetbrains.anko.textColor
 
 
 /********************************************
@@ -26,57 +27,74 @@ class TaskBox @JvmOverloads constructor(
 
     private var taskText = text
 
-    private var taskTextView: TextView? = null
+    private var taskTextView: TextView
 
     private var isRecurring = false
     private var isComplete = false
 
     init
     {
+        var tempLayout = RelativeLayout.LayoutParams(
+            LinearLayout.LayoutParams.MATCH_PARENT,
+            ViewGroup.LayoutParams.MATCH_PARENT)
+
             //setBackgroundColor(ContextCompat.getColor(context, R.color.colorTaskBackground)
-            orientation = LinearLayout.HORIZONTAL
+        orientation = LinearLayout.HORIZONTAL
 
-            taskTextView = TextView(context)
+        taskTextView = TextView(context)
 
-            layoutParams = LinearLayout.LayoutParams(
-              LinearLayout.LayoutParams.WRAP_CONTENT,
-                ViewGroup.LayoutParams.WRAP_CONTENT)
+        layoutParams = tempLayout
 
-            gravity = right
+        gravity = right
 
-        taskTextView?.text = taskText
-        taskTextView?.textSize = 30f
-        taskTextView?.layoutParams = LinearLayout.LayoutParams(
+        tempLayout = RelativeLayout.LayoutParams(
             LinearLayout.LayoutParams.WRAP_CONTENT,
             ViewGroup.LayoutParams.WRAP_CONTENT)
 
         val taskSwitch = CheckBox(context)
 
-        taskSwitch.layoutParams = LinearLayout.LayoutParams(
+        tempLayout.addRule(RelativeLayout.ALIGN_PARENT_LEFT)
+        //tempLayout.addRule(RelativeLayout.LEFT_OF, taskSwitch.id)
+
+        taskTextView.text = taskText
+        taskTextView.textSize = 30f
+        taskTextView.layoutParams = tempLayout
+
+        taskTextView.gravity = left
+
+        addView(taskTextView, tempLayout)
+
+        tempLayout = RelativeLayout.LayoutParams(
             LinearLayout.LayoutParams.WRAP_CONTENT,
             ViewGroup.LayoutParams.WRAP_CONTENT)
 
-        addView(taskTextView)
-        addView(taskSwitch)
+        tempLayout.addRule(RelativeLayout.ALIGN_PARENT_RIGHT)
+        //tempLayout.addRule(RelativeLayout.RIGHT_OF, taskTextView.id)
+
+
+        taskSwitch.layoutParams = tempLayout
+
+        //taskSwitch.gravity = right
+
+        addView(taskSwitch, tempLayout)
     }
 
     fun ChangeName(name: String)
     {
         taskText = name
 
-        taskTextView?.text = taskText
+        taskTextView.text = taskText
     }
 
 
-    fun toggleReccurringIfNotComplete() {
-        if(!isComplete) {
-            isRecurring = !isRecurring
+    fun setRecurringIfNotComplete(reccuring: Boolean) {
+        if(!isComplete)
+            isRecurring = reccuring
 
-            if (isRecurring)
-                taskTextView?.setTextColor(Color.RED)
-            else
-                taskTextView?.setTextColor(Color.BLACK)
-        }
+        if(isRecurring)
+            taskTextView.textColor = Color.RED
+        else
+            taskTextView.textColor = Color.BLACK
     }
 
     fun checkCompletion():  Boolean {
@@ -93,9 +111,8 @@ class TaskBox @JvmOverloads constructor(
 
     fun completeTask(){
         isComplete = true
-        if (taskTextView != null) {
-            taskTextView.apply { taskTextView?.paintFlags = taskTextView?.paintFlags!!.or(Paint.STRIKE_THRU_TEXT_FLAG) }
-        }
+        taskTextView.apply { taskTextView.paintFlags = taskTextView.paintFlags!!.or(Paint.STRIKE_THRU_TEXT_FLAG) }
+
 
         getChildAt(1).isClickable = false
         getChildAt(1).visibility = View.INVISIBLE

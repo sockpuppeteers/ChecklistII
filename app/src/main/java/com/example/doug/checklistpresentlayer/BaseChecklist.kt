@@ -5,6 +5,7 @@ import android.graphics.Color
 import android.os.Bundle
 import android.support.constraint.ConstraintLayout
 import android.support.design.widget.NavigationView
+import android.support.v4.content.ContextCompat.startActivity
 import android.support.v4.view.GravityCompat
 import android.support.v4.widget.DrawerLayout
 import android.support.v7.app.ActionBar
@@ -34,6 +35,7 @@ import org.joda.time.LocalDate
 import kotlin.concurrent.thread
 import android.widget.ImageButton
 import com.google.gson.reflect.TypeToken
+import org.jetbrains.anko.db.NULL
 import org.joda.time.format.DateTimeFormat
 import java.text.SimpleDateFormat
 import java.time.format.DateTimeFormatter
@@ -161,20 +163,72 @@ class BaseChecklist : AppCompatActivity(){
                 val taskSettingsRecurringLayoutView =
                     layoutInflater.inflate(R.layout.task_settings_recursion_popup, null)
 
+
+                taskSettingsRecurringLayoutView.CurrentDaysTextView.text = calcTempStringDays(taskCount)
+
+                taskSettingsRecurringLayoutView.CurrentTimeTextView.text = calcTempStringTime(taskCount)
+
                 popupSettingsRecurringWindow.contentView = taskSettingsRecurringLayoutView
 
                 taskSettingsRecurringLayoutView.CloseRecurringButton.setOnClickListener{
+
+                    currentTask?.setRecurringIfNotComplete(taskSettingsRecurringLayoutView.RecursionSwitch.isChecked)
 
                     popupSettingsRecurringWindow.dismiss()
 
                     popupPresent = false
                 }
 
+                //********************************************************************
+                //Format for recurring date string is Day-Day-Day-.... ex. Mon-Tue-Fri
+                //
+                //Format for recurring time string is hour:minute AM\PM
+                //********************************************************************
+                taskSettingsRecurringLayoutView.SaveRecurringSettingsButton.setOnClickListener {
+                    var dateString = ""
+
+                    if(taskSettingsRecurringLayoutView.SundaySwitch.isChecked)
+                        dateString += "Sun-"
+
+                    if(taskSettingsRecurringLayoutView.MondaySwitch.isChecked)
+                        dateString += "Mon-"
+
+                    if(taskSettingsRecurringLayoutView.TuesdaySwitch.isChecked)
+                        dateString += "Tue-"
+
+                    if(taskSettingsRecurringLayoutView.WednesdaySwitch.isChecked)
+                        dateString += "Wed-"
+
+                    if(taskSettingsRecurringLayoutView.ThursdaySwitch.isChecked)
+                        dateString += "Thu-"
+
+                    if(taskSettingsRecurringLayoutView.FridaySwitch.isChecked)
+                        dateString += "Fri-"
+
+                    if(taskSettingsRecurringLayoutView.SaturdaySwitch.isChecked)
+                        dateString += "Sat-"
+
+                    if(dateString != currentChecklist.tasks[taskCount].reccuringDays)
+                        currentChecklist.updateTaskRecurringDays(taskCount, currentUser, dateString)
+
+                    var timeString =
+                        taskSettingsRecurringLayoutView.HourSpinner.selectedItem.toString() +
+                                ":" + taskSettingsRecurringLayoutView.MinuteSpinner.selectedItem.toString() +
+                                " " + taskSettingsRecurringLayoutView.AmPmSpinner.selectedItem.toString()
+
+                    if(timeString != currentChecklist.tasks[taskCount].reccuringTime)
+                        currentChecklist.updateTaskRecurringTime(taskCount, currentUser, timeString)
+
+                    taskSettingsRecurringLayoutView.CurrentDaysTextView.text = calcTempStringDays(taskCount)
+
+                    taskSettingsRecurringLayoutView.CurrentTimeTextView.text = calcTempStringTime(taskCount)
+                }
+
                 taskSettingsRecurringLayoutView.RecursionSwitch.isChecked =
                     currentTask?.checkReccurring() != null && currentTask?.checkReccurring() == true
 
                 taskSettingsRecurringLayoutView.RecursionSwitch.setOnClickListener {
-                    currentTask?.toggleReccurringIfNotComplete()
+                    //currentTask?.toggleReccurringIfNotComplete()
                 }
 
                 popupSettingsRecurringWindow.setOnDismissListener {
@@ -242,6 +296,18 @@ class BaseChecklist : AppCompatActivity(){
         }
     }
 
+    private fun calcTempStringDays(index: Int) = when(currentChecklist.tasks[index].reccuringDays != null) {
+        true -> getString(R.string.CURRENT_RECURRING_DAYS_TEXT) +
+                " " + currentChecklist.tasks[index].reccuringDays
+        false -> "No current recurring days"
+    }
+
+    private fun calcTempStringTime(index: Int) = when(currentChecklist.tasks[index].reccuringTime != null){
+        true -> getString(R.string.CURRENT_RECURRING_TIME_TEXT) +
+                " " + currentChecklist.tasks[index].reccuringTime
+        false -> "No current recurring time"
+    }
+
     fun createNewTask(TaskText: String, IsReaccuring: Boolean, taskID: Int?) {
         var new_task_box = TaskBox(
             this,
@@ -249,7 +315,7 @@ class BaseChecklist : AppCompatActivity(){
         )
 
         if(IsReaccuring)
-            new_task_box.toggleReccurringIfNotComplete()
+            new_task_box.setRecurringIfNotComplete(IsReaccuring)
 
         val mainView = findViewById<ScrollView>(R.id.TaskScrollView)
 
@@ -352,7 +418,7 @@ class BaseChecklist : AppCompatActivity(){
         )
 
         if(task.isRecurring == true)
-            new_task_box.toggleReccurringIfNotComplete()
+            new_task_box.setRecurringIfNotComplete(true)
 
         val mainView = findViewById<ScrollView>(R.id.TaskScrollView)
 
@@ -442,7 +508,7 @@ class BaseChecklist : AppCompatActivity(){
         )
 
         if(task.isRecurring == true)
-            new_task_box.toggleReccurringIfNotComplete()
+            new_task_box.setRecurringIfNotComplete(true)
 
         val mainView = findViewById<ScrollView>(R.id.TaskScrollView)
 

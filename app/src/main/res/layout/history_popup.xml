@@ -40,8 +40,7 @@
                     android:orientation="vertical"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content" android:id="@+id/HistoryLinearLayout"
-                    android:gravity="center_horizontal">
-            </LinearLayout>
+                    android:gravity="center_horizontal"/>
         </ScrollView>
     </android.support.constraint.ConstraintLayout>
 </android.support.constraint.ConstraintLayout>
