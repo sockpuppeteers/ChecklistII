@@ -610,10 +610,10 @@ class BaseChecklist : AppCompatActivity(){
 
         //create a database access object
         var db = Database()
+        //deleteListDataFile()
 
         //if there's a local file, populate our list from that
         if (listFileExists()){
-            //deleteListDataFile()
             currentChecklist.tasks = getListFromFile()
             //Need to do things with this information TODO
             //Currently this function recognizes if the completed
