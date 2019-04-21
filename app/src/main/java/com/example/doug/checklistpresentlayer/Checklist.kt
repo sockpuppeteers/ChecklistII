@@ -90,7 +90,6 @@ class Checklist( var name: String, var cListID : Int? ) : ListClass(cListID, nam
 
             GlobalScope.launch {
                 dbAccess.PutTask(tasks[arrayIndex])
-
             }
         }
     }
