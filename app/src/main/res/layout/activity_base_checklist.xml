@@ -68,8 +68,8 @@
                         android:layout_marginTop="8dp"
                         app:layout_constraintTop_toBottomOf="@+id/TaskScrollView"
                         app:layout_constraintStart_toStartOf="parent"
-                        android:layout_marginStart="24dp" app:layout_constraintEnd_toEndOf="parent"
-                        android:layout_marginEnd="24dp"
+                        android:layout_marginStart="8dp" app:layout_constraintEnd_toEndOf="parent"
+                        android:layout_marginEnd="8dp"
                         android:id="@+id/linearLayout">
                     <Button
                             android:text="@string/ADD_BUTTON_STRING"
@@ -84,33 +84,23 @@
                             android:layout_marginTop="8dp" app:layout_constraintTop_toBottomOf="@+id/TaskScrollView"/>
                     <Button
                             android:text="@string/CHECKOFF_BUTTON_STRING"
-                            android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:id="@+id/CheckoffButton"
                             app:layout_constraintStart_toEndOf="@+id/AddTaskButton"
                             app:layout_constraintEnd_toStartOf="@+id/HistoryButton"
                             app:layout_constraintBottom_toBottomOf="parent" android:layout_marginBottom="18dp"
                             android:layout_marginTop="8dp" app:layout_constraintTop_toBottomOf="@+id/TaskScrollView"
-                            android:textSize="13sp"/>
+                            android:textSize="13sp" android:layout_width="wrap_content"/>
                     <Button
                             android:text="@string/HISTORY_BUTTON_STRING"
-                            android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:id="@+id/HistoryButton"
                             app:layout_constraintStart_toEndOf="@+id/CheckoffButton"
                             android:layout_marginBottom="18dp"
                             app:layout_constraintBottom_toBottomOf="parent"
                             app:layout_constraintEnd_toStartOf="@+id/EditTaskButton" android:layout_marginTop="8dp"
-                            app:layout_constraintTop_toBottomOf="@+id/TaskScrollView" android:textSize="13sp"/>
-                    <Button
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:id="@+id/EditTaskButton" app:layout_constraintEnd_toEndOf="parent"
-                            android:layout_marginEnd="8dp"
-                            android:layout_marginBottom="18dp" app:layout_constraintBottom_toBottomOf="parent"
-                            app:layout_constraintStart_toEndOf="@+id/HistoryButton"
-                            android:text="@string/EDIT_BUTTON_STRING" android:layout_marginTop="8dp"
-                            app:layout_constraintTop_toBottomOf="@+id/TaskScrollView"/>
+                            app:layout_constraintTop_toBottomOf="@+id/TaskScrollView" android:textSize="13sp"
+                            android:layout_width="wrap_content"/>
                 </LinearLayout>
             </android.support.constraint.ConstraintLayout>
         </FrameLayout>

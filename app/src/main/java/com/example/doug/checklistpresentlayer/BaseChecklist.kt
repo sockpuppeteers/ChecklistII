@@ -650,35 +650,57 @@ class BaseChecklist : AppCompatActivity(){
             //have happened since last opened.
             //if there's only one user on the list, don't do anything
             //if (currentChecklist.users.size > 1) {
-                GlobalScope.launch {
-                    /*Right here start up a loading swirly*/
+            GlobalScope.launch {
+                /*Right here start up a loading swirly*/
 
-                    //disable certain actions while data is being loaded from database
-                    turnOnButtons()
-                    turnOffButtons()
+                //disable certain actions while data is being loaded from database
+                turnOnButtons()
+                turnOffButtons()
 
-                    var list = currentChecklist
-                    list.tasks = db.GetTasks(currentChecklist.listID!!)
-                    list.users = db.GetUsers(currentChecklist.listID!!)
-                    list.changes = db.GetChanges(currentChecklist.listID!!)
+                var list = currentChecklist
+                list.tasks = db.GetTasks(currentChecklist.listID!!)
+                list.users = db.GetUsers(currentChecklist.listID!!)
+                list.changes = db.GetChanges(currentChecklist.listID!!)
 
-                    currentChecklist.users = list.users
-                    //currentChecklist.tasks = list.tasks
-                    //currentChecklist.changes = list.changes
+                currentChecklist.users = list.users
+                currentChecklist.tasks = list.tasks
+                currentChecklist.changes = list.changes
 
-                    this@BaseChecklist.runOnUiThread {
-                        subMenu.clear()
-                        for ((i, up) in currentChecklist.users.withIndex()) {
-                            subMenu.add(0, Menu.FIRST + i, Menu.FIRST, up.Username)
-                        }
+                this@BaseChecklist.runOnUiThread {
+                    val taskLayout = findViewById<LinearLayout>(R.id.TaskLayout)
+                    subMenu.clear()
+                    for ((i, up) in currentChecklist.users.withIndex()) {
+                        subMenu.add(0, Menu.FIRST + i, Menu.FIRST, up.Username)
                     }
+                    taskLayout.removeAllViews()
+                    for (Task in currentChecklist.tasks)
+                    {
+                        if (Task.compdatetime != null)
+                        {
+                            val now = LocalDate.now()
+                            val formatter = DateTimeFormat.forPattern("yyyy-MM-dd")
+                            val dt = formatter.parseDateTime(Task.compdatetime)
+                            val dead = dt.plusDays(2)
+                            if (now.isEqual(dead.toLocalDate()))
+                            {
+                                //we don't want the task
+                            }
+                            else
+                            {
+                                addTaskFromList(Task)
+                            }
+                        }
+                        else if (Task.name != "")
+                            addTaskFromList(Task)
+                    }
+                }
 
 //                    if (list != currentChecklist){
-                    /*have a popup or something telling the user that the list has been updated*/
-                    //currentChecklist = list
-                    turnOnButtons()
+                /*have a popup or something telling the user that the list has been updated*/
+                //currentChecklist = list
+                turnOnButtons()
 
-                }
+            }
             //}
         }
 
@@ -1036,16 +1058,12 @@ class BaseChecklist : AppCompatActivity(){
         turnOff.isClickable = false
         val turnOff2 : Button = findViewById(R.id.CheckoffButton)
         turnOff2.isClickable = false
-        val turnOff3 : Button = findViewById(R.id.EditTaskButton)
-        turnOff3.isClickable = false
     }
     private fun turnOnButtons() {
 
         var turnOn : Button = findViewById(R.id.AddTaskButton)
         turnOn.isClickable = true
         turnOn = findViewById(R.id.CheckoffButton)
-        turnOn.isClickable = true
-        turnOn = findViewById(R.id.EditTaskButton)
         turnOn.isClickable = true
     }
 }
