@@ -88,8 +88,6 @@ class Checklist( var name: String, var cListID : Int? ) : ListClass(cListID, nam
             logChange(tasks[arrayIndex].TaskID!!, tasks[arrayIndex].name, completedBy, kAction.COMPLETE_TASK)
             tasks[arrayIndex].compdatetime = LocalDate.now().toString()
 
-            println("in thread")
-
             GlobalScope.launch {
                 dbAccess.PutTask(tasks[arrayIndex])
 

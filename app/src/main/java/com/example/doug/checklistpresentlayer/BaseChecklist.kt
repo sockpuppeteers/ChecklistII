@@ -838,7 +838,7 @@ class BaseChecklist : AppCompatActivity(){
                 {
                     val taskSwitch = currentChild.getChildAt(1)
 
-                    if(taskSwitch is Switch)
+                    if(taskSwitch is CheckBox)
                     {
                         if(taskSwitch.isChecked)
                         {
