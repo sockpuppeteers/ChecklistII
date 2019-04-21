@@ -658,9 +658,9 @@ class BaseChecklist : AppCompatActivity(){
                     list.users = db.GetUsers(currentChecklist.listID!!)
                     list.changes = db.GetChanges(currentChecklist.listID!!)
 
-                    currentChecklist.users = list.users
-                    currentChecklist.tasks = list.tasks
-                    currentChecklist.changes = list.changes
+                    //currentChecklist.users = list.users
+                    //currentChecklist.tasks = list.tasks
+                    //currentChecklist.changes = list.changes
 
                     this@BaseChecklist.runOnUiThread {
                         subMenu.clear()
