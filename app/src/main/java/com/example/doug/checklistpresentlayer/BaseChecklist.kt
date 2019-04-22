@@ -1,5 +1,7 @@
 package com.example.doug.checklistpresentlayer
 
+import android.app.SearchManager
+import android.content.Context
 import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
@@ -607,6 +609,8 @@ class BaseChecklist : AppCompatActivity(){
         //displays their own tasks and no other checklist's tasks
         currentChecklist.i_name = intent.getStringExtra("ListName")
 
+        setSupportActionBar(findViewById(R.id.toolbar))
+
         //creates a submenu named user
         navigationView = findViewById(R.id.nav_view)
         menu = navigationView.menu
@@ -743,16 +747,16 @@ class BaseChecklist : AppCompatActivity(){
 
         //allows the opening and closing of a nav drawer on the right side of the screen.
         userLayout = findViewById(R.id.user_drawer_layout)
-        val menuRight = findViewById<View>(R.id.menuRight) as ImageButton
-        menuRight.setOnClickListener {
-            if (userLayout.isDrawerOpen(GravityCompat.END)) {
-                userLayout.closeDrawer(GravityCompat.END)
-            } else {
-                userLayout.openDrawer(GravityCompat.END)
-            }
-        }
+//        val menuRight = findViewById<View>(R.id.menuRight) as ImageButton
+//        menuRight.setOnClickListener {
+//            if (userLayout.isDrawerOpen(GravityCompat.END)) {
+//                userLayout.closeDrawer(GravityCompat.END)
+//            } else {
+//                userLayout.openDrawer(GravityCompat.END)
+//            }
+//        }
 
-        //populates the submenu with the usernames of everyone on the list (stored in mUserList
+        //populates the submenu with the usernames of everyone on the list (stored in mUserList)
         //Menu.FIRST + i gives each a unique ID, used later in the program.
         for ((i, up) in currentChecklist.users.withIndex()) {
             subMenu.add(0, Menu.FIRST + i, Menu.FIRST, up.Username)
@@ -783,6 +787,8 @@ class BaseChecklist : AppCompatActivity(){
 
             true
         }
+
+        handleIntent(intent)
 
         val addButton = findViewById<Button>(R.id.AddTaskButton)
         val checkoffButton = findViewById<Button>(R.id.CheckoffButton)
@@ -1050,7 +1056,34 @@ class BaseChecklist : AppCompatActivity(){
                 userLayout.openDrawer(GravityCompat.START)
                 true
             }
+            R.id.users_drawer -> {
+                if (userLayout.isDrawerOpen(GravityCompat.END)) {
+                    userLayout.closeDrawer(GravityCompat.END)
+                } else {
+                    userLayout.openDrawer(GravityCompat.END)
+                }
+                //userLayout.openDrawer(GravityCompat.START)
+                true
+            }
             else -> super.onOptionsItemSelected(item)
+        }
+    }
+    override fun onCreateOptionsMenu(menu: Menu): Boolean {
+        menuInflater.inflate(R.menu.options_menu, menu)
+
+        // Associate searchable configuration with the SearchView
+        val searchManager = getSystemService(Context.SEARCH_SERVICE) as SearchManager
+        (menu.findItem(R.id.search).actionView as SearchView).apply {
+            setSearchableInfo(searchManager.getSearchableInfo(componentName))
+        }
+
+        return true
+    }
+    private fun handleIntent(intent: Intent) {
+
+        if (Intent.ACTION_SEARCH == intent.action) {
+            val query = intent.getStringExtra(SearchManager.QUERY)
+            //use the query to search your data somehow
         }
     }
     private fun turnOffButtons() {
