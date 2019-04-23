@@ -20,9 +20,10 @@ class SearchResultsActivity : Activity() {
     private fun handleIntent(intent: Intent) {
         if (Intent.ACTION_SEARCH == intent.action) {
             val query = intent.getStringExtra(SearchManager.QUERY)
-            //use the query to search your data somehow
-            //TODO Cade, add database call here
-            //query is the string the user entered into search user, you should be able to use that to search the database.
+            val db = Database()
+
+            println("in handleintent")
+            db.GetUser(query)
         }
     }
 }
