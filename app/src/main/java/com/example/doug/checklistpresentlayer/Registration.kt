@@ -3,6 +3,7 @@ package com.example.doug.checklistpresentlayer
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.content.Intent
+import android.content.pm.ActivityInfo
 import kotlinx.android.synthetic.main.activity_login.*
 import kotlinx.android.synthetic.main.activity_registration.*
 import java.nio.charset.Charset
@@ -12,6 +13,7 @@ import java.util.regex.Pattern
 class Registration : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
         setContentView(R.layout.activity_registration)
         var pwMatch = true
         //boolean that checks if the username is US ASCII (could be weird for multi language features)

@@ -205,6 +205,30 @@ class Database {
         return users
     }
 
+    fun GetUser(username: String) : User {
+        var user = User(-1, "", "", "", "")
+
+        runBlocking {
+            //Do an api to get a list of all users in a checklist
+            val (request, response, result) = Fuel.get("https://sockpuppeteerapi3.azurewebsites.net/Api/users/getstring/$username").awaitStringResponseResult()
+
+            //if the request is successful, copy the data into our users object
+            //otherwise copy the error message
+            result.fold(
+                {
+                    //create a json model of the return body
+                    //the code is funky because the object is wrapped in a list, idk exactly how it works
+                    val gson = Gson()
+                    user = gson.fromJson(result.component1(), User::class.java)
+                    println(user)},
+                //print a message if the api call fails
+                { println("api call failure in GetUser function") }
+            )
+        }
+
+        return user
+    }
+
     fun PostChange(change: Change) {
         //create a json model of change
         val gson = Gson()

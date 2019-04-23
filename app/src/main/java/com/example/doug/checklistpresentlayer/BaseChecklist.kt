@@ -1,6 +1,9 @@
 package com.example.doug.checklistpresentlayer
 
+import android.app.SearchManager
+import android.content.Context
 import android.content.Intent
+import android.content.pm.ActivityInfo
 import android.graphics.Color
 import android.os.Bundle
 import android.support.constraint.ConstraintLayout
@@ -46,7 +49,7 @@ import java.time.format.DateTimeFormatter
 class BaseChecklist : AppCompatActivity(){
 
     var currentChecklist = Checklist("Your Checklist", 0 )
-
+    var taskFlag = true
     //Flag to see if any popups are present
     var popupPresent = false
 
@@ -163,6 +166,9 @@ class BaseChecklist : AppCompatActivity(){
                 val taskSettingsRecurringLayoutView =
                     layoutInflater.inflate(R.layout.task_settings_recursion_popup, null)
 
+                taskSettingsRecurringLayoutView.RecursionSwitch.setOnClickListener {
+                    currentTask?.setRecurringIfNotComplete(taskSettingsRecurringLayoutView.RecursionSwitch.isChecked)
+                }
 
                 taskSettingsRecurringLayoutView.CurrentDaysTextView.text = calcTempStringDays(taskCount)
 
@@ -170,6 +176,13 @@ class BaseChecklist : AppCompatActivity(){
 
                 popupSettingsRecurringWindow.contentView = taskSettingsRecurringLayoutView
 
+                popupSettingsRecurringWindow.setOnDismissListener {
+
+                    currentTask?.setRecurringIfNotComplete(taskSettingsRecurringLayoutView.RecursionSwitch.isChecked)
+
+                    popupPresent = false
+
+                }
                 taskSettingsRecurringLayoutView.CloseRecurringButton.setOnClickListener{
 
                     currentTask?.setRecurringIfNotComplete(taskSettingsRecurringLayoutView.RecursionSwitch.isChecked)
@@ -208,7 +221,7 @@ class BaseChecklist : AppCompatActivity(){
                     if(taskSettingsRecurringLayoutView.SaturdaySwitch.isChecked)
                         dateString += "Sat-"
 
-                    if(dateString != currentChecklist.tasks[taskCount].reccuringDays)
+                    if(dateString != currentChecklist.tasks[taskCount].recurringDays)
                         currentChecklist.updateTaskRecurringDays(taskCount, currentUser, dateString)
 
                     var timeString =
@@ -216,7 +229,7 @@ class BaseChecklist : AppCompatActivity(){
                                 ":" + taskSettingsRecurringLayoutView.MinuteSpinner.selectedItem.toString() +
                                 " " + taskSettingsRecurringLayoutView.AmPmSpinner.selectedItem.toString()
 
-                    if(timeString != currentChecklist.tasks[taskCount].reccuringTime)
+                    if(timeString != currentChecklist.tasks[taskCount].recurringTime)
                         currentChecklist.updateTaskRecurringTime(taskCount, currentUser, timeString)
 
                     taskSettingsRecurringLayoutView.CurrentDaysTextView.text = calcTempStringDays(taskCount)
@@ -227,9 +240,6 @@ class BaseChecklist : AppCompatActivity(){
                 taskSettingsRecurringLayoutView.RecursionSwitch.isChecked =
                     currentTask?.checkReccurring() != null && currentTask?.checkReccurring() == true
 
-                taskSettingsRecurringLayoutView.RecursionSwitch.setOnClickListener {
-                    //currentTask?.toggleReccurringIfNotComplete()
-                }
 
                 popupSettingsRecurringWindow.setOnDismissListener {
                     popupPresent = false
@@ -296,15 +306,15 @@ class BaseChecklist : AppCompatActivity(){
         }
     }
 
-    private fun calcTempStringDays(index: Int) = when(currentChecklist.tasks[index].reccuringDays != null) {
+    private fun calcTempStringDays(index: Int) = when(currentChecklist.tasks[index].recurringDays != null) {
         true -> getString(R.string.CURRENT_RECURRING_DAYS_TEXT) +
-                " " + currentChecklist.tasks[index].reccuringDays
+                " " + currentChecklist.tasks[index].recurringDays
         false -> "No current recurring days"
     }
 
-    private fun calcTempStringTime(index: Int) = when(currentChecklist.tasks[index].reccuringTime != null){
+    private fun calcTempStringTime(index: Int) = when(currentChecklist.tasks[index].recurringTime != null){
         true -> getString(R.string.CURRENT_RECURRING_TIME_TEXT) +
-                " " + currentChecklist.tasks[index].reccuringTime
+                " " + currentChecklist.tasks[index].recurringTime
         false -> "No current recurring time"
     }
 
@@ -385,7 +395,7 @@ class BaseChecklist : AppCompatActivity(){
         //Sets the on lick listener for the new task gui element
         new_task_box.setOnClickListener{
 
-            if(!popupPresent) {
+            if(!popupPresent && taskFlag) {
 
                 popupPresent = true
 
@@ -600,12 +610,15 @@ class BaseChecklist : AppCompatActivity(){
 
     override fun onCreate(savedInstanceState: Bundle?) {
         currentUser = User(intent.getIntExtra("UserID", 0), intent.getStringExtra("UserName"))
+        requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_base_checklist)
         currentChecklist.listID = intent.getIntExtra("ChecklistID", 0)
         //line below gets the checklist name so that each checklist correctly
         //displays their own tasks and no other checklist's tasks
         currentChecklist.i_name = intent.getStringExtra("ListName")
+
+        setSupportActionBar(findViewById(R.id.toolbar))
 
         //creates a submenu named user
         navigationView = findViewById(R.id.nav_view)
@@ -650,35 +663,57 @@ class BaseChecklist : AppCompatActivity(){
             //have happened since last opened.
             //if there's only one user on the list, don't do anything
             //if (currentChecklist.users.size > 1) {
-                GlobalScope.launch {
-                    /*Right here start up a loading swirly*/
+            GlobalScope.launch {
+                /*Right here start up a loading swirly*/
 
-                    //disable certain actions while data is being loaded from database
-                    turnOnButtons()
-                    turnOffButtons()
+                //disable certain actions while data is being loaded from database
+                turnOnButtons()
+                turnOffButtons()
 
-                    var list = currentChecklist
-                    list.tasks = db.GetTasks(currentChecklist.listID!!)
-                    list.users = db.GetUsers(currentChecklist.listID!!)
-                    list.changes = db.GetChanges(currentChecklist.listID!!)
+                var list = currentChecklist
+                list.tasks = db.GetTasks(currentChecklist.listID!!)
+                list.users = db.GetUsers(currentChecklist.listID!!)
+                list.changes = db.GetChanges(currentChecklist.listID!!)
 
-                    currentChecklist.users = list.users
-                    //currentChecklist.tasks = list.tasks
-                    //currentChecklist.changes = list.changes
+                currentChecklist.users = list.users
+                currentChecklist.tasks = list.tasks
+                currentChecklist.changes = list.changes
 
-                    this@BaseChecklist.runOnUiThread {
-                        subMenu.clear()
-                        for ((i, up) in currentChecklist.users.withIndex()) {
-                            subMenu.add(0, Menu.FIRST + i, Menu.FIRST, up.Username)
-                        }
+                this@BaseChecklist.runOnUiThread {
+                    val taskLayout = findViewById<LinearLayout>(R.id.TaskLayout)
+                    subMenu.clear()
+                    for ((i, up) in currentChecklist.users.withIndex()) {
+                        subMenu.add(0, Menu.FIRST + i, Menu.FIRST, up.Username)
                     }
+                    taskLayout.removeAllViews()
+                    for (Task in currentChecklist.tasks)
+                    {
+                        if (Task.compdatetime != null)
+                        {
+                            val now = LocalDate.now()
+                            val formatter = DateTimeFormat.forPattern("yyyy-MM-dd")
+                            val dt = formatter.parseDateTime(Task.compdatetime)
+                            val dead = dt.plusDays(2)
+                            if (now.isEqual(dead.toLocalDate()))
+                            {
+                                //we don't want the task
+                            }
+                            else
+                            {
+                                addTaskFromList(Task)
+                            }
+                        }
+                        else if (Task.name != "")
+                            addTaskFromList(Task)
+                    }
+                }
 
 //                    if (list != currentChecklist){
-                    /*have a popup or something telling the user that the list has been updated*/
-                    //currentChecklist = list
-                    turnOnButtons()
+                /*have a popup or something telling the user that the list has been updated*/
+                //currentChecklist = list
+                turnOnButtons()
 
-                }
+            }
             //}
         }
 
@@ -721,16 +756,16 @@ class BaseChecklist : AppCompatActivity(){
 
         //allows the opening and closing of a nav drawer on the right side of the screen.
         userLayout = findViewById(R.id.user_drawer_layout)
-        val menuRight = findViewById<View>(R.id.menuRight) as ImageButton
-        menuRight.setOnClickListener {
-            if (userLayout.isDrawerOpen(GravityCompat.END)) {
-                userLayout.closeDrawer(GravityCompat.END)
-            } else {
-                userLayout.openDrawer(GravityCompat.END)
-            }
-        }
+//        val menuRight = findViewById<View>(R.id.menuRight) as ImageButton
+//        menuRight.setOnClickListener {
+//            if (userLayout.isDrawerOpen(GravityCompat.END)) {
+//                userLayout.closeDrawer(GravityCompat.END)
+//            } else {
+//                userLayout.openDrawer(GravityCompat.END)
+//            }
+//        }
 
-        //populates the submenu with the usernames of everyone on the list (stored in mUserList
+        //populates the submenu with the usernames of everyone on the list (stored in mUserList)
         //Menu.FIRST + i gives each a unique ID, used later in the program.
         for ((i, up) in currentChecklist.users.withIndex()) {
             subMenu.add(0, Menu.FIRST + i, Menu.FIRST, up.Username)
@@ -761,6 +796,8 @@ class BaseChecklist : AppCompatActivity(){
 
             true
         }
+
+        //handleIntent(intent)
 
         val addButton = findViewById<Button>(R.id.AddTaskButton)
         val checkoffButton = findViewById<Button>(R.id.CheckoffButton)
@@ -1028,7 +1065,34 @@ class BaseChecklist : AppCompatActivity(){
                 userLayout.openDrawer(GravityCompat.START)
                 true
             }
+            R.id.users_drawer -> {
+                if (userLayout.isDrawerOpen(GravityCompat.END)) {
+                    userLayout.closeDrawer(GravityCompat.END)
+                } else {
+                    userLayout.openDrawer(GravityCompat.END)
+                }
+                //userLayout.openDrawer(GravityCompat.START)
+                true
+            }
             else -> super.onOptionsItemSelected(item)
+        }
+    }
+    override fun onCreateOptionsMenu(menu: Menu): Boolean {
+        menuInflater.inflate(R.menu.options_menu, menu)
+
+        // Associate searchable configuration with the SearchView
+        val searchManager = getSystemService(Context.SEARCH_SERVICE) as SearchManager
+        (menu.findItem(R.id.search).actionView as SearchView).apply {
+            setSearchableInfo(searchManager.getSearchableInfo(componentName))
+        }
+
+        return true
+    }
+    private fun handleIntent(intent: Intent) {
+
+        if (Intent.ACTION_SEARCH == intent.action) {
+            val query = intent.getStringExtra(SearchManager.QUERY)
+            //use the query to search your data somehow
         }
     }
     private fun turnOffButtons() {
@@ -1036,8 +1100,7 @@ class BaseChecklist : AppCompatActivity(){
         turnOff.isClickable = false
         val turnOff2 : Button = findViewById(R.id.CheckoffButton)
         turnOff2.isClickable = false
-        val turnOff3 : Button = findViewById(R.id.EditTaskButton)
-        turnOff3.isClickable = false
+        taskFlag = false
     }
     private fun turnOnButtons() {
 
@@ -1045,7 +1108,6 @@ class BaseChecklist : AppCompatActivity(){
         turnOn.isClickable = true
         turnOn = findViewById(R.id.CheckoffButton)
         turnOn.isClickable = true
-        turnOn = findViewById(R.id.EditTaskButton)
-        turnOn.isClickable = true
+        taskFlag = true
     }
 }

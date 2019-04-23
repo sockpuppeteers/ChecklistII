@@ -8,6 +8,7 @@ import kotlinx.android.synthetic.main.activity_main.*
 import okhttp3.*
 import java.io.IOException
 import android.content.Intent
+import android.content.pm.ActivityInfo
 import android.support.design.widget.NavigationView
 import android.support.v4.view.GravityCompat
 import android.support.v4.widget.DrawerLayout
@@ -23,6 +24,7 @@ class UserLogin : AppCompatActivity() {
     private lateinit var drawerLayout: DrawerLayout
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
         setContentView(R.layout.activity_main)
         drawerLayout = findViewById(R.id.drawer_layout)
 

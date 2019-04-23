@@ -4,6 +4,7 @@
 package com.example.doug.checklistpresentlayer
 
 import android.content.Intent
+import android.content.pm.ActivityInfo
 import khttp.*
 import android.graphics.Color
 import android.os.Bundle
@@ -56,6 +57,7 @@ class BaseListofLists : AppCompatActivity(){
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
         setContentView(R.layout.activity_base_listoflists)
         currentListofLists.uID = intent.getIntExtra("UserID", 0)
         UName = intent.getStringExtra("uname")
