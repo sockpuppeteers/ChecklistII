@@ -55,16 +55,16 @@ class Checklist( var name: String, var cListID : Int? ) : ListClass(cListID, nam
     fun updateTaskRecurringDays(arrayIndex: Int, modifiedBy: User, dateString: String){
         if (arrayIndex >= 0 && arrayIndex < tasks.size) {
             logChange(tasks[arrayIndex].TaskID!!, tasks[arrayIndex].name, modifiedBy, kAction.CHANGE_RECURRING_DAYS)
+            // Add proper api calls //TODO
             tasks[arrayIndex].recurringDays = dateString
-            dbAccess.PutTask(tasks[arrayIndex])
         }
     }
 
     fun updateTaskRecurringTime(arrayIndex: Int, modifiedBy: User, timeString: String){
         if (arrayIndex >= 0 && arrayIndex < tasks.size) {
             logChange(tasks[arrayIndex].TaskID!!, tasks[arrayIndex].name, modifiedBy, kAction.CHANGE_RECURRING_TIME)
+            // Add proper api calls //TODO
             tasks[arrayIndex].recurringTime = timeString
-            dbAccess.PutTask(tasks[arrayIndex])
         }
     }
 

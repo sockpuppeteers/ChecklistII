@@ -13,8 +13,8 @@ data class Task (@SerializedName("Name") var name : String = "") {
     @SerializedName("Deadline") var Deadline : String? = null
     @SerializedName("DateCompleted") var compdatetime : String? =  null
     @SerializedName("IsRecurring") var isRecurring : Boolean? = false
-    @SerializedName("RecurringTime") var recurringTime : String? = null
-    @SerializedName("RecurringDays") var recurringDays : String? = null
+    var recurringTime : String? = null
+    var recurringDays : String? = null
 
     constructor(_name: String, deadline: String) : this(_name){
         Deadline = deadline
