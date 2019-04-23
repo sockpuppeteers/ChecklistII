@@ -788,7 +788,7 @@ class BaseChecklist : AppCompatActivity(){
             true
         }
 
-        handleIntent(intent)
+        //handleIntent(intent)
 
         val addButton = findViewById<Button>(R.id.AddTaskButton)
         val checkoffButton = findViewById<Button>(R.id.CheckoffButton)
