@@ -22,6 +22,7 @@ class SearchResultsActivity : Activity() {
             val query = intent.getStringExtra(SearchManager.QUERY)
             val db = Database()
 
+            println("in handleintent")
             db.GetUser(query)
         }
     }
