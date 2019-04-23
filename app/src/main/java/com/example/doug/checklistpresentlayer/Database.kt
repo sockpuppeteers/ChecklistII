@@ -219,7 +219,8 @@ class Database {
                     //create a json model of the return body
                     //the code is funky because the object is wrapped in a list, idk exactly how it works
                     val gson = Gson()
-                    user = gson.fromJson(result.component1(), User::class.java)},
+                    user = gson.fromJson(result.component1(), User::class.java)
+                    println(user)},
                 //print a message if the api call fails
                 { println("api call failure in GetUser function") }
             )
