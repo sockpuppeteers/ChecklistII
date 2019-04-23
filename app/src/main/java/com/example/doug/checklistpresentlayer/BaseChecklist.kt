@@ -36,6 +36,7 @@ import org.joda.time.Duration
 import org.joda.time.LocalDate
 import kotlin.concurrent.thread
 import android.widget.ImageButton
+import com.example.doug.checklistpresentlayer.R.id.groups
 import com.google.gson.reflect.TypeToken
 import org.jetbrains.anko.db.NULL
 import org.joda.time.format.DateTimeFormat
@@ -789,6 +790,8 @@ class BaseChecklist : AppCompatActivity(){
         }
 
         //handleIntent(intent)
+//        val adapter : SearchresultExpandableListAdapter = SearchresultExpandableListAdapter(this, groups);
+//        listView.setAdapter(adapter)
 
         val addButton = findViewById<Button>(R.id.AddTaskButton)
         val checkoffButton = findViewById<Button>(R.id.CheckoffButton)
@@ -1069,12 +1072,16 @@ class BaseChecklist : AppCompatActivity(){
         }
     }
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        menuInflater.inflate(R.menu.options_menu, menu)
+        // Inflate the options menu from XML
+        val inflater = menuInflater
+        inflater.inflate(R.menu.options_menu, menu)
 
-        // Associate searchable configuration with the SearchView
+        // Get the SearchView and set the searchable configuration
         val searchManager = getSystemService(Context.SEARCH_SERVICE) as SearchManager
         (menu.findItem(R.id.search).actionView as SearchView).apply {
+            // Assumes current activity is the searchable activity
             setSearchableInfo(searchManager.getSearchableInfo(componentName))
+            setIconifiedByDefault(false) // Do not iconify the widget; expand it by default
         }
 
         return true
