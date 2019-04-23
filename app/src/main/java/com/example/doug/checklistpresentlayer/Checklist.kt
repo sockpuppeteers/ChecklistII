@@ -56,7 +56,7 @@ class Checklist( var name: String, var cListID : Int? ) : ListClass(cListID, nam
         if (arrayIndex >= 0 && arrayIndex < tasks.size) {
             logChange(tasks[arrayIndex].TaskID!!, tasks[arrayIndex].name, modifiedBy, kAction.CHANGE_RECURRING_DAYS)
             // Add proper api calls //TODO
-            tasks[arrayIndex].reccuringDays = dateString
+            tasks[arrayIndex].recurringDays = dateString
         }
     }
 
@@ -64,7 +64,7 @@ class Checklist( var name: String, var cListID : Int? ) : ListClass(cListID, nam
         if (arrayIndex >= 0 && arrayIndex < tasks.size) {
             logChange(tasks[arrayIndex].TaskID!!, tasks[arrayIndex].name, modifiedBy, kAction.CHANGE_RECURRING_TIME)
             // Add proper api calls //TODO
-            tasks[arrayIndex].reccuringTime = timeString
+            tasks[arrayIndex].recurringTime = timeString
         }
     }
 

@@ -8,5 +8,5 @@ import khttp.*
 import org.json.JSONObject
 
 data class RecurringTask (@SerializedName("RecurringTaskID") var id : Int?, @SerializedName("TaskID") var TaskID: Int = -1,
-                          @SerializedName("DateCompleted") var Day : String =  "",
-                          @SerializedName("IsRecurring") var Time : String = "")
+                          @SerializedName("Day") var Day : String =  "",
+                          @SerializedName("Time") var Time : String = "")
