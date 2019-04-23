@@ -210,7 +210,7 @@ class BaseChecklist : AppCompatActivity(){
                     if(taskSettingsRecurringLayoutView.SaturdaySwitch.isChecked)
                         dateString += "Sat-"
 
-                    if(dateString != currentChecklist.tasks[taskCount].recurringDays)
+                    if(dateString != currentChecklist.tasks[taskCount].reccuringDays)
                         currentChecklist.updateTaskRecurringDays(taskCount, currentUser, dateString)
 
                     var timeString =
@@ -218,7 +218,7 @@ class BaseChecklist : AppCompatActivity(){
                                 ":" + taskSettingsRecurringLayoutView.MinuteSpinner.selectedItem.toString() +
                                 " " + taskSettingsRecurringLayoutView.AmPmSpinner.selectedItem.toString()
 
-                    if(timeString != currentChecklist.tasks[taskCount].recurringTime)
+                    if(timeString != currentChecklist.tasks[taskCount].reccuringTime)
                         currentChecklist.updateTaskRecurringTime(taskCount, currentUser, timeString)
 
                     taskSettingsRecurringLayoutView.CurrentDaysTextView.text = calcTempStringDays(taskCount)
@@ -298,15 +298,15 @@ class BaseChecklist : AppCompatActivity(){
         }
     }
 
-    private fun calcTempStringDays(index: Int) = when(currentChecklist.tasks[index].recurringDays != null) {
+    private fun calcTempStringDays(index: Int) = when(currentChecklist.tasks[index].reccuringDays != null) {
         true -> getString(R.string.CURRENT_RECURRING_DAYS_TEXT) +
-                " " + currentChecklist.tasks[index].recurringDays
+                " " + currentChecklist.tasks[index].reccuringDays
         false -> "No current recurring days"
     }
 
-    private fun calcTempStringTime(index: Int) = when(currentChecklist.tasks[index].recurringTime != null){
+    private fun calcTempStringTime(index: Int) = when(currentChecklist.tasks[index].reccuringTime != null){
         true -> getString(R.string.CURRENT_RECURRING_TIME_TEXT) +
-                " " + currentChecklist.tasks[index].recurringTime
+                " " + currentChecklist.tasks[index].reccuringTime
         false -> "No current recurring time"
     }
 
