@@ -13,7 +13,6 @@ class SearchResultsActivity : Activity() {
     }
 
     override fun onNewIntent(intent: Intent) {
-        setIntent(intent)
         handleIntent(intent)
     }
 
