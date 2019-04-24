@@ -36,7 +36,7 @@ import org.joda.time.Duration
 import org.joda.time.LocalDate
 import kotlin.concurrent.thread
 import android.widget.ImageButton
-import com.example.doug.checklistpresentlayer.R.id.groups
+//import com.example.doug.checklistpresentlayer.R.id.groups
 import com.google.gson.reflect.TypeToken
 import org.jetbrains.anko.db.NULL
 import org.joda.time.format.DateTimeFormat
@@ -77,18 +77,18 @@ class BaseChecklist : AppCompatActivity(){
             val taskSettingsLayoutView =
                 layoutInflater.inflate(R.layout.task_settings_popup, null)
 
-            var taskCount = TaskLayout.childCount
+            var taskCount = 0
             var found = false
             //Checks all current gui elements to see if they are checked
-            while (taskCount >= 0 && ! found) {
-                taskCount--
+            while (taskCount < currentChecklist.tasks.count() && !found) {
+                if(currentChecklist.tasks[taskCount].TaskID == currentTask?.taskID)
+                {
+                    found = true
 
-                val currentChild = TaskLayout.getChildAt(taskCount)
-
-                if (currentChild is TaskBox) {
-                        if(currentChild == currentTask) {
-                        found = true
-                    }
+                }
+                else
+                {
+                    taskCount++
                 }
             }
 
@@ -173,6 +173,12 @@ class BaseChecklist : AppCompatActivity(){
 
                 popupSettingsRecurringWindow.contentView = taskSettingsRecurringLayoutView
 
+                taskSettingsRecurringLayoutView.RecursionSwitch.setOnClickListener {
+                    currentTask?.setRecurringIfNotComplete(taskSettingsRecurringLayoutView.RecursionSwitch.isChecked)
+                    currentChecklist.setTaskRecursion(taskCount, currentUser,
+                        taskSettingsRecurringLayoutView.RecursionSwitch.isChecked)
+                }
+
                 taskSettingsRecurringLayoutView.CloseRecurringButton.setOnClickListener{
 
                     currentTask?.setRecurringIfNotComplete(taskSettingsRecurringLayoutView.RecursionSwitch.isChecked)
@@ -229,10 +235,6 @@ class BaseChecklist : AppCompatActivity(){
 
                 taskSettingsRecurringLayoutView.RecursionSwitch.isChecked =
                     currentTask?.checkReccurring() != null && currentTask?.checkReccurring() == true
-
-                taskSettingsRecurringLayoutView.RecursionSwitch.setOnClickListener {
-                    //currentTask?.toggleReccurringIfNotComplete()
-                }
 
                 popupSettingsRecurringWindow.setOnDismissListener {
                     popupPresent = false
@@ -420,6 +422,8 @@ class BaseChecklist : AppCompatActivity(){
             task.name
         )
 
+        new_task_box.taskID = task.TaskID
+
         if(task.isRecurring == true)
             new_task_box.setRecurringIfNotComplete(true)
         if (task.compdatetime != null)
@@ -511,6 +515,8 @@ class BaseChecklist : AppCompatActivity(){
             this,
             task.name
         )
+
+        new_task_box.taskID = task.TaskID
 
         if(task.isRecurring == true)
             new_task_box.setRecurringIfNotComplete(true)

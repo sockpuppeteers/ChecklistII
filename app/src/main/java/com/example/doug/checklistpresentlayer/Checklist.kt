@@ -52,6 +52,15 @@ class Checklist( var name: String, var cListID : Int? ) : ListClass(cListID, nam
         }
     }
 
+    fun setTaskRecursion(arrayIndex: Int, modifiedBy: User, toggle: Boolean?) {
+        if (arrayIndex >= 0 && arrayIndex < tasks.size) {
+            logChange(tasks[arrayIndex].TaskID!!, tasks[arrayIndex].name, modifiedBy, kAction.CHANGE_TASK_RECURRING);
+            tasks[arrayIndex].isRecurring = toggle
+            dbAccess.PutTask(tasks[arrayIndex])
+        }
+    }
+
+
     fun updateTaskRecurringDays(arrayIndex: Int, modifiedBy: User, dateString: String){
         if (arrayIndex >= 0 && arrayIndex < tasks.size) {
             logChange(tasks[arrayIndex].TaskID!!, tasks[arrayIndex].name, modifiedBy, kAction.CHANGE_RECURRING_DAYS)

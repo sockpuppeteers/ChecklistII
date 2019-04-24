@@ -24,6 +24,7 @@ class TaskBox @JvmOverloads constructor(
     attrs: AttributeSet? = null,
     defStyle: Int = 0): LinearLayout(context, attrs, defStyle) {
 
+    var taskID: Int? = null
 
     private var taskText = text
 
