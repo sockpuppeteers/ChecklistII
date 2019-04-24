@@ -1,0 +1,55 @@
+Index: app/src/main/java/com/example/doug/checklistpresentlayer/Database.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.example.doug.checklistpresentlayer\n\nimport okhttp3.*\nimport java.io.IOException\nimport java.util.*\n\nclass Database( var uName: String ) {\n\n    var body: String? = \"\"\n\n    fun LogIn(Password: String) : UserPage\n    {\n        var user = UserPage(0,\"\",\"\",\"\", \"\")\n        FetchJson(Password)\n        while (body == \"\"){}\n        if (body == \"failed\" || body == \"{\\\"Message\\\":\\\"username or password is wrong dude\\\"}\" || body == \"{\\\"Message\\\":\\\"An error has occurred.\\\"}\") {\n            user = UserPage(0,\"\",\"\",\"\", body)\n        }\n        else {\n            var seprate: List<String>? = body?.split(\"[\", \"]\", \"{\", \"}\", \"\\\"\", \":\", \",\")?.filter { it.isNotBlank() }\n\n            if (seprate != null) {\n                var i = 0\n                var UID = 0\n                var UN = \"\"\n                var FN = \"\"\n                var LN = \"\"\n                for (item in seprate) {\n                    if (i == 0) {\n                        if (item == \"UserID\") {\n                            i = 1\n                        }\n                        if (item == \"Username\") {\n                            i = 2\n                        }\n                        if (item == \"FName\") {\n                            i = 3\n                        }\n                        if (item == \"Lname\") {\n                            i = 4\n                        }\n                    } else {\n                        if (i == 1) {\n                            UID = item.toInt()\n                            i = 0\n                        } else if (i == 2) {\n                            UN = item\n                            i = 0\n                        } else if (i == 3) {\n                            FN = item\n                            i = 0\n                        } else if (i == 4) {\n                            LN = item\n                            i = 0\n                            user = UserPage(UID, UN, FN, LN, \"none\")\n                        }\n                    }\n                }\n            }\n        }\n        return user\n    }\n\n    fun FetchJson(password: String)// : String?\n    {\n        val url = \"https://api20190207120410.azurewebsites.net/Api/Users/login/\" + uName + '/' + password\n        val request = Request.Builder().url(url).build()\n\n        val client = OkHttpClient()\n        client.newCall(request).enqueue(object: Callback {\n            override fun onFailure(call: Call, e: IOException) {\n                println(\"Failed to execute request\")\n                body = \"failed\"\n            }\n\n            override fun onResponse(call: Call, response: Response) {\n                body = response.body()?.string()\n                println(body)\n            }\n        })\n    }\n}
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- app/src/main/java/com/example/doug/checklistpresentlayer/Database.kt	(revision d58f79b24eacc3ca247f52eb6ce5742df8f58afe)
++++ app/src/main/java/com/example/doug/checklistpresentlayer/Database.kt	(date 1551306398033)
+@@ -13,7 +13,8 @@
+         var user = UserPage(0,"","","", "")
+         FetchJson(Password)
+         while (body == ""){}
+-        if (body == "failed" || body == "{\"Message\":\"username or password is wrong dude\"}" || body == "{\"Message\":\"An error has occurred.\"}") {
++        if (body == "failed" || body == "{\"Message\":\"username or password is wrong dude\"}" ||
++                body == "{\"Message\":\"An error has occurred.\"}") {
+             user = UserPage(0,"","","", body)
+         }
+         else {
+@@ -61,6 +62,8 @@
+         return user
+     }
+ 
++
++
+     fun FetchJson(password: String)// : String?
+     {
+         val url = "https://api20190207120410.azurewebsites.net/Api/Users/login/" + uName + '/' + password
+@@ -75,7 +78,7 @@
+ 
+             override fun onResponse(call: Call, response: Response) {
+                 body = response.body()?.string()
+-                println(body)
++                //println(body)
+             }
+         })
+     }
+Index: .idea/misc.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<project version=\"4\">\n  <component name=\"NullableNotNullManager\">\n    <option name=\"myDefaultNullable\" value=\"android.support.annotation.Nullable\" />\n    <option name=\"myDefaultNotNull\" value=\"android.support.annotation.NonNull\" />\n    <option name=\"myNullables\">\n      <value>\n        <list size=\"7\">\n          <item index=\"0\" class=\"java.lang.String\" itemvalue=\"org.jetbrains.annotations.Nullable\" />\n          <item index=\"1\" class=\"java.lang.String\" itemvalue=\"javax.annotation.Nullable\" />\n          <item index=\"2\" class=\"java.lang.String\" itemvalue=\"javax.annotation.CheckForNull\" />\n          <item index=\"3\" class=\"java.lang.String\" itemvalue=\"edu.umd.cs.findbugs.annotations.Nullable\" />\n          <item index=\"4\" class=\"java.lang.String\" itemvalue=\"android.support.annotation.Nullable\" />\n          <item index=\"5\" class=\"java.lang.String\" itemvalue=\"androidx.annotation.Nullable\" />\n          <item index=\"6\" class=\"java.lang.String\" itemvalue=\"androidx.annotation.RecentlyNullable\" />\n        </list>\n      </value>\n    </option>\n    <option name=\"myNotNulls\">\n      <value>\n        <list size=\"6\">\n          <item index=\"0\" class=\"java.lang.String\" itemvalue=\"org.jetbrains.annotations.NotNull\" />\n          <item index=\"1\" class=\"java.lang.String\" itemvalue=\"javax.annotation.Nonnull\" />\n          <item index=\"2\" class=\"java.lang.String\" itemvalue=\"edu.umd.cs.findbugs.annotations.NonNull\" />\n          <item index=\"3\" class=\"java.lang.String\" itemvalue=\"android.support.annotation.NonNull\" />\n          <item index=\"4\" class=\"java.lang.String\" itemvalue=\"androidx.annotation.NonNull\" />\n          <item index=\"5\" class=\"java.lang.String\" itemvalue=\"androidx.annotation.RecentlyNonNull\" />\n        </list>\n      </value>\n    </option>\n  </component>\n  <component name=\"ProjectRootManager\" version=\"2\" languageLevel=\"JDK_1_8\" project-jdk-name=\"1.8 (1)\" project-jdk-type=\"JavaSDK\">\n    <output url=\"file://$PROJECT_DIR$/build/classes\" />\n  </component>\n  <component name=\"ProjectType\">\n    <option name=\"id\" value=\"Android\" />\n  </component>\n</project>
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- .idea/misc.xml	(revision d58f79b24eacc3ca247f52eb6ce5742df8f58afe)
++++ .idea/misc.xml	(date 1550275254871)
+@@ -29,7 +29,7 @@
+       </value>
+     </option>
+   </component>
+-  <component name="ProjectRootManager" version="2" languageLevel="JDK_1_8" project-jdk-name="1.8 (1)" project-jdk-type="JavaSDK">
++  <component name="ProjectRootManager" version="2" languageLevel="JDK_1_8" project-jdk-name="1.8" project-jdk-type="JavaSDK">
+     <output url="file://$PROJECT_DIR$/build/classes" />
+   </component>
+   <component name="ProjectType">

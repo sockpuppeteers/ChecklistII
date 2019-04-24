@@ -5,8 +5,13 @@ import android.app.SearchManager
 import android.content.Intent
 import android.content.pm.ActivityInfo
 import android.os.Bundle
+import android.util.SparseArray
+
+
 
 class SearchResultsActivity : Activity() {
+
+    var users = SparseArray<User>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -25,7 +30,8 @@ class SearchResultsActivity : Activity() {
             val db = Database()
 
             println("in handleintent")
-            db.GetUser(query)
+            users.append(0, db.GetUser(query))
+            //db.GetUser(query)
         }
     }
 }

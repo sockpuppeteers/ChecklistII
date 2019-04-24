@@ -77,18 +77,18 @@ class BaseChecklist : AppCompatActivity(){
             val taskSettingsLayoutView =
                 layoutInflater.inflate(R.layout.task_settings_popup, null)
 
-            var taskCount = TaskLayout.childCount
+            var taskCount = 0
             var found = false
             //Checks all current gui elements to see if they are checked
-            while (taskCount >= 0 && ! found) {
-                taskCount--
+            while (taskCount < currentChecklist.tasks.count() && !found) {
+                if(currentChecklist.tasks[taskCount].TaskID == currentTask?.taskID)
+                {
+                    found = true
 
-                val currentChild = TaskLayout.getChildAt(taskCount)
-
-                if (currentChild is TaskBox) {
-                        if(currentChild == currentTask) {
-                        found = true
-                    }
+                }
+                else
+                {
+                    taskCount++
                 }
             }
 
@@ -183,6 +183,12 @@ class BaseChecklist : AppCompatActivity(){
                     popupPresent = false
 
                 }
+                taskSettingsRecurringLayoutView.RecursionSwitch.setOnClickListener {
+                    currentTask?.setRecurringIfNotComplete(taskSettingsRecurringLayoutView.RecursionSwitch.isChecked)
+                    currentChecklist.setTaskRecursion(taskCount, currentUser,
+                        taskSettingsRecurringLayoutView.RecursionSwitch.isChecked)
+                }
+
                 taskSettingsRecurringLayoutView.CloseRecurringButton.setOnClickListener{
 
                     currentTask?.setRecurringIfNotComplete(taskSettingsRecurringLayoutView.RecursionSwitch.isChecked)
@@ -426,6 +432,8 @@ class BaseChecklist : AppCompatActivity(){
             this,
             task.name
         )
+
+        new_task_box.taskID = task.TaskID
 
         if(task.isRecurring == true)
             new_task_box.setRecurringIfNotComplete(true)
@@ -798,6 +806,8 @@ class BaseChecklist : AppCompatActivity(){
         }
 
         //handleIntent(intent)
+//        val adapter : SearchresultExpandableListAdapter = SearchresultExpandableListAdapter(this, groups);
+//        listView.setAdapter(adapter)
 
         val addButton = findViewById<Button>(R.id.AddTaskButton)
         val checkoffButton = findViewById<Button>(R.id.CheckoffButton)
@@ -1078,12 +1088,16 @@ class BaseChecklist : AppCompatActivity(){
         }
     }
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        menuInflater.inflate(R.menu.options_menu, menu)
+        // Inflate the options menu from XML
+        val inflater = menuInflater
+        inflater.inflate(R.menu.options_menu, menu)
 
-        // Associate searchable configuration with the SearchView
+        // Get the SearchView and set the searchable configuration
         val searchManager = getSystemService(Context.SEARCH_SERVICE) as SearchManager
         (menu.findItem(R.id.search).actionView as SearchView).apply {
+            // Assumes current activity is the searchable activity
             setSearchableInfo(searchManager.getSearchableInfo(componentName))
+            setIconifiedByDefault(false) // Do not iconify the widget; expand it by default
         }
 
         return true
