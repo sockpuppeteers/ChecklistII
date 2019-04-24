@@ -715,6 +715,9 @@ class BaseChecklist : AppCompatActivity(){
                             addTaskFromList(Task)
                     }
                 }
+                deleteListDataFile()
+                createListFile(currentChecklist)
+
 
 //                    if (list != currentChecklist){
                 /*have a popup or something telling the user that the list has been updated*/
