@@ -678,7 +678,7 @@ class BaseChecklist : AppCompatActivity(){
                 turnOnButtons()
                 turnOffButtons()
 
-                var list = currentChecklist
+                val list = currentChecklist
                 list.tasks = db.GetTasks(currentChecklist.listID!!)
                 list.users = db.GetUsers(currentChecklist.listID!!)
                 list.changes = db.GetChanges(currentChecklist.listID!!)
@@ -1044,7 +1044,7 @@ class BaseChecklist : AppCompatActivity(){
     //however, we might need some other error checking in here
     fun getListFromFile() : MutableList<Task> {
         //context will give us access to our local files directory
-        var context = applicationContext
+        val context = applicationContext
 
         val filename = currentChecklist.i_name
         val directory = context.filesDir
@@ -1060,7 +1060,7 @@ class BaseChecklist : AppCompatActivity(){
 
     fun deleteListDataFile(){
         //context will give us access to our local files directory
-        var context = applicationContext
+        val context = applicationContext
 
         val filename = currentChecklist.i_name
         val directory = context.filesDir
