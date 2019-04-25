@@ -633,6 +633,9 @@ class BaseChecklist : AppCompatActivity(){
         menu = navigationView.menu
         subMenu = menu.addSubMenu(getString(R.string.SUB_MENU_TITLE))
 
+        val spinner : ProgressBar = findViewById(R.id.progress_bar2)
+        spinner.visibility = View.VISIBLE
+
         //create a database access object
         var db = Database()
         //deleteListDataFile()
@@ -714,6 +717,7 @@ class BaseChecklist : AppCompatActivity(){
                         else if (Task.name != "")
                             addTaskFromList(Task)
                     }
+                    spinner.visibility = View.INVISIBLE
                 }
                 deleteListDataFile()
                 createListFile(currentChecklist)
