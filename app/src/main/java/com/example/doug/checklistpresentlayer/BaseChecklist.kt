@@ -1101,17 +1101,54 @@ class BaseChecklist : AppCompatActivity(){
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         // Inflate the options menu from XML
         val inflater = menuInflater
+        val db = Database()
         inflater.inflate(R.menu.options_menu, menu)
 
-        // Get the SearchView and set the searchable configuration
-        val searchManager = getSystemService(Context.SEARCH_SERVICE) as SearchManager
-        (menu.findItem(R.id.search).actionView as SearchView).apply {
-            // Assumes current activity is the searchable activity
-            setSearchableInfo(searchManager.getSearchableInfo(componentName))
-            setIconifiedByDefault(false) // Do not iconify the widget; expand it by default
+        val searchItem = menu.findItem(R.id.search)
+        if(searchItem != null){
+            val searchView = searchItem.actionView as SearchView
+
+            searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener{
+                override fun onQueryTextSubmit(query: String?): Boolean {
+                    val u = db.GetUser(query as String)
+                    if (u.UserID != -1) {
+                        db.AddUserToList(u.UserID as Int, currentChecklist.listID as Int)
+                        subMenu.add(0, Menu.FIRST + 7, Menu.FIRST, query)
+                    }
+                    return true
+                }
+
+                override fun onQueryTextChange(newText: String?): Boolean {
+
+//                    displayList.clear()
+//                    if(newText!!.isNotEmpty()){
+//                        val search = newText.toLowerCase()
+//                        countries.forEach {
+//                            if(it.toLowerCase().contains(search)){
+//                                displayList.add(it)
+//                            }
+//                        }
+//                    }else{
+//                        displayList.addAll(countries)
+//                    }
+//                    country_list.adapter.notifyDataSetChanged()
+                    return true
+                }
+
+            })
         }
 
-        return true
+        return super.onCreateOptionsMenu(menu)
+
+        // Get the SearchView and set the searchable configuration
+//        val searchManager = getSystemService(Context.SEARCH_SERVICE) as SearchManager
+//        (menu.findItem(R.id.search).actionView as SearchView).apply {
+//            // Assumes current activity is the searchable activity
+//            setSearchableInfo(searchManager.getSearchableInfo(componentName))
+//            setIconifiedByDefault(false) // Do not iconify the widget; expand it by default
+//        }
+//
+//        return true
     }
     private fun handleIntent(intent: Intent) {
 
