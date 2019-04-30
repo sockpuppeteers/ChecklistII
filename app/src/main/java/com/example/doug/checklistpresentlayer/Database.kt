@@ -181,7 +181,13 @@ class Database {
     }
 
     fun AddUserToList(userID: Int, checklistID: Int){
-        Fuel.get("https://sockpuppeteerapi3.azurewebsites.net/api/checklist/${checklistID}/AddUser/${userID}")
+        runBlocking {
+            val (request, response, result) = Fuel.get("https://sockpuppeteerapi3.azurewebsites.net/api/checklist/${checklistID}/AddUser/${userID}").awaitStringResponseResult()
+
+            result.fold(
+                { /*on success*/ }, { /*on fail*/ }
+            )
+        }
     }
 
     //returns a list of users that have access to a given checklist

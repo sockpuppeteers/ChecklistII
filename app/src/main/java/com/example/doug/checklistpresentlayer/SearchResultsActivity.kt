@@ -31,7 +31,8 @@ class SearchResultsActivity : Activity() {
 
             println("in handleintent")
             users.append(0, db.GetUser(query))
-            //db.GetUser(query)
+            var user = db.GetUser(query)
+
         }
     }
 }

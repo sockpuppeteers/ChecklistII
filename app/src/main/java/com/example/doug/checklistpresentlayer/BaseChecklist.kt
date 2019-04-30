@@ -43,9 +43,6 @@ import org.joda.time.format.DateTimeFormat
 import java.text.SimpleDateFormat
 import java.time.format.DateTimeFormatter
 
-/********************************************
- *TODO: Move listener assignments to functions
- ********************************************/
 class BaseChecklist : AppCompatActivity(){
 
     var currentChecklist = Checklist("Your Checklist", 0 )
@@ -1113,7 +1110,7 @@ class BaseChecklist : AppCompatActivity(){
                     val u = db.GetUser(query as String)
                     if (u.UserID != -1) {
                         db.AddUserToList(u.UserID as Int, currentChecklist.listID as Int)
-                        subMenu.add(0, Menu.FIRST + 7, Menu.FIRST, query)
+                        subMenu.add(0, Menu.FIRST + 7, Menu.FIRST, u.Username)
                     }
                     return true
                 }

@@ -83,35 +83,40 @@ class BaseListofLists : AppCompatActivity(){
                 var db = Database()
                 var list = db.GetListofLists(UName)
 
-                currentListofLists.lists = list
-                this@BaseListofLists.runOnUiThread {
-                    taskLayout.removeAllViews()
-                    for (ListClass in currentListofLists.lists) {
-                        //Fill box with checklist name
-                        tempBox = ListBox(
-                            cont,
-                            ListClass.i_name
-                        )
+                if (!list.isEmpty())
+                    currentListofLists.lists = list
 
-                        //Set The action to be executed when the list in clicked
-                        tempBox.setOnClickListener{
-                            val tempIntent = Intent(cont, BaseChecklist::class.java).apply {
-                                putExtra("ListName", ListClass.i_name)
-                                putExtra("UserName", UName)
-                                putExtra("ChecklistID", ListClass.listID)
-                                putExtra("uname", UName)
-                                putExtra("fname", FName)
-                                putExtra("lname", LName)
-                                putExtra("UserID",intent.getIntExtra("UserID", 0))
+                this@BaseListofLists.runOnUiThread {
+                    if (!list.isEmpty()){
+                        taskLayout.removeAllViews()
+                        for (ListClass in currentListofLists.lists) {
+                            //Fill box with checklist name
+                            tempBox = ListBox(
+                                cont,
+                                ListClass.i_name
+                            )
+
+                            //Set The action to be executed when the list in clicked
+                            tempBox.setOnClickListener{
+                                val tempIntent = Intent(cont, BaseChecklist::class.java).apply {
+                                    putExtra("ListName", ListClass.i_name)
+                                    putExtra("UserName", UName)
+                                    putExtra("ChecklistID", ListClass.listID)
+                                    putExtra("uname", UName)
+                                    putExtra("fname", FName)
+                                    putExtra("lname", LName)
+                                    putExtra("UserID",intent.getIntExtra("UserID", 0))
+                                }
+
+                                //Start the BaseChecklist Activity
+                                startActivity(tempIntent)
                             }
 
-                            //Start the BaseChecklist Activity
-                            startActivity(tempIntent)
+                            //Add box to page
+                            taskLayout.addView(tempBox)
                         }
-
-                        //Add box to page
-                        taskLayout.addView(tempBox)
                     }
+
                     spinner.visibility = View.INVISIBLE
                 }
             }
