@@ -64,9 +64,18 @@ class BaseListofLists : AppCompatActivity(){
         FName = intent.getStringExtra("fname")
         LName = intent.getStringExtra("lname")
 
+
+        //Get layout of checklist names
+        val taskLayout = findViewById<LinearLayout>(R.id.TaskLayout)
+        var tempBox: ListBox
+        val cont = this
+
+        val spinner : ProgressBar = findViewById(R.id.lprogress_bar)
         //if the lists are stored locally in the db
         //then we can load it from there
         if (listsFileExists()){
+            spinner.visibility = View.VISIBLE
+
             currentListofLists.lists = getListFromFile()
 
             //check the db to see if the user
@@ -74,7 +83,42 @@ class BaseListofLists : AppCompatActivity(){
                 var db = Database()
                 var list = db.GetListofLists(UName)
 
-                currentListofLists.lists = list
+                if (!list.isEmpty())
+                    currentListofLists.lists = list
+
+                this@BaseListofLists.runOnUiThread {
+                    if (!list.isEmpty()){
+                        taskLayout.removeAllViews()
+                        for (ListClass in currentListofLists.lists) {
+                            //Fill box with checklist name
+                            tempBox = ListBox(
+                                cont,
+                                ListClass.i_name
+                            )
+
+                            //Set The action to be executed when the list in clicked
+                            tempBox.setOnClickListener{
+                                val tempIntent = Intent(cont, BaseChecklist::class.java).apply {
+                                    putExtra("ListName", ListClass.i_name)
+                                    putExtra("UserName", UName)
+                                    putExtra("ChecklistID", ListClass.listID)
+                                    putExtra("uname", UName)
+                                    putExtra("fname", FName)
+                                    putExtra("lname", LName)
+                                    putExtra("UserID",intent.getIntExtra("UserID", 0))
+                                }
+
+                                //Start the BaseChecklist Activity
+                                startActivity(tempIntent)
+                            }
+
+                            //Add box to page
+                            taskLayout.addView(tempBox)
+                        }
+                    }
+
+                    spinner.visibility = View.INVISIBLE
+                }
             }
         }
         //otherwise query the api for our data
@@ -86,11 +130,6 @@ class BaseListofLists : AppCompatActivity(){
             //put those lists in a local file
             createListsFile(currentListofLists)
         }
-
-        //Get layout of checklist names
-        val taskLayout = findViewById<LinearLayout>(R.id.TaskLayout)
-        var tempBox: ListBox
-
         for (ListClass in currentListofLists.lists) {
             //Fill box with checklist name
             tempBox = ListBox(
