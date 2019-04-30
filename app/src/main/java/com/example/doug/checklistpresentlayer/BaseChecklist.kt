@@ -741,6 +741,8 @@ class BaseChecklist : AppCompatActivity(){
             TaskText
         )
 
+        new_task_box.taskID = taskID
+
         if(IsReaccuring)
             new_task_box.setRecurringIfNotComplete(IsReaccuring)
 
@@ -937,6 +939,8 @@ class BaseChecklist : AppCompatActivity(){
             this,
             task.name
         )
+
+        new_task_box.taskID = task.TaskID
 
         if(task.isRecurring == true)
             new_task_box.setRecurringIfNotComplete(true)
