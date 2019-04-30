@@ -1,0 +1,9 @@
+<changelist name="I'm" date="1556214562694" recycled="false">
+  <option name="PATH" value="$PROJECT_DIR$/.idea/shelf/I'm/shelved.patch" />
+  <option name="DESCRIPTION" value="I'm" />
+  <binary>
+    <option name="BEFORE_PATH" value="app/src/main/res/drawable/golden_gate_bridge.png" />
+    <option name="AFTER_PATH" value="app/src/main/res/drawable/golden_gate_bridge.png" />
+    <option name="SHELVED_PATH" value="$PROJECT_DIR$/.idea/shelf/I'm/golden_gate_bridge.png" />
+  </binary>
+</changelist>

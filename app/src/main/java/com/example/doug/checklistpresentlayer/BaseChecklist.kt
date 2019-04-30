@@ -634,7 +634,6 @@ class BaseChecklist : AppCompatActivity(){
         subMenu = menu.addSubMenu(getString(R.string.SUB_MENU_TITLE))
 
         val spinner : ProgressBar = findViewById(R.id.progress_bar2)
-        spinner.visibility = View.VISIBLE
 
         //create a database access object
         var db = Database()
@@ -642,6 +641,7 @@ class BaseChecklist : AppCompatActivity(){
 
         //if there's a local file, populate our list from that
         if (listFileExists()){
+            spinner.visibility = View.VISIBLE
             currentChecklist.tasks = getListFromFile()
             //Need to do things with this information TODO
             //Currently this function recognizes if the completed
@@ -734,6 +734,7 @@ class BaseChecklist : AppCompatActivity(){
 
         //if no local file exists, populate our list from the database
         else{
+            spinner.visibility = View.VISIBLE
             println("loaded list from database")
             var currentTasks = db.GetTasks(intent.getIntExtra("ChecklistID", 0))
             currentChecklist.users = db.GetUsers(intent.getIntExtra("ChecklistID", 0))
@@ -765,6 +766,7 @@ class BaseChecklist : AppCompatActivity(){
             GlobalScope.launch {
                 createListFile(currentChecklist)
             }
+            spinner.visibility = View.INVISIBLE
 
         }
 
