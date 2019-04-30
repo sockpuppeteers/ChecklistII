@@ -68,7 +68,14 @@ class BaseListofLists : AppCompatActivity(){
         //then we can load it from there
         if (listsFileExists()){
             currentListofLists.lists = getListFromFile()
-            println("from local file")
+
+            //check the db to see if the user
+            GlobalScope.launch {
+                var db = Database()
+                var list = db.GetListofLists(UName)
+
+                currentListofLists.lists = list
+            }
         }
         //otherwise query the api for our data
         else{
@@ -78,7 +85,6 @@ class BaseListofLists : AppCompatActivity(){
 
             //put those lists in a local file
             createListsFile(currentListofLists)
-            println("from db")
         }
 
         //Get layout of checklist names

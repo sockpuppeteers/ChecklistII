@@ -65,6 +65,7 @@ class Checklist( var name: String, var cListID : Int? ) : ListClass(cListID, nam
         if (arrayIndex >= 0 && arrayIndex < tasks.size) {
             logChange(tasks[arrayIndex].TaskID!!, tasks[arrayIndex].name, modifiedBy, kAction.CHANGE_RECURRING_DAYS)
             tasks[arrayIndex].recurringDays = dateString
+
             dbAccess.PutTask(tasks[arrayIndex])
         }
     }
@@ -73,6 +74,7 @@ class Checklist( var name: String, var cListID : Int? ) : ListClass(cListID, nam
         if (arrayIndex >= 0 && arrayIndex < tasks.size) {
             logChange(tasks[arrayIndex].TaskID!!, tasks[arrayIndex].name, modifiedBy, kAction.CHANGE_RECURRING_TIME)
             tasks[arrayIndex].recurringTime = timeString
+
             dbAccess.PutTask(tasks[arrayIndex])
         }
     }
@@ -120,13 +122,12 @@ class Checklist( var name: String, var cListID : Int? ) : ListClass(cListID, nam
      *      value. Shows which user modified it for logs.
      ***************************************************************/
     fun changeTaskName(arrayIndex: Int, modifiedBy: User, name: String) {
-
         if (arrayIndex >= 0 && arrayIndex < tasks.size) {
             logChange(tasks[arrayIndex].TaskID!!, tasks[arrayIndex].name, modifiedBy, kAction.CHANGE_TASK_NAME, name)
+            tasks[arrayIndex].name = name
             GlobalScope.launch {
                 dbAccess.PutTask(tasks[arrayIndex])
             }
-            tasks[arrayIndex].name = name
         }
     }
 
@@ -138,6 +139,9 @@ class Checklist( var name: String, var cListID : Int? ) : ListClass(cListID, nam
         if (arrayIndex >= 0 && arrayIndex < tasks.size) {
             logChange(tasks[arrayIndex].TaskID!!, tasks[arrayIndex].name, modifiedBy, kAction.CHANGE_TASK_DEADLINE, deadline)
             tasks[arrayIndex].Deadline = deadline
+            GlobalScope.launch {
+                dbAccess.PutTask(tasks[arrayIndex])
+            }
         }
     }
 
@@ -148,7 +152,10 @@ class Checklist( var name: String, var cListID : Int? ) : ListClass(cListID, nam
     fun removeDeadline(arrayIndex: Int, modifiedBy: User) {
         if (arrayIndex >= 0 && arrayIndex < tasks.size) {
             logChange(tasks[arrayIndex].TaskID!!, tasks[arrayIndex].name, modifiedBy, kAction.REMOVE_TASK_DEADLINE)
-            tasks[arrayIndex].Deadline = ""
+            tasks[arrayIndex].Deadline = null
+            GlobalScope.launch {
+                dbAccess.PutTask(tasks[arrayIndex])
+            }
         }
     }
 

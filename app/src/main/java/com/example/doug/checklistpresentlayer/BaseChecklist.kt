@@ -141,6 +141,9 @@ class BaseChecklist : AppCompatActivity(){
                 currentChecklist.tasks = list.tasks
                 currentChecklist.changes = list.changes
 
+                deleteListDataFile()
+                createListFile(currentChecklist)
+
                 this@BaseChecklist.runOnUiThread {
                     val taskLayout = findViewById<LinearLayout>(R.id.TaskLayout)
                     subMenu.clear()
@@ -174,9 +177,7 @@ class BaseChecklist : AppCompatActivity(){
                 createListFile(currentChecklist)
 
 
-//                    if (list != currentChecklist){
                 /*have a popup or something telling the user that the list has been updated*/
-                //currentChecklist = list
                 turnOnButtons()
 
             }

@@ -152,11 +152,14 @@ class Database {
         val gson = Gson()
         val json = gson.toJson(task)
 
+        println(json.toString())
+        println("taskID: ${task.TaskID}")
+
         //make a put request
         Fuel.put("https://sockpuppeteerapi3.azurewebsites.net/api/task/${task.TaskID}")
             .header("Content-Type" to "application/json")
             .body(json.toString())
-            .response { req, res, result -> /* you could do something with the response here */ }
+            .response { req, res, result -> println(res.statusCode)}
     }
 
     fun DeleteTask(task: Task){
