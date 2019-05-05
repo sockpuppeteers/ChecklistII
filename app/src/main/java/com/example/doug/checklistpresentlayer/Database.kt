@@ -19,6 +19,9 @@ import com.google.gson.reflect.TypeToken
 
 class Database {
     var user = User(0, "", "", "", "","none")
+    companion object {
+        var offlineModeEnabled = false
+    }
 
     fun LogIn(Username: String, Password: String) : UserPage {
         runBlocking {
@@ -56,7 +59,7 @@ class Database {
                     val gson = Gson()
                     checklists = gson.fromJson(result.component1(), object : TypeToken<MutableList<ListClass>>() {}.type)},
                 //print a message if the api call fails
-                { println("api call failure in GetListofLists function") }
+                { offlineModeEnabled = true }
             )
         }
 
@@ -80,7 +83,7 @@ class Database {
                     val gson = Gson()
                     tasks = gson.fromJson(result.component1(), object : TypeToken<MutableList<Task>>() {}.type)},
                 //print a message if the api call fails
-                { println("api call failure in GetTasks function") }
+                { offlineModeEnabled = true }
             )
         }
 
@@ -140,7 +143,7 @@ class Database {
                     var newTask = gson.fromJson(data, Task::class.java)
                     listID = newTask.TaskID!!
                 },
-                { error -> println("Error in PostChecklist function: ${error.message}") }
+                { offlineModeEnabled = true }
             )
         }
 
@@ -207,7 +210,7 @@ class Database {
                     val gson = Gson()
                     users = gson.fromJson(result.component1(), object : TypeToken<MutableList<User>>() {}.type)},
                 //print a message if the api call fails
-                { println("api call failure in GetUsers function") }
+                { offlineModeEnabled = true }
             )
         }
 
@@ -231,7 +234,7 @@ class Database {
                     user = gson.fromJson(result.component1(), User::class.java)
                     println(user)},
                 //print a message if the api call fails
-                { println("api call failure in GetUser function") }
+                { offlineModeEnabled = true }
             )
         }
 
@@ -251,7 +254,7 @@ class Database {
 
             //we don't do anything with the result
             result.fold(
-                {/* if its successful */}, { /* if it fails */ }
+                {/* if its successful */}, { offlineModeEnabled = true }
             )
         }
     }
@@ -273,7 +276,7 @@ class Database {
                     val gson = Gson()
                     changes = gson.fromJson(result.component1(), object : TypeToken<MutableList<Change>>() {}.type)},
                 //print a message if the api call fails
-                { println("api call failure in GetChanges function") }
+                { offlineModeEnabled = true }
             )
         }
 
