@@ -1287,16 +1287,6 @@ class BaseChecklist : AppCompatActivity(){
         }
 
         return super.onCreateOptionsMenu(menu)
-
-        // Get the SearchView and set the searchable configuration
-//        val searchManager = getSystemService(Context.SEARCH_SERVICE) as SearchManager
-//        (menu.findItem(R.id.search).actionView as SearchView).apply {
-//            // Assumes current activity is the searchable activity
-//            setSearchableInfo(searchManager.getSearchableInfo(componentName))
-//            setIconifiedByDefault(false) // Do not iconify the widget; expand it by default
-//        }
-//
-//        return true
     }
 
     private fun turnOffButtons() {
