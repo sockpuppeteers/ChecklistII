@@ -46,7 +46,7 @@ class ListofLists(var name: String, var error: String?, var uID : Int = 0) {
                     lists.add(newList)
                     AddUserToList(uID, newList.listID!!)
                 },
-                { error -> println("Error in PostChecklist function: ${error.message}") }
+                { lists.add(checklist) }
             )
         }
     }

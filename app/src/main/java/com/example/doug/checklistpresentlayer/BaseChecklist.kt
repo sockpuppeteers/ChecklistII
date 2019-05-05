@@ -147,10 +147,17 @@ class BaseChecklist : AppCompatActivity(){
                 list.tasks = db.GetTasks(currentChecklist.listID!!)
                 list.users = db.GetUsers(currentChecklist.listID!!)
                 list.changes = db.GetChanges(currentChecklist.listID!!)
-                currentListofLists.lists = db.GetListofLists(currentUser.Username!!)
+
+                var listOfLists = db.GetListofLists(currentUser.Username!!)
+
+                if (!listOfLists.isEmpty())
+                    currentListofLists.lists = listOfLists
 
                 currentChecklist.users = list.users
-                currentChecklist.tasks = list.tasks
+
+                if (!list.tasks.isEmpty())
+                    currentChecklist.tasks = list.tasks
+
                 currentChecklist.changes = list.changes
 
                 deleteListDataFile()
