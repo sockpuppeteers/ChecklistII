@@ -63,22 +63,22 @@ class UserLogin : AppCompatActivity() {
                 drawerLayout.openDrawer(GravityCompat.START)
                 true
             }
-            R.id.dProfile -> {
-                true
-            }
-            R.id.dSettings -> {
-                true
-            }
-            R.id.dLogOut -> {
-                //delete local data files
-                deleteUserDataFile()
-                deleteListsDataFile()
-
-                //redirect to the login page
-                val tempIntent = Intent(this, MainActivity::class.java)
-                startActivity(tempIntent)
-                true
-            }
+//            R.id.dProfile -> {
+//                true
+//            }
+//            R.id.dSettings -> {
+//                true
+//            }
+//            R.id.dLogOut -> {
+//                //delete local data files
+//                deleteUserDataFile()
+//                deleteListsDataFile()
+//
+//                //redirect to the login page
+//                val tempIntent = Intent(this, MainActivity::class.java)
+//                startActivity(tempIntent)
+//                true
+//            }
             else -> super.onOptionsItemSelected(item)
         }
     }

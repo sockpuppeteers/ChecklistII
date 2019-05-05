@@ -37,8 +37,8 @@
                         android:layout_centerHorizontal="true"
                         app:layout_constraintEnd_toEndOf="parent"
                         android:layout_marginEnd="8dp" app:layout_constraintStart_toStartOf="parent"
-                        android:layout_marginStart="8dp" android:layout_marginTop="24dp"
-                        android:visibility="invisible"/>
+                        android:layout_marginStart="8dp"
+                        android:visibility="invisible" app:layout_constraintTop_toTopOf="parent"/>
                 <ScrollView
                         android:layout_width="0dp"
                         android:layout_height="0dp"
@@ -99,7 +99,14 @@
             </android.support.constraint.ConstraintLayout>
         </FrameLayout>
         <android.support.design.widget.NavigationView
-            android:id="@+id/nav_view"
+                android:id="@+id/left_nav_view"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_gravity="start"
+                android:fitsSystemWindows="true"
+                app:menu="@menu/drawer_view"/>
+        <android.support.design.widget.NavigationView
+            android:id="@+id/right_nav_view"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:layout_gravity="end"

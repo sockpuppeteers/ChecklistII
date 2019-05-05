@@ -32,11 +32,13 @@
     <string name="SATURDAY_TEXT">Saturday</string>
     <string name="DATE_SELECTION_TEXT">Recurring Days</string>
     <string name="ADD_USER_TEXT">Add User</string>
-    <string name="SUB_MENU_TITLE">Users</string>
+    <string name="USER_MENU_TITLE">Users</string>
+    <string name="LIST_MENU_TITLE">Lists</string>
     <string name="SEARCH_TEXT">Search Users</string>
     <string name="LOGO_TEXT">Logo</string>
     <string name="INCORRECT_TEXT">Incorrect username or password</string>
     <string name="SOMETHING_TEXT">Something went wrong</string>
+    <string name="LIST_TEXT">List of Lists</string>
     <string-array name="MINUTES_TEXT">
         <item>00</item>
         <item>05</item>

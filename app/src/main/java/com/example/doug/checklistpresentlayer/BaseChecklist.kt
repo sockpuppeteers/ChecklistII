@@ -52,12 +52,16 @@ class BaseChecklist : AppCompatActivity(){
 
     var currentUser = User(1)
     var currentTask: TaskBox? = null
+    var currentListofLists = ListofLists("Your CheckLists", "none")
 
     private lateinit var userLayout: DrawerLayout
-    private lateinit var navigationView: NavigationView
-    private lateinit var menu: Menu
-    private lateinit var subMenu: SubMenu
-    //private val mUserList = ArrayList<UserPage>()
+    private lateinit var rightnavigationView: NavigationView
+    private lateinit var leftnavigationView: NavigationView
+    private lateinit var rightmenu: Menu
+    private lateinit var leftmenu: Menu
+    private lateinit var rightsubMenu: SubMenu
+    private lateinit var leftsubMenu: SubMenu
+    private lateinit var taskLayout: LinearLayout
 
     //Intialize things here
     init {
@@ -74,12 +78,22 @@ class BaseChecklist : AppCompatActivity(){
         currentChecklist.i_name = intent.getStringExtra("ListName")
 
         setSupportActionBar(findViewById(R.id.toolbar))
+        val actionbar: ActionBar? = supportActionBar
+        actionbar?.apply {
+            setDisplayHomeAsUpEnabled(true)
+            setHomeAsUpIndicator(R.drawable.ic_menu_black_24dp)
+        }
         title = intent.getStringExtra("ListName")
 
         //creates a submenu named user
-        navigationView = findViewById(R.id.nav_view)
-        menu = navigationView.menu
-        subMenu = menu.addSubMenu(getString(R.string.SUB_MENU_TITLE))
+        rightnavigationView = findViewById(R.id.right_nav_view)
+        leftnavigationView = findViewById(R.id.left_nav_view)
+        rightmenu = rightnavigationView.menu
+        leftmenu = leftnavigationView.menu
+        rightsubMenu = rightmenu.addSubMenu(getString(R.string.USER_MENU_TITLE))
+        leftsubMenu = leftmenu.addSubMenu(getString(R.string.LIST_MENU_TITLE))
+        userLayout = findViewById(R.id.user_drawer_layout)
+        taskLayout = findViewById(R.id.TaskLayout)
 
         val spinner : ProgressBar = findViewById(R.id.progress_bar2)
 
@@ -133,19 +147,25 @@ class BaseChecklist : AppCompatActivity(){
                 list.tasks = db.GetTasks(currentChecklist.listID!!)
                 list.users = db.GetUsers(currentChecklist.listID!!)
                 list.changes = db.GetChanges(currentChecklist.listID!!)
+                currentListofLists.lists = db.GetListofLists(currentUser.Username!!)
 
                 currentChecklist.users = list.users
                 currentChecklist.tasks = list.tasks
                 currentChecklist.changes = list.changes
 
                 deleteListDataFile()
+                deleteListsDataFile()
                 createListFile(currentChecklist)
+                createListsFile(currentListofLists)
 
                 this@BaseChecklist.runOnUiThread {
-                    val taskLayout = findViewById<LinearLayout>(R.id.TaskLayout)
-                    subMenu.clear()
+                    rightsubMenu.clear()
                     for ((i, up) in currentChecklist.users.withIndex()) {
-                        subMenu.add(0, Menu.FIRST + i, Menu.FIRST, up.Username)
+                        rightsubMenu.add(0, Menu.FIRST + i, Menu.FIRST, up.Username)
+                    }
+                    leftsubMenu.clear()
+                    for ((i, lol) in currentListofLists.lists.withIndex()) {
+                        leftsubMenu.add(0, Menu.FIRST + i, Menu.FIRST, lol.i_name)
                     }
                     taskLayout.removeAllViews()
                     for (Task in currentChecklist.tasks)
@@ -221,7 +241,6 @@ class BaseChecklist : AppCompatActivity(){
 
 
         //allows the opening and closing of a nav drawer on the right side of the screen.
-        userLayout = findViewById(R.id.user_drawer_layout)
 //        val menuRight = findViewById<View>(R.id.menuRight) as ImageButton
 //        menuRight.setOnClickListener {
 //            if (userLayout.isDrawerOpen(GravityCompat.END)) {
@@ -234,11 +253,11 @@ class BaseChecklist : AppCompatActivity(){
         //populates the submenu with the usernames of everyone on the list (stored in mUserList)
         //Menu.FIRST + i gives each a unique ID, used later in the program.
         for ((i, up) in currentChecklist.users.withIndex()) {
-            subMenu.add(0, Menu.FIRST + i, Menu.FIRST, up.Username)
+            rightsubMenu.add(0, Menu.FIRST + i, Menu.FIRST, up.Username)
         }
 
-        //gets called whenever any item is selected in the nav menu
-        navigationView.setNavigationItemSelectedListener { menuItem ->
+        //gets called whenever any item is selected in the user nav menu
+        rightnavigationView.setNavigationItemSelectedListener { menuItem ->
             //handles all items in nav drawer that are created at compile time
             if (!onOptionsItemSelected(menuItem))
             {
@@ -263,9 +282,58 @@ class BaseChecklist : AppCompatActivity(){
             true
         }
 
-        //handleIntent(intent)
-//        val adapter : SearchresultExpandableListAdapter = SearchresultExpandableListAdapter(this, groups);
-//        listView.setAdapter(adapter)
+        //gets called whenever any item is selected in the user nav menu
+        leftnavigationView.setNavigationItemSelectedListener { menuItem ->
+            //handles all items in nav drawer that are created at compile time
+            if (!onOptionsItemSelected(menuItem))
+            {
+                spinner.visibility = View.VISIBLE
+                GlobalScope.launch {
+                    /*Right here start up a loading swirly*/
+
+                    //disable certain actions while data is being loaded from database
+                    turnOnButtons()
+                    turnOffButtons()
+                    val id = menuItem.itemId - Menu.FIRST//come back here
+                    val listid = currentListofLists.lists[id].listID
+                    currentChecklist.tasks = db.GetTasks(listid!!)
+                    currentChecklist.users = db.GetUsers(listid!!)
+                    currentChecklist.changes = db.GetChanges(listid!!)
+                    currentListofLists.lists = db.GetListofLists(currentUser.Username!!)
+
+                    this@BaseChecklist.runOnUiThread {
+                        //handles all items in nav drawer that are created at run time
+                        val id = menuItem.itemId - Menu.FIRST
+                        if (id < currentListofLists.lists.size && id >= 0) {
+                            val up = currentListofLists.lists[id]
+                            taskLayout.removeAllViews()
+                            for (Task in currentChecklist.tasks) {
+                                if (Task.compdatetime != null) {
+                                    val now = LocalDate.now()
+                                    val formatter = DateTimeFormat.forPattern("yyyy-MM-dd")
+                                    val dt = formatter.parseDateTime(Task.compdatetime)
+                                    val dead = dt.plusDays(2)
+                                    if (now.isEqual(dead.toLocalDate())) {
+                                        //we don't want the task
+                                    } else {
+                                        addTaskFromList(Task)
+                                    }
+                                } else if (Task.name != "")
+                                    addTaskFromList(Task)
+                            }
+                        }
+                        spinner.visibility = View.INVISIBLE
+                    }
+                    turnOnButtons()
+                }
+            }
+            // close drawer when item is tapped
+            userLayout.closeDrawers()
+            // Add code here to update the UI based on the item selected
+            // For example, swap UI fragments here
+
+            true
+        }
 
         val addButton = findViewById<Button>(R.id.AddTaskButton)
         val checkoffButton = findViewById<Button>(R.id.CheckoffButton)
@@ -1051,6 +1119,83 @@ class BaseChecklist : AppCompatActivity(){
         return File(applicationContext.filesDir, currentChecklist.i_name).exists()
     }
 
+    fun createListsFile(lists: ListofLists) {
+        //convert lists to a JSON string
+        val gson = Gson()
+        val userJson = gson.toJson(lists.lists)
+
+        //context will give us access to our local files directory
+        var context = applicationContext
+
+        val filename = "LISTS"
+        val directory = context.filesDir
+
+        //write the file LISTS to local directory
+        val file = File(directory, filename)
+        FileOutputStream(file).use {
+            it.write(userJson.toByteArray())
+        }
+    }
+
+    fun listsFileExists() : Boolean {
+        return File(applicationContext.filesDir, "LISTS").exists()
+    }
+
+    //we don't have to check if the file exists in this function
+    //because we call listFileExists() before calling this
+    //however, we might need some other error checking in here
+    fun getListsFromFile() : MutableList<ListClass> {
+        //context will give us access to our local files directory
+        var context = applicationContext
+
+        val filename = "LISTS"
+        val directory = context.filesDir
+
+        //read from LISTS and store it as a string
+        val file = File(directory, filename)
+        val fileData = FileInputStream(file).bufferedReader().use { it.readText() }
+
+        //create a MutableList<ListClass> object based on the JSON from the file
+        val gson = Gson()
+        return gson.fromJson(fileData, object : TypeToken<MutableList<ListClass>>() {}.type)
+    }
+
+    fun deleteUserDataFile(){
+        //context will give us access to our local files directory
+        var context = applicationContext
+
+        val filename = "USERDATA"
+        val directory = context.filesDir
+
+        //delete the USERDATA file
+        File(directory, filename).delete()
+    }
+
+    //deletes the file that contains list of lists data
+    fun deleteListsDataFile(){
+        //context will give us access to our local files directory
+        var context = applicationContext
+
+        val filename = "LISTS"
+        val directory = context.filesDir
+
+        //delete the LISTS file
+        File(directory, filename).delete()
+    }
+
+    //deletes the file with the given name.
+    //this should be an individual checklist's file, which is filled
+    //with task/change data
+    fun deleteListDataFile(filename: String){
+        //context will give us access to our local files directory
+        var context = applicationContext
+
+        val directory = context.filesDir
+
+        //delete the file
+        File(directory, filename).delete()
+    }
+
     //we don't have to check if the file exists in this function
     //because we call listFileExists() before calling this
     //however, we might need some other error checking in here
@@ -1080,6 +1225,7 @@ class BaseChecklist : AppCompatActivity(){
         //delete the file
         File(directory, filename).delete()
     }
+
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         //handles all nav drawer activity that was added at run time.
         return when (item.itemId) {
@@ -1099,6 +1245,7 @@ class BaseChecklist : AppCompatActivity(){
             else -> super.onOptionsItemSelected(item)
         }
     }
+
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         // Inflate the options menu from XML
         val inflater = menuInflater
@@ -1114,7 +1261,7 @@ class BaseChecklist : AppCompatActivity(){
                     val u = db.GetUser(query as String)
                     if (u.UserID != -1) {
                         db.AddUserToList(u.UserID as Int, currentChecklist.listID as Int)
-                        subMenu.add(0, Menu.FIRST + 7, Menu.FIRST, u.Username)
+                        rightsubMenu.add(0, Menu.FIRST + 7, Menu.FIRST, u.Username)
                     }
                     return true
                 }
@@ -1151,13 +1298,7 @@ class BaseChecklist : AppCompatActivity(){
 //
 //        return true
     }
-    private fun handleIntent(intent: Intent) {
 
-        if (Intent.ACTION_SEARCH == intent.action) {
-            val query = intent.getStringExtra(SearchManager.QUERY)
-            //use the query to search your data somehow
-        }
-    }
     private fun turnOffButtons() {
         val turnOff: Button = findViewById(R.id.AddTaskButton)
         turnOff.isClickable = false
@@ -1165,6 +1306,7 @@ class BaseChecklist : AppCompatActivity(){
         turnOff2.isClickable = false
         taskFlag = false
     }
+
     private fun turnOnButtons() {
 
         var turnOn : Button = findViewById(R.id.AddTaskButton)

@@ -129,7 +129,10 @@ class BaseListofLists : AppCompatActivity(){
 
             //put those lists in a local file
             createListsFile(currentListofLists)
+
+            spinner.visibility = View.INVISIBLE
         }
+
         for (ListClass in currentListofLists.lists) {
             //Fill box with checklist name
             tempBox = ListBox(
@@ -401,28 +404,28 @@ class BaseListofLists : AppCompatActivity(){
                 drawerLayout.openDrawer(GravityCompat.START)
                 true
             }
-            R.id.dProfile -> {
-                val tempIntent = Intent(this, UserLogin::class.java).apply {
-                    putExtra("uname", UName)
-                    putExtra("fname", FName)
-                    putExtra("lname", LName)
-                }
-                startActivity(tempIntent)
-                true
-            }
-            R.id.dSettings -> {
-                true
-            }
-            R.id.dLogOut -> {
-                //delete local data files
-                deleteUserDataFile()
-                deleteListsDataFile()
-
-                //redirect to the login page
-                val tempIntent = Intent(this, MainActivity::class.java)
-                startActivity(tempIntent)
-                true
-            }
+//            R.id.dProfile -> {
+//                val tempIntent = Intent(this, UserLogin::class.java).apply {
+//                    putExtra("uname", UName)
+//                    putExtra("fname", FName)
+//                    putExtra("lname", LName)
+//                }
+//                startActivity(tempIntent)
+//                true
+//            }
+//            R.id.dSettings -> {
+//                true
+//            }
+//            R.id.dLogOut -> {
+//                //delete local data files
+//                deleteUserDataFile()
+//                deleteListsDataFile()
+//
+//                //redirect to the login page
+//                val tempIntent = Intent(this, MainActivity::class.java)
+//                startActivity(tempIntent)
+//                true
+//            }
             else -> super.onOptionsItemSelected(item)
         }
     }
