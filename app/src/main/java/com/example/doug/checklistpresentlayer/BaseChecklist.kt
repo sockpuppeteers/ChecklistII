@@ -83,7 +83,7 @@ class BaseChecklist : AppCompatActivity(){
             setDisplayHomeAsUpEnabled(true)
             setHomeAsUpIndicator(R.drawable.ic_menu_black_24dp)
         }
-        title = intent.getStringExtra("ListName")
+        title = currentChecklist.i_name
 
         //creates a submenu named user
         rightnavigationView = findViewById(R.id.right_nav_view)
@@ -147,7 +147,7 @@ class BaseChecklist : AppCompatActivity(){
                 list.tasks = db.GetTasks(currentChecklist.listID!!)
                 list.users = db.GetUsers(currentChecklist.listID!!)
                 list.changes = db.GetChanges(currentChecklist.listID!!)
-                currentListofLists.lists = db.GetListofLists(currentUser.Username!!)
+                currentListofLists.lists = db.GetListofLists(currentUser.Username)
 
                 currentChecklist.users = list.users
                 currentChecklist.tasks = list.tasks
@@ -297,13 +297,15 @@ class BaseChecklist : AppCompatActivity(){
                     val id = menuItem.itemId - Menu.FIRST//come back here
                     val listid = currentListofLists.lists[id].listID
                     currentChecklist.tasks = db.GetTasks(listid!!)
-                    currentChecklist.users = db.GetUsers(listid!!)
-                    currentChecklist.changes = db.GetChanges(listid!!)
-                    currentListofLists.lists = db.GetListofLists(currentUser.Username!!)
+                    currentChecklist.users = db.GetUsers(listid)
+                    currentChecklist.changes = db.GetChanges(listid)
+                    currentChecklist.i_name = currentListofLists.lists[id].i_name
+                    currentListofLists.lists = db.GetListofLists(currentUser.Username)
 
                     this@BaseChecklist.runOnUiThread {
                         //handles all items in nav drawer that are created at run time
                         val id = menuItem.itemId - Menu.FIRST
+                        title = currentChecklist.i_name
                         if (id < currentListofLists.lists.size && id >= 0) {
                             val up = currentListofLists.lists[id]
                             taskLayout.removeAllViews()
