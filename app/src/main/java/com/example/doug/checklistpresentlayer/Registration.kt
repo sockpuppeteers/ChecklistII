@@ -47,27 +47,8 @@ class Registration : AppCompatActivity() {
         }
     }
 
-    //For a pw to be strong it has to contain a special character and a number, both checks are done here
+    //passwords must be at least 8 characters long
     fun pwStrong(str : String) : Boolean {
-        var hasSp = false
-        var hasNum = false
-        //makes sure the string isn't empty, blank passwords cannot be checked
-        if (str == null || str.trim().isEmpty()) {
-
-            return hasSp;
-        }
-        //looks for anything NOT alphanumeric (special character)
-        var p = Pattern.compile("[^A-Za-z0-9]")
-        var m = p.matcher(str)
-        hasSp = m.find()
-        //only needs to look for numbers if it found a special character
-        if (hasSp) {
-            //looks for anything followed by an integer followed by anything
-            var temp = "(.)*(\\d)(.)*"
-            var p1 = Pattern.compile(temp)
-            hasNum = p1.matcher(str).matches()
-        }
-        //checks to see if both are true
-        return (hasSp && hasNum)
+        return str.length >= 8
     }
 }

@@ -82,9 +82,8 @@ class MainActivity : AppCompatActivity() {
         }
 
         login_button.setOnClickListener {
+            deleteListsDataFile()
             if (hasInternetConnection()) {
-
-
                 //sets the loading spinner to visible and to not fill as it goes, just to spin
                 spinner.visibility = View.VISIBLE
                 spinner.isIndeterminate = true
@@ -137,6 +136,7 @@ class MainActivity : AppCompatActivity() {
 
         register_text_button.setOnClickListener {
             if (hasInternetConnection()){
+                deleteListsDataFile()
                 val tempIntent = Intent(this, Registration::class.java)
                 startActivity(tempIntent)
             }
