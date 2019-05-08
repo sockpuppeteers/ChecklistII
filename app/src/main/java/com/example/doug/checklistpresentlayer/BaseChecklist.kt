@@ -1,5 +1,6 @@
 package com.example.doug.checklistpresentlayer
 
+import android.app.Activity
 import android.app.SearchManager
 import android.content.Context
 import android.content.Intent
@@ -15,6 +16,7 @@ import android.support.v7.app.ActionBar
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.Toolbar
 import android.view.*
+import android.view.inputmethod.InputMethodManager
 import android.widget.*
 import com.google.gson.Gson
 import kotlinx.android.synthetic.main.activity_base_checklist.*
@@ -39,6 +41,7 @@ import kotlin.concurrent.thread
 import android.widget.ImageButton
 import com.google.gson.reflect.TypeToken
 import org.jetbrains.anko.db.NULL
+import org.jetbrains.anko.searchView
 import org.joda.time.format.DateTimeFormat
 import java.text.SimpleDateFormat
 import java.time.format.DateTimeFormatter
@@ -1272,6 +1275,16 @@ class BaseChecklist : AppCompatActivity(){
                         db.AddUserToList(u.UserID as Int, currentChecklist.listID as Int)
                         rightsubMenu.add(0, Menu.FIRST + 7, Menu.FIRST, u.Username)
                     }
+                    searchItem.collapseActionView()
+                    val activity : Activity = this@BaseChecklist
+                    val imm = activity.getSystemService(Activity.INPUT_METHOD_SERVICE) as InputMethodManager
+                    //Find the currently focused view, so we can grab the correct window token from it.
+                    var view = activity.currentFocus;
+                    //If no view currently has focus, create a new one, just so we can grab a window token from it
+                    if (view == null) {
+                        view = View(activity)
+                    }
+                    imm.hideSoftInputFromWindow(view.windowToken, 0)
                     return true
                 }
 
