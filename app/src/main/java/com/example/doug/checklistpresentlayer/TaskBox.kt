@@ -116,7 +116,7 @@ class TaskBox @JvmOverloads constructor(
         taskTextView.apply { taskTextView.paintFlags = taskTextView.paintFlags!!.or(Paint.STRIKE_THRU_TEXT_FLAG) }
 
 
-        getChildAt(1).isClickable = false
-        getChildAt(1).visibility = View.INVISIBLE
+        getChildAt(0).isClickable = false
+        getChildAt(0).visibility = View.INVISIBLE
     }
 }
