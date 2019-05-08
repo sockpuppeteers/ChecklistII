@@ -6,6 +6,8 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.ActivityInfo
 import android.graphics.Color
+import android.net.ConnectivityManager
+import android.net.NetworkInfo
 import android.os.Bundle
 import android.support.constraint.ConstraintLayout
 import android.support.design.widget.NavigationView
@@ -86,7 +88,7 @@ class BaseChecklist : AppCompatActivity(){
             setDisplayHomeAsUpEnabled(true)
             setHomeAsUpIndicator(R.drawable.ic_menu_black_24dp)
         }
-        title = intent.getStringExtra("ListName")
+        title = currentChecklist.i_name
 
         //creates a submenu named user
         rightnavigationView = findViewById(R.id.right_nav_view)
@@ -150,17 +152,10 @@ class BaseChecklist : AppCompatActivity(){
                 list.tasks = db.GetTasks(currentChecklist.listID!!)
                 list.users = db.GetUsers(currentChecklist.listID!!)
                 list.changes = db.GetChanges(currentChecklist.listID!!)
-
-                var listOfLists = db.GetListofLists(currentUser.Username!!)
-
-                if (!listOfLists.isEmpty())
-                    currentListofLists.lists = listOfLists
+                currentListofLists.lists = db.GetListofLists(currentUser.Username)
 
                 currentChecklist.users = list.users
-
-                if (!list.tasks.isEmpty())
-                    currentChecklist.tasks = list.tasks
-
+                currentChecklist.tasks = list.tasks
                 currentChecklist.changes = list.changes
 
                 deleteListDataFile()
@@ -307,13 +302,15 @@ class BaseChecklist : AppCompatActivity(){
                     val id = menuItem.itemId - Menu.FIRST//come back here
                     val listid = currentListofLists.lists[id].listID
                     currentChecklist.tasks = db.GetTasks(listid!!)
-                    currentChecklist.users = db.GetUsers(listid!!)
-                    currentChecklist.changes = db.GetChanges(listid!!)
-                    currentListofLists.lists = db.GetListofLists(currentUser.Username!!)
+                    currentChecklist.users = db.GetUsers(listid)
+                    currentChecklist.changes = db.GetChanges(listid)
+                    currentChecklist.i_name = currentListofLists.lists[id].i_name
+                    currentListofLists.lists = db.GetListofLists(currentUser.Username)
 
                     this@BaseChecklist.runOnUiThread {
                         //handles all items in nav drawer that are created at run time
                         val id = menuItem.itemId - Menu.FIRST
+                        title = currentChecklist.i_name
                         if (id < currentListofLists.lists.size && id >= 0) {
                             val up = currentListofLists.lists[id]
                             taskLayout.removeAllViews()
@@ -368,14 +365,14 @@ class BaseChecklist : AppCompatActivity(){
 
                 //Creates and adds the on click action to the add button
                 acceptButton.setOnClickListener{
-
                     val popup_edittext = popupView.PopupMainView.PopupEditText
 
                     //Retrieves the name of the task if the name is long enough
                     if (popup_edittext.text.toString().length >= 1) {
-                        createNewTask(popup_edittext.text.toString(), false, 0/*needs to be something later*/)
-                        //currentChecklist.createTask(popup_edittext.text.toString(),
-                        //   "none", User(intent.getIntExtra("UserID", 0)))
+                        if (hasInternetConnection()) {
+                            createNewTask(popup_edittext.text.toString(), false, 0/*needs to be something later*/)
+                            //TODO make a popup to tell the user no internet
+                        }
                     }
 
                     //Set dismiss listener
@@ -414,38 +411,43 @@ class BaseChecklist : AppCompatActivity(){
         addButton.setOnClickListener(addListener)
         //Create the click listener for the checkoff button
         val checkoffListener = View.OnClickListener {
+            if (hasInternetConnection()) {
+                var taskCount = TaskLayout.childCount - 1
+                //Checks all current gui elements to see if they are checked
+                while (taskCount >= 0) {
+                    val currentChild = TaskLayout.getChildAt(taskCount)
 
-            var taskCount = TaskLayout.childCount - 1
-            //Checks all current gui elements to see if they are checked
-            while (taskCount >= 0)
-            {
-                val currentChild = TaskLayout.getChildAt(taskCount)
+                    if (currentChild is TaskBox) {
+                        val taskSwitch = currentChild.getChildAt(1)
 
-                if(currentChild is TaskBox)
-                {
-                    val taskSwitch = currentChild.getChildAt(0)
+                        if (taskSwitch is CheckBox) {
+                            if (taskSwitch.isChecked) {
+                                if (!currentChild.checkCompletion()) {
+                                    if (currentChild.checkReccurring()) {
+                                        createNewTask(
+                                            currentChild.getTaskText(),
+                                            true,
+                                            0/*needs to be something later*/
+                                        )
+                                        //currentChecklist.createTask(currentChild.getTaskText(), "enable Later", User(1))
+                                    }
 
-                    if(taskSwitch is CheckBox)
-                    {
-                        if(taskSwitch.isChecked)
-                        {
-                            if(!currentChild.checkCompletion()) {
-                                if (currentChild.checkReccurring()) {
-                                    createNewTask(currentChild.getTaskText(), true, 0/*needs to be something later*/)
-                                    //currentChecklist.createTask(currentChild.getTaskText(), "enable Later", User(1))
+                                    currentChild.completeTask()
+
+                                    //TaskLayout.removeView(TaskLayout.getChildAt(taskCount))
+
+                                    currentChecklist.completeTask(taskCount, currentUser)
                                 }
-
-                                currentChild.completeTask()
-
-                                //TaskLayout.removeView(TaskLayout.getChildAt(taskCount))
-
-                                currentChecklist.completeTask(taskCount, currentUser)
                             }
                         }
                     }
-                }
 
-                taskCount--
+                    taskCount--
+                }
+            }
+            //this else clause happens when they have no internet connection
+            else {
+                //TODO add a popup or something here
             }
         }
 
@@ -712,8 +714,6 @@ class BaseChecklist : AppCompatActivity(){
 
                     if(taskSettingsRecurringLayoutView.SaturdaySwitch.isChecked)
                         dateString += "Sat-"
-
-                    dateString.removeSuffix("-")
 
                     if(dateString != currentChecklist.tasks[taskCount].recurringDays)
                         currentChecklist.updateTaskRecurringDays(taskCount, currentUser, dateString)
@@ -1259,21 +1259,24 @@ class BaseChecklist : AppCompatActivity(){
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        // Inflate the options menu from XML
-        val inflater = menuInflater
-        val db = Database()
-        inflater.inflate(R.menu.options_menu, menu)
+        if (hasInternetConnection()) {
+            // Inflate the options menu from XML
+            val inflater = menuInflater
+            val db = Database()
+            inflater.inflate(R.menu.options_menu, menu)
 
-        val searchItem = menu.findItem(R.id.search)
-        if(searchItem != null){
-            val searchView = searchItem.actionView as SearchView
+            val searchItem = menu.findItem(R.id.search)
+            if (searchItem != null) {
+                val searchView = searchItem.actionView as SearchView
 
-            searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener{
-                override fun onQueryTextSubmit(query: String?): Boolean {
-                    val u = db.GetUser(query as String)
-                    if (u.UserID != -1) {
-                        db.AddUserToList(u.UserID as Int, currentChecklist.listID as Int)
-                        rightsubMenu.add(0, Menu.FIRST + 7, Menu.FIRST, u.Username)
+                searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+                    override fun onQueryTextSubmit(query: String?): Boolean {
+                        val u = db.GetUser(query as String)
+                        if (u.UserID != -1) {
+                            db.AddUserToList(u.UserID as Int, currentChecklist.listID as Int)
+                            rightsubMenu.add(0, Menu.FIRST + 7, Menu.FIRST, u.Username)
+                        }
+                        return true
                     }
                     searchItem.collapseActionView()
                     val activity : Activity = this@BaseChecklist
@@ -1288,27 +1291,20 @@ class BaseChecklist : AppCompatActivity(){
                     return true
                 }
 
-                override fun onQueryTextChange(newText: String?): Boolean {
+                    override fun onQueryTextChange(newText: String?): Boolean {
+                        return true
+                    }
 
-//                    displayList.clear()
-//                    if(newText!!.isNotEmpty()){
-//                        val search = newText.toLowerCase()
-//                        countries.forEach {
-//                            if(it.toLowerCase().contains(search)){
-//                                displayList.add(it)
-//                            }
-//                        }
-//                    }else{
-//                        displayList.addAll(countries)
-//                    }
-//                    country_list.adapter.notifyDataSetChanged()
-                    return true
-                }
+                })
+            }
 
-            })
+            return super.onCreateOptionsMenu(menu)
         }
 
-        return super.onCreateOptionsMenu(menu)
+        //this clause happens if they have no internet connection
+        else {
+            return false
+        }
     }
 
     private fun turnOffButtons() {
@@ -1326,5 +1322,13 @@ class BaseChecklist : AppCompatActivity(){
         turnOn = findViewById(R.id.CheckoffButton)
         turnOn.isClickable = true
         taskFlag = true
+    }
+
+    private fun hasInternetConnection() : Boolean {
+        val connectivityManager = this.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        val activeNetwork: NetworkInfo? = connectivityManager.activeNetworkInfo
+        val isConnected: Boolean = activeNetwork?.isConnectedOrConnecting == true
+
+        return isConnected
     }
 }
