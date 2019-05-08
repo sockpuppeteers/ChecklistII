@@ -63,7 +63,7 @@ class TaskBox @JvmOverloads constructor(
 
         taskTextView.gravity = left
 
-        addView(taskTextView, tempLayout)
+
 
         tempLayout = RelativeLayout.LayoutParams(
             LinearLayout.LayoutParams.WRAP_CONTENT,
@@ -78,6 +78,7 @@ class TaskBox @JvmOverloads constructor(
         //taskSwitch.gravity = right
 
         addView(taskSwitch, tempLayout)
+        addView(taskTextView, tempLayout)
     }
 
     fun ChangeName(name: String)

@@ -420,7 +420,7 @@ class BaseChecklist : AppCompatActivity(){
 
                 if(currentChild is TaskBox)
                 {
-                    val taskSwitch = currentChild.getChildAt(1)
+                    val taskSwitch = currentChild.getChildAt(0)
 
                     if(taskSwitch is CheckBox)
                     {
@@ -709,6 +709,8 @@ class BaseChecklist : AppCompatActivity(){
 
                     if(taskSettingsRecurringLayoutView.SaturdaySwitch.isChecked)
                         dateString += "Sat-"
+
+                    dateString.removeSuffix("-")
 
                     if(dateString != currentChecklist.tasks[taskCount].recurringDays)
                         currentChecklist.updateTaskRecurringDays(taskCount, currentUser, dateString)
