@@ -5,6 +5,8 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.ActivityInfo
 import android.graphics.Color
+import android.net.ConnectivityManager
+import android.net.NetworkInfo
 import android.os.Bundle
 import android.support.constraint.ConstraintLayout
 import android.support.design.widget.NavigationView
@@ -360,14 +362,14 @@ class BaseChecklist : AppCompatActivity(){
 
                 //Creates and adds the on click action to the add button
                 acceptButton.setOnClickListener{
-
                     val popup_edittext = popupView.PopupMainView.PopupEditText
 
                     //Retrieves the name of the task if the name is long enough
                     if (popup_edittext.text.toString().length >= 1) {
-                        createNewTask(popup_edittext.text.toString(), false, 0/*needs to be something later*/)
-                        //currentChecklist.createTask(popup_edittext.text.toString(),
-                        //   "none", User(intent.getIntExtra("UserID", 0)))
+                        if (hasInternetConnection()) {
+                            createNewTask(popup_edittext.text.toString(), false, 0/*needs to be something later*/)
+                            //TODO make a popup to tell the user no internet
+                        }
                     }
 
                     //Set dismiss listener
@@ -406,38 +408,43 @@ class BaseChecklist : AppCompatActivity(){
         addButton.setOnClickListener(addListener)
         //Create the click listener for the checkoff button
         val checkoffListener = View.OnClickListener {
+            if (hasInternetConnection()) {
+                var taskCount = TaskLayout.childCount - 1
+                //Checks all current gui elements to see if they are checked
+                while (taskCount >= 0) {
+                    val currentChild = TaskLayout.getChildAt(taskCount)
 
-            var taskCount = TaskLayout.childCount - 1
-            //Checks all current gui elements to see if they are checked
-            while (taskCount >= 0)
-            {
-                val currentChild = TaskLayout.getChildAt(taskCount)
+                    if (currentChild is TaskBox) {
+                        val taskSwitch = currentChild.getChildAt(1)
 
-                if(currentChild is TaskBox)
-                {
-                    val taskSwitch = currentChild.getChildAt(1)
+                        if (taskSwitch is CheckBox) {
+                            if (taskSwitch.isChecked) {
+                                if (!currentChild.checkCompletion()) {
+                                    if (currentChild.checkReccurring()) {
+                                        createNewTask(
+                                            currentChild.getTaskText(),
+                                            true,
+                                            0/*needs to be something later*/
+                                        )
+                                        //currentChecklist.createTask(currentChild.getTaskText(), "enable Later", User(1))
+                                    }
 
-                    if(taskSwitch is CheckBox)
-                    {
-                        if(taskSwitch.isChecked)
-                        {
-                            if(!currentChild.checkCompletion()) {
-                                if (currentChild.checkReccurring()) {
-                                    createNewTask(currentChild.getTaskText(), true, 0/*needs to be something later*/)
-                                    //currentChecklist.createTask(currentChild.getTaskText(), "enable Later", User(1))
+                                    currentChild.completeTask()
+
+                                    //TaskLayout.removeView(TaskLayout.getChildAt(taskCount))
+
+                                    currentChecklist.completeTask(taskCount, currentUser)
                                 }
-
-                                currentChild.completeTask()
-
-                                //TaskLayout.removeView(TaskLayout.getChildAt(taskCount))
-
-                                currentChecklist.completeTask(taskCount, currentUser)
                             }
                         }
                     }
-                }
 
-                taskCount--
+                    taskCount--
+                }
+            }
+            //this else clause happens when they have no internet connection
+            else {
+                //TODO add a popup or something here
             }
         }
 
@@ -1249,46 +1256,40 @@ class BaseChecklist : AppCompatActivity(){
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        // Inflate the options menu from XML
-        val inflater = menuInflater
-        val db = Database()
-        inflater.inflate(R.menu.options_menu, menu)
+        if (hasInternetConnection()) {
+            // Inflate the options menu from XML
+            val inflater = menuInflater
+            val db = Database()
+            inflater.inflate(R.menu.options_menu, menu)
 
-        val searchItem = menu.findItem(R.id.search)
-        if(searchItem != null){
-            val searchView = searchItem.actionView as SearchView
+            val searchItem = menu.findItem(R.id.search)
+            if (searchItem != null) {
+                val searchView = searchItem.actionView as SearchView
 
-            searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener{
-                override fun onQueryTextSubmit(query: String?): Boolean {
-                    val u = db.GetUser(query as String)
-                    if (u.UserID != -1) {
-                        db.AddUserToList(u.UserID as Int, currentChecklist.listID as Int)
-                        rightsubMenu.add(0, Menu.FIRST + 7, Menu.FIRST, u.Username)
+                searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+                    override fun onQueryTextSubmit(query: String?): Boolean {
+                        val u = db.GetUser(query as String)
+                        if (u.UserID != -1) {
+                            db.AddUserToList(u.UserID as Int, currentChecklist.listID as Int)
+                            rightsubMenu.add(0, Menu.FIRST + 7, Menu.FIRST, u.Username)
+                        }
+                        return true
                     }
-                    return true
-                }
 
-                override fun onQueryTextChange(newText: String?): Boolean {
+                    override fun onQueryTextChange(newText: String?): Boolean {
+                        return true
+                    }
 
-//                    displayList.clear()
-//                    if(newText!!.isNotEmpty()){
-//                        val search = newText.toLowerCase()
-//                        countries.forEach {
-//                            if(it.toLowerCase().contains(search)){
-//                                displayList.add(it)
-//                            }
-//                        }
-//                    }else{
-//                        displayList.addAll(countries)
-//                    }
-//                    country_list.adapter.notifyDataSetChanged()
-                    return true
-                }
+                })
+            }
 
-            })
+            return super.onCreateOptionsMenu(menu)
         }
 
-        return super.onCreateOptionsMenu(menu)
+        //this clause happens if they have no internet connection
+        else {
+            return false
+        }
     }
 
     private fun turnOffButtons() {
@@ -1306,5 +1307,13 @@ class BaseChecklist : AppCompatActivity(){
         turnOn = findViewById(R.id.CheckoffButton)
         turnOn.isClickable = true
         taskFlag = true
+    }
+
+    private fun hasInternetConnection() : Boolean {
+        val connectivityManager = this.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        val activeNetwork: NetworkInfo? = connectivityManager.activeNetworkInfo
+        val isConnected: Boolean = activeNetwork?.isConnectedOrConnecting == true
+
+        return isConnected
     }
 }
