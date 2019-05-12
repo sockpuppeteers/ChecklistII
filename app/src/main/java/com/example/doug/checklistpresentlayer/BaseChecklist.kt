@@ -2,6 +2,7 @@ package com.example.doug.checklistpresentlayer
 
 import android.app.Activity
 import android.app.SearchManager
+import android.content.ClipData
 import android.content.Context
 import android.content.Intent
 import android.content.pm.ActivityInfo
@@ -63,6 +64,7 @@ class BaseChecklist : AppCompatActivity(){
     private lateinit var userLayout: DrawerLayout
     private lateinit var rightnavigationView: NavigationView
     private lateinit var leftnavigationView: NavigationView
+    private lateinit var userButton: ClipData.Item
     private lateinit var rightmenu: Menu
     private lateinit var leftmenu: Menu
     private lateinit var rightsubMenu: SubMenu
@@ -1419,6 +1421,16 @@ class BaseChecklist : AppCompatActivity(){
                     userLayout.openDrawer(GravityCompat.END)
                 }
                 //userLayout.openDrawer(GravityCompat.START)
+                true
+            }
+            R.id.oUser -> {
+                val tempIntent = Intent(this, UserLogin::class.java).apply {
+                    putExtra("uname", currentUser.Username)
+                    putExtra("fname", currentUser.FName)
+                    putExtra("lname", currentUser.LName)
+                    putExtra("UserID", currentUser.UserID)
+                }
+                startActivity(tempIntent)
                 true
             }
             else -> super.onOptionsItemSelected(item)

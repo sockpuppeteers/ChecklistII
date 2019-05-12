@@ -16,6 +16,7 @@ import android.support.v7.app.ActionBar
 import android.support.v7.widget.Toolbar
 import android.view.MenuItem
 import android.view.View
+import android.widget.TextView
 import java.io.File
 
 //This is actually the nav drawer functionality from user profile page
@@ -26,27 +27,10 @@ class UserLogin : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
         setContentView(R.layout.activity_main)
-        drawerLayout = findViewById(R.id.drawer_layout)
-
-        val toolbar: Toolbar = findViewById(R.id.toolbar)
-        setSupportActionBar(toolbar)
+        setSupportActionBar(findViewById(R.id.toolbar))
         val actionbar: ActionBar? = supportActionBar
         actionbar?.apply {
             setDisplayHomeAsUpEnabled(true)
-            setHomeAsUpIndicator(R.drawable.ic_menu_black_24dp)
-        }
-        val navigationView: NavigationView = findViewById(R.id.nav_view)
-
-        navigationView.setNavigationItemSelectedListener { menuItem ->
-            // set item as selected to persist highlight
-            menuItem.isChecked = true
-            onOptionsItemSelected(menuItem)
-            // close drawer when item is tapped
-            drawerLayout.closeDrawers()
-            // Add code here to update the UI based on the item selected
-            // For example, swap UI fragments here
-
-            true
         }
 
         val UName = intent.getStringExtra("uname")
@@ -56,31 +40,21 @@ class UserLogin : AppCompatActivity() {
         UserName.text = "(" + UName + ")"
 
         Icon.setImageResource(icon1)
-    }
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        return when (item.itemId) {
-            android.R.id.home -> {
-                drawerLayout.openDrawer(GravityCompat.START)
-                true
-            }
-//            R.id.dProfile -> {
-//                true
-//            }
-//            R.id.dSettings -> {
-//                true
-//            }
-//            R.id.dLogOut -> {
-//                //delete local data files
-//                deleteUserDataFile()
-//                deleteListsDataFile()
-//
-//                //redirect to the login page
-//                val tempIntent = Intent(this, MainActivity::class.java)
-//                startActivity(tempIntent)
-//                true
-//            }
-            else -> super.onOptionsItemSelected(item)
+
+        val logout = findViewById<TextView>(R.id.Logout)
+        logout.setOnClickListener{
+            deleteUserDataFile()
+            deleteListsDataFile()
+
+            //redirect to the login page
+            val tempIntent = Intent(this, MainActivity::class.java)
+            startActivity(tempIntent)
         }
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        this.onBackPressed()
+        return true
     }
 
     fun deleteUserDataFile(){
