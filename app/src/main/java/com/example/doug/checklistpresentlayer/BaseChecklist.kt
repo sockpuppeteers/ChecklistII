@@ -53,6 +53,7 @@ class BaseChecklist : AppCompatActivity(){
 
     var currentChecklist = Checklist("Your Checklist", 0 )
     var taskFlag = true
+    var deleteFlag = false
     //Flag to see if any popups are present
     var popupPresent = false
 
@@ -82,6 +83,7 @@ class BaseChecklist : AppCompatActivity(){
         //line below gets the checklist name so that each checklist correctly
         //displays their own tasks and no other checklist's tasks
         currentChecklist.i_name = intent.getStringExtra("ListName")
+        currentListofLists.uID = currentUser.UserID as Int
 
         setSupportActionBar(findViewById(R.id.toolbar))
         val actionbar: ActionBar? = supportActionBar
@@ -170,9 +172,13 @@ class BaseChecklist : AppCompatActivity(){
                         rightsubMenu.add(0, Menu.FIRST + i, Menu.FIRST, up.Username)
                     }
                     leftsubMenu.clear()
+                    var ii = 0
                     for ((i, lol) in currentListofLists.lists.withIndex()) {
                         leftsubMenu.add(0, Menu.FIRST + i, Menu.FIRST, lol.i_name)
+                        ii = i
                     }
+                    leftsubMenu.add(0, Menu.FIRST + ii + 1, Menu.FIRST, getString(R.string.ADD_LIST_TEXT)).setIcon(R.drawable.ic_add_box_black_24dp)
+                    leftsubMenu.add(0, Menu.FIRST + ii + 2, Menu.FIRST, getString(R.string.DELETE_LIST_TEXT)).setIcon(R.drawable.ic_delete_black_24dp)
                     taskLayout.removeAllViews()
                     for (Task in currentChecklist.tasks)
                     {
@@ -291,52 +297,193 @@ class BaseChecklist : AppCompatActivity(){
         //gets called whenever any item is selected in the user nav menu
         leftnavigationView.setNavigationItemSelectedListener { menuItem ->
             //handles all items in nav drawer that are created at compile time
-            if (!onOptionsItemSelected(menuItem))
-            {
-                spinner.visibility = View.VISIBLE
-                GlobalScope.launch {
-                    /*Right here start up a loading swirly*/
+            val id = menuItem.itemId - Menu.FIRST
+            if (!deleteFlag) {
+                if (!onOptionsItemSelected(menuItem)) {
+                    if (id < currentListofLists.lists.size && id >= 0) {
+                        spinner.visibility = View.VISIBLE
+                        GlobalScope.launch {
+                            /*Right here start up a loading swirly*/
 
-                    //disable certain actions while data is being loaded from database
-                    turnOnButtons()
-                    turnOffButtons()
-                    val id = menuItem.itemId - Menu.FIRST//come back here
-                    val listid = currentListofLists.lists[id].listID
-                    currentChecklist.tasks = db.GetTasks(listid!!)
-                    currentChecklist.users = db.GetUsers(listid)
-                    currentChecklist.changes = db.GetChanges(listid)
-                    currentChecklist.i_name = currentListofLists.lists[id].i_name
-                    currentListofLists.lists = db.GetListofLists(currentUser.Username)
+                            //disable certain actions while data is being loaded from database
+                            turnOnButtons()
+                            turnOffButtons()
 
-                    this@BaseChecklist.runOnUiThread {
-                        //handles all items in nav drawer that are created at run time
-                        val id = menuItem.itemId - Menu.FIRST
-                        title = currentChecklist.i_name
-                        if (id < currentListofLists.lists.size && id >= 0) {
-                            val up = currentListofLists.lists[id]
-                            taskLayout.removeAllViews()
-                            for (Task in currentChecklist.tasks) {
-                                if (Task.compdatetime != null) {
-                                    val now = LocalDate.now()
-                                    val formatter = DateTimeFormat.forPattern("yyyy-MM-dd")
-                                    val dt = formatter.parseDateTime(Task.compdatetime)
-                                    val dead = dt.plusDays(2)
-                                    if (now.isEqual(dead.toLocalDate())) {
-                                        //we don't want the task
-                                    } else {
-                                        addTaskFromList(Task)
+                            val listid = currentListofLists.lists[id].listID
+                            currentChecklist.tasks = db.GetTasks(listid!!)
+                            currentChecklist.users = db.GetUsers(listid)
+                            currentChecklist.changes = db.GetChanges(listid)
+                            currentChecklist.i_name = currentListofLists.lists[id].i_name
+                            currentListofLists.lists = db.GetListofLists(currentUser.Username)
+
+                            this@BaseChecklist.runOnUiThread {
+                                //replaces the tasks and title on screen
+                                title = currentChecklist.i_name
+                                if (id < currentListofLists.lists.size && id >= 0) {
+                                    val up = currentListofLists.lists[id]
+                                    taskLayout.removeAllViews()
+                                    for (Task in currentChecklist.tasks) {
+                                        if (Task.compdatetime != null) {
+                                            val now = LocalDate.now()
+                                            val formatter = DateTimeFormat.forPattern("yyyy-MM-dd")
+                                            val dt = formatter.parseDateTime(Task.compdatetime)
+                                            val dead = dt.plusDays(2)
+                                            if (now.isEqual(dead.toLocalDate())) {
+                                                //we don't want the task
+                                            } else {
+                                                addTaskFromList(Task)
+                                            }
+                                        } else if (Task.name != "")
+                                            addTaskFromList(Task)
                                     }
-                                } else if (Task.name != "")
-                                    addTaskFromList(Task)
+                                }
+                                spinner.visibility = View.INVISIBLE
+                                // close drawer when item is tapped
+                                userLayout.closeDrawers()
                             }
+                            turnOnButtons()
                         }
-                        spinner.visibility = View.INVISIBLE
+                    } else if (id < currentListofLists.lists.size + 2 && id >= 0) {
+                        if (id == currentListofLists.lists.size) {
+                            if (!popupPresent) {
+
+                                val mainView = findViewById<ScrollView>(R.id.TaskScrollView)
+
+                                val popupWindow = PopupWindow(this)
+
+                                val popupView = layoutInflater.inflate(R.layout.popup_layout, null)
+                                popupView.PopupEditText.hint = "Enter List Name"
+
+                                popupWindow.contentView = popupView
+
+                                val acceptButton = popupView.PopupMainView.AcceptButton
+
+                                //Creates and adds the on click action to the add button
+                                acceptButton.setOnClickListener {
+                                    val popup_edittext = popupView.PopupMainView.PopupEditText
+
+                                    val list_name = popup_edittext.text.toString()
+
+                                    if (list_name.length >= 1) {
+                                        spinner.visibility = View.VISIBLE
+                                        GlobalScope.launch {
+                                            //Create the new list and post it to the database
+                                            val length = currentListofLists.lists.size
+                                            currentListofLists.createList(
+                                                list_name, currentUser
+                                            )
+                                            while (currentListofLists.lists.size == length);
+                                            this@BaseChecklist.runOnUiThread {
+                                                leftsubMenu.clear()
+                                                var ii = 0
+                                                for ((i, lol) in currentListofLists.lists.withIndex()) {
+                                                    leftsubMenu.add(0, Menu.FIRST + i, Menu.FIRST, lol.i_name)
+                                                    ii = i
+                                                }
+                                                leftsubMenu.add(
+                                                    0, Menu.FIRST + ii + 1, Menu.FIRST,
+                                                    getString(R.string.ADD_LIST_TEXT)
+                                                ).setIcon(R.drawable.ic_add_box_black_24dp)
+                                                leftsubMenu.add(
+                                                    0,
+                                                    Menu.FIRST + ii + 2,
+                                                    Menu.FIRST,
+                                                    getString(R.string.DELETE_LIST_TEXT)
+                                                ).setIcon(R.drawable.ic_delete_black_24dp)
+                                                spinner.visibility = View.INVISIBLE
+                                            }
+                                        }
+
+                                        popupWindow.dismiss()
+
+                                        //create a new coroutine that will
+                                        //update the local LIST file to be current
+                                        GlobalScope.launch {
+                                            deleteListsDataFile()
+                                            createListsFile(currentListofLists)
+                                        }
+
+                                        popupWindow.setOnDismissListener {
+                                            PopupWindow.OnDismissListener {
+                                                popupPresent = false
+                                            }
+                                        }
+                                    }
+                                }
+
+                                val cancelButton = popupView.PopupMainView.CancelButton
+
+                                cancelButton.setOnClickListener {
+
+                                    popupWindow.dismiss()
+
+                                }
+
+                                popupWindow.setOnDismissListener {
+                                    val popupEdittext = popupView.PopupMainView.PopupEditText
+
+                                    popupEdittext.text.clear()
+
+                                    popupPresent = false
+                                }
+
+                                popupWindow.isFocusable = true
+
+                                popupWindow.showAtLocation(mainView, Gravity.CENTER, 0, 0)
+
+                                popupPresent = true
+
+                            }
+                        } else {
+                            leftsubMenu.clear()
+                            for ((i, lol) in currentListofLists.lists.withIndex()) {
+                                leftsubMenu.add(0, Menu.FIRST + i, Menu.FIRST, lol.i_name)
+                                    .setIcon(R.drawable.ic_cancel_black_24dp)
+                            }
+                            deleteFlag = true
+                        }
                     }
-                    turnOnButtons()
+
                 }
             }
-            // close drawer when item is tapped
-            userLayout.closeDrawers()
+            else
+            {
+                if (id < currentListofLists.lists.size && id >= 0)
+                {
+                    GlobalScope.launch {
+                        deleteListDataFile(currentListofLists.lists[id].i_name)
+                    }
+
+                    //remove the task from the list, and delete it from the database
+                    currentListofLists.deleteList(id, User(1))
+
+                    //update the list of lists local file to be current
+                    GlobalScope.launch {
+                        deleteListsDataFile()
+                        createListsFile(currentListofLists)
+                    }
+
+                    leftsubMenu.clear()
+                    var ii = 0
+                    for ((i, lol) in currentListofLists.lists.withIndex()) {
+                        leftsubMenu.add(0, Menu.FIRST + i, Menu.FIRST, lol.i_name)
+                        ii = i
+                    }
+                    leftsubMenu.add(
+                        0, Menu.FIRST + ii + 1, Menu.FIRST,
+                        getString(R.string.ADD_LIST_TEXT)
+                    ).setIcon(R.drawable.ic_add_box_black_24dp)
+                    leftsubMenu.add(
+                        0,
+                        Menu.FIRST + ii + 2,
+                        Menu.FIRST,
+                        getString(R.string.DELETE_LIST_TEXT)
+                    ).setIcon(R.drawable.ic_delete_black_24dp)
+                    spinner.visibility = View.INVISIBLE
+
+                    deleteFlag = false
+                }
+            }
             // Add code here to update the UI based on the item selected
             // For example, swap UI fragments here
 
@@ -1317,6 +1464,26 @@ class BaseChecklist : AppCompatActivity(){
         return when (item.itemId) {
             android.R.id.home -> {
                 userLayout.openDrawer(GravityCompat.START)
+                if (deleteFlag)
+                {
+                    leftsubMenu.clear()
+                    var ii = 0
+                    for ((i, lol) in currentListofLists.lists.withIndex()) {
+                        leftsubMenu.add(0, Menu.FIRST + i, Menu.FIRST, lol.i_name)
+                        ii = i
+                    }
+                    leftsubMenu.add(
+                        0, Menu.FIRST + ii + 1, Menu.FIRST,
+                        getString(R.string.ADD_LIST_TEXT)
+                    ).setIcon(R.drawable.ic_add_box_black_24dp)
+                    leftsubMenu.add(
+                        0,
+                        Menu.FIRST + ii + 2,
+                        Menu.FIRST,
+                        getString(R.string.DELETE_LIST_TEXT)
+                    ).setIcon(R.drawable.ic_delete_black_24dp)
+                    deleteFlag = false
+                }
                 true
             }
             R.id.users_drawer -> {
