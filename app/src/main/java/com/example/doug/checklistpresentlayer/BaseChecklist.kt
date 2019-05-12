@@ -17,6 +17,7 @@ import android.support.v4.widget.DrawerLayout
 import android.support.v7.app.ActionBar
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.Toolbar
+import android.text.TextUtils.split
 import android.view.*
 import android.view.inputmethod.InputMethodManager
 import android.widget.*
@@ -116,7 +117,7 @@ class BaseChecklist : AppCompatActivity(){
             //and nothing is done
             //add each task in currentChecklist to the page
             for (Task in currentChecklist.tasks){
-                if (Task.compdatetime != null)
+                if (Task.compdatetime != null && Task.isRecurring != false)
                 {
                     val now = LocalDate.now()
                     val formatter = DateTimeFormat.forPattern("yyyy-MM-dd")
@@ -175,7 +176,7 @@ class BaseChecklist : AppCompatActivity(){
                     taskLayout.removeAllViews()
                     for (Task in currentChecklist.tasks)
                     {
-                        if (Task.compdatetime != null)
+                        if (Task.compdatetime != null && Task.isRecurring != false)
                         {
                             val now = LocalDate.now()
                             val formatter = DateTimeFormat.forPattern("yyyy-MM-dd")
@@ -216,7 +217,7 @@ class BaseChecklist : AppCompatActivity(){
             //Same issue as "Need to do things with this information" TODO
             for (Task in currentTasks)
             {
-                if (Task.compdatetime != null)
+                if (Task.compdatetime != null && Task.isRecurring != false)
                 {
                     val now = LocalDate.now()
                     val formatter = DateTimeFormat.forPattern("yyyy-MM-dd")
@@ -418,17 +419,17 @@ class BaseChecklist : AppCompatActivity(){
                     val currentChild = TaskLayout.getChildAt(taskCount)
 
                     if (currentChild is TaskBox) {
-                        val taskSwitch = currentChild.getChildAt(1)
+                        val taskSwitch = currentChild.getChildAt(0)
 
                         if (taskSwitch is CheckBox) {
                             if (taskSwitch.isChecked) {
                                 if (!currentChild.checkCompletion()) {
                                     if (currentChild.checkReccurring()) {
-                                        createNewTask(
+                                        /*createNewTask(
                                             currentChild.getTaskText(),
                                             true,
                                             0/*needs to be something later*/
-                                        )
+                                        )*/
                                         //currentChecklist.createTask(currentChild.getTaskText(), "enable Later", User(1))
                                     }
 
@@ -925,8 +926,26 @@ class BaseChecklist : AppCompatActivity(){
 
         new_task_box.taskID = task.TaskID
 
+        var found = false
+
         if(task.isRecurring == true)
-            new_task_box.setRecurringIfNotComplete(true)
+        {
+            if(task.compdatetime != null) {
+                val recurringDays = split("-", task.recurringDays)
+
+                var today = DateTimeFormatter.ofPattern("EEE")
+
+                for (i in 0..recurringDays.size) {
+                    if (recurringDays[i] == today.toString()
+                        && task.compdatetime != LocalDate.now().toString()) {
+                        found = true
+                    }
+                }
+            }
+            else {
+                new_task_box.setRecurringIfNotComplete(true)
+            }
+        }
         if (task.compdatetime != null)
             new_task_box.completeTask()
 
@@ -1009,6 +1028,24 @@ class BaseChecklist : AppCompatActivity(){
         val taskLayout = findViewById<LinearLayout>(R.id.TaskLayout)
 
         taskLayout.addView(new_task_box)
+
+        if(found) {
+            var taskCount = 0
+            var taskFound = false
+            //Checks all current gui elements to see if they are checked
+            while (taskCount < currentChecklist.tasks.count() && !taskFound) {
+                if(currentChecklist.tasks[taskCount].TaskID == currentTask?.taskID)
+                {
+                    taskFound = true
+                }
+                else
+                {
+                    taskCount++
+                }
+            }
+
+            currentChecklist.uncompleteTask(taskCount, currentUser)
+        }
     }
 
     fun addTaskFromList(task: Task) {
@@ -1017,10 +1054,29 @@ class BaseChecklist : AppCompatActivity(){
             task.name
         )
 
+        var found = false
+
         new_task_box.taskID = task.TaskID
 
         if(task.isRecurring == true)
-            new_task_box.setRecurringIfNotComplete(true)
+        {
+            if(task.compdatetime != null) {
+                val recurringDays = split("-", task.recurringDays)
+
+                var today = DateTimeFormatter.ofPattern("EEE")
+
+                for (i in 0..recurringDays.size) {
+                    if (recurringDays[i] == today.toString()
+                        && task.compdatetime != LocalDate.now().toString()) {
+                        found = true
+                    }
+                }
+            }
+            else {
+                new_task_box.setRecurringIfNotComplete(true)
+            }
+        }
+
         if (task.compdatetime != null)
             new_task_box.completeTask()
 
@@ -1106,6 +1162,24 @@ class BaseChecklist : AppCompatActivity(){
         val taskLayout = findViewById<LinearLayout>(R.id.TaskLayout)
 
         taskLayout.addView(new_task_box)
+
+        if(found) {
+            var taskCount = 0
+            var taskFound = false
+            //Checks all current gui elements to see if they are checked
+            while (taskCount < currentChecklist.tasks.count() && !taskFound) {
+                if(currentChecklist.tasks[taskCount].TaskID == currentTask?.taskID)
+                {
+                    taskFound = true
+                }
+                else
+                {
+                    taskCount++
+                }
+            }
+
+            currentChecklist.uncompleteTask(taskCount, currentUser)
+        }
     }
 
     fun createListFile(list: Checklist) {
