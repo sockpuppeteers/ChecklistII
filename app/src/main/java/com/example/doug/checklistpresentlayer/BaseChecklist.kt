@@ -1080,14 +1080,14 @@ class BaseChecklist : AppCompatActivity(){
             if(task.compdatetime != null) {
                 val recurringDays = split("-", task.recurringDays)
 
-                var today = DateTimeFormatter.ofPattern("EEE")
+                 var today = DateTimeFormatter.ofPattern("EEE")
 
-                for (i in 0..recurringDays.size) {
-                    if (recurringDays[i] == today.toString()
-                        && task.compdatetime != LocalDate.now().toString()) {
-                        found = true
-                    }
-                }
+                 for (i in 0 until recurringDays.size - 1) {
+                     if (recurringDays[i] == today.toString()
+                         && task.compdatetime != LocalDate.now().toString()) {
+                         found = true
+                     }
+                 }
             }
             else {
                 new_task_box.setRecurringIfNotComplete(true)
@@ -1208,11 +1208,12 @@ class BaseChecklist : AppCompatActivity(){
         if(task.isRecurring == true)
         {
             if(task.compdatetime != null) {
+
                 val recurringDays = split("-", task.recurringDays)
 
                 var today = DateTimeFormatter.ofPattern("EEE")
 
-                for (i in 0..recurringDays.size) {
+                for (i in 0 until recurringDays.size - 1) {
                     if (recurringDays[i] == today.toString()
                         && task.compdatetime != LocalDate.now().toString()) {
                         found = true
