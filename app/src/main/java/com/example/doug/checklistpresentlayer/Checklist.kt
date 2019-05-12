@@ -2,6 +2,7 @@ package com.example.doug.checklistpresentlayer
 import android.provider.Settings
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import org.jetbrains.anko.db.NULL
 import org.joda.time.LocalDate
 
 
@@ -98,6 +99,17 @@ class Checklist( var name: String, var cListID : Int? ) : ListClass(cListID, nam
         if (arrayIndex >= 0 && arrayIndex < tasks.size) {
             logChange(tasks[arrayIndex].TaskID!!, tasks[arrayIndex].name, completedBy, kAction.COMPLETE_TASK)
             tasks[arrayIndex].compdatetime = LocalDate.now().toString()
+
+            GlobalScope.launch {
+                dbAccess.PutTask(tasks[arrayIndex])
+            }
+        }
+    }
+
+    fun uncompleteTask(arrayIndex: Int, completedBy: User) {
+        if (arrayIndex >= 0 && arrayIndex < tasks.size) {
+            logChange(tasks[arrayIndex].TaskID!!, tasks[arrayIndex].name, completedBy, kAction.TASK_RECURRED)
+            tasks[arrayIndex].compdatetime = null
 
             GlobalScope.launch {
                 dbAccess.PutTask(tasks[arrayIndex])
