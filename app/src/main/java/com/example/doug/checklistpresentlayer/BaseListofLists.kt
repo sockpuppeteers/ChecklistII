@@ -233,55 +233,6 @@ class BaseListofLists : AppCompatActivity(){
                                 popupPresent = false
                             } }
 
-                            //don't delete this, it will be useful later
-//                            val popupFunctionWindow = PopupWindow(this)
-//
-//                            val taskFunctionLayoutView =
-//                                layoutInflater.inflate(R.layout.task_functions_layout, null)
-//
-//                            popupFunctionWindow.contentView = taskFunctionLayoutView
-//
-//                            val DeleteButton = taskFunctionLayoutView.FunctionDeleteButton
-//
-//                            val CloseButton = taskFunctionLayoutView.FunctionCloseButton
-//
-//                            val CloseListener = View.OnClickListener {
-//                                popupFunctionWindow.dismiss()
-//
-//                                popupPresent = false
-//                            }
-//
-//                            val DeleteListener = View.OnClickListener {
-//                                for(i in TaskLayout.childCount downTo 0 step 1)
-//                                {
-//                                    val tempChild = TaskLayout.getChildAt(i)
-//                                    if(tempChild is TaskBox)
-//                                    {
-//                                        if(tempChild.getTaskText() == currentTask?.getTaskText())
-//                                        {
-//                                            TaskLayout.removeView(TaskLayout.getChildAt(i))
-//                                            currentListofLists.deleteList(i, User(1))
-//                                        }
-//                                    }
-//                                }
-//
-//                                popupFunctionWindow.dismiss()
-//
-//                                popupPresent = false
-//                            }
-//
-//                            popupFunctionWindow.contentView = taskFunctionLayoutView
-//
-//                            DeleteButton.setOnClickListener(DeleteListener)
-//
-//                            CloseButton.setOnClickListener(CloseListener)
-//
-//                            popupFunctionWindow.setOnDismissListener {
-//                                PopupWindow.OnDismissListener {
-//                                    popupPresent = false
-//                                }
-//                            }
-
                             new_list_box.setOnClickListener{
                                 val tempIntent = Intent(this, BaseChecklist::class.java).apply {
                                     putExtra("ListName", popup_edittext.text.toString())
