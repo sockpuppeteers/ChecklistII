@@ -311,10 +311,10 @@ class BaseChecklist : AppCompatActivity(){
                             turnOnButtons()
                             turnOffButtons()
 
-                            val listid = currentListofLists.lists[id].listID
-                            currentChecklist.tasks = db.GetTasks(listid!!)
-                            currentChecklist.users = db.GetUsers(listid)
-                            currentChecklist.changes = db.GetChanges(listid)
+                            currentChecklist.listID = currentListofLists.lists[id].listID
+                            currentChecklist.tasks = db.GetTasks(currentChecklist.listID!!)
+                            currentChecklist.users = db.GetUsers(currentChecklist.listID!!)
+                            currentChecklist.changes = db.GetChanges(currentChecklist.listID!!)
                             currentChecklist.i_name = currentListofLists.lists[id].i_name
                             currentListofLists.lists = db.GetListofLists(currentUser.Username)
 
