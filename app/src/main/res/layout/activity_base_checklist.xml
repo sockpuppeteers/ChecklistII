@@ -39,23 +39,23 @@
                         android:layout_marginEnd="8dp" app:layout_constraintStart_toStartOf="parent"
                         android:layout_marginStart="8dp"
                         android:visibility="invisible" app:layout_constraintTop_toTopOf="parent"/>
-                <ScrollView
+                <android.support.v7.widget.RecyclerView
                         android:layout_width="0dp"
                         android:layout_height="0dp"
                         app:layout_constraintStart_toStartOf="parent"
                         android:layout_marginStart="32dp" app:layout_constraintEnd_toEndOf="parent"
                         android:layout_marginEnd="32dp"
-                        android:id="@+id/TaskScrollView"
+                        android:id="@+id/simple_recyclerview"
                         app:layout_constraintHorizontal_bias="1.0" android:layout_marginBottom="8dp"
                         app:layout_constraintBottom_toTopOf="@+id/linearLayout"
                         app:layout_constraintTop_toBottomOf="@+id/toolbar">
-                    <LinearLayout
-                            android:orientation="vertical"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content" android:id="@+id/TaskLayout"
-                            android:gravity="center_horizontal">
-                    </LinearLayout>
-                </ScrollView>
+                    <!--<LinearLayout-->
+                            <!--android:orientation="vertical"-->
+                            <!--android:layout_width="match_parent"-->
+                            <!--android:layout_height="wrap_content" android:id="@+id/TaskLayout"-->
+                            <!--android:gravity="center_horizontal">-->
+                    <!--</LinearLayout>-->
+                </android.support.v7.widget.RecyclerView>
                 <LinearLayout
                         android:orientation="horizontal"
                         android:layout_height="wrap_content" android:layout_marginBottom="8dp"

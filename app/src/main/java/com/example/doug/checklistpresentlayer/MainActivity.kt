@@ -28,7 +28,8 @@ class MainActivity : AppCompatActivity() {
         JodaTimeAndroid.init(this)
         setContentView(R.layout.activity_login)
         val ctext = this
-
+        val tempIntent = Intent(this, TestActivity::class.java)
+        startActivity(tempIntent)
         var user: UserPage
         val spinner : ProgressBar = findViewById(R.id.progress_bar)
         val error1 : TextView = findViewById(R.id.WrongText)
@@ -45,16 +46,16 @@ class MainActivity : AppCompatActivity() {
 
                 if (!lists.isEmpty()){
                     //Go to the checklist page of the first checklist in lists
-                    val tempIntent = Intent(this, BaseChecklist::class.java).apply {
-                        putExtra("ListName", lists[0].i_name)
-                        putExtra("UserName", user.ViewUserName())
-                        putExtra("ChecklistID", lists[0].listID)
-                        putExtra("uname", user.ViewUserName())
-                        putExtra("fname", user.ViewFName())
-                        putExtra("lname", user.ViewLName())
-                        putExtra("UserID", user.ViewID())
-                    }
-                    startActivity(tempIntent)
+//                    val tempIntent = Intent(this, BaseChecklist::class.java).apply {
+//                        putExtra("ListName", lists[0].i_name)
+//                        putExtra("UserName", user.ViewUserName())
+//                        putExtra("ChecklistID", lists[0].listID)
+//                        putExtra("uname", user.ViewUserName())
+//                        putExtra("fname", user.ViewFName())
+//                        putExtra("lname", user.ViewLName())
+//                        putExtra("UserID", user.ViewID())
+//                    }
+//                    startActivity(tempIntent)
                 }
 
                 //go to list of lists page
