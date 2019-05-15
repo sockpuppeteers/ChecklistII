@@ -4,8 +4,11 @@ import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.content.Intent
 import android.content.pm.ActivityInfo
+import com.google.gson.Gson
 import kotlinx.android.synthetic.main.activity_login.*
 import kotlinx.android.synthetic.main.activity_registration.*
+import java.io.File
+import java.io.FileOutputStream
 import java.nio.charset.Charset
 import java.util.regex.Pattern
 
@@ -28,18 +31,32 @@ class Registration : AppCompatActivity() {
                 pwMatch = false
             if (userAscii && pwAscii && pwMatch && pwStrong(rPW1.text.toString())) {
                 //error will be empty if everything was successful
-                var error: String = db.RegisterUser(rUserName.text.toString(),
+                var user: User = db.RegisterUser(rUserName.text.toString(),
                     rEmail.text.toString(), rFName.text.toString(), rLName.text.toString(),
                     rPW1.text.toString())
-                if (error != "")
-                    rErrorText.text = error
+                if (user.Error != "" && user.Error != null)
+                    rErrorText.text = user.Error
+
                 //else will be called if there were no errors
                 else {
-                    //send the data to the next page
-                    val tempIntent = Intent(this, BaseListofLists::class.java).apply {
-                        putExtra("uname", rUserName.text.toString())
-                        putExtra("fname", rFName.text.toString())
-                        putExtra("lname", rLName.text.toString())
+                    var lists = ListofLists(user.Username, null, user.UserID!!)
+
+                    //create a new checklist
+                    lists.PostChecklist(ListClass(null, "My First List"))
+
+                    //update local file
+                    deleteListsDataFile()
+                    createListsFile(lists)
+
+                    //Go to the checklist page of the my first list
+                    val tempIntent = Intent(this, BaseChecklist::class.java).apply {
+                        putExtra("ListName", lists.lists[0].i_name)
+                        putExtra("UserName", user.Username)
+                        putExtra("ChecklistID", lists.lists[0].listID)
+                        putExtra("uname", user.Username)
+                        putExtra("fname", user.FName)
+                        putExtra("lname", user.LName)
+                        putExtra("UserID", user.UserID!!)
                     }
                     startActivity(tempIntent)
                 }
@@ -50,5 +67,35 @@ class Registration : AppCompatActivity() {
     //passwords must be at least 8 characters long
     fun pwStrong(str : String) : Boolean {
         return str.length >= 8
+    }
+
+    fun createListsFile(lists: ListofLists) {
+        //convert lists to a JSON string
+        val gson = Gson()
+        val userJson = gson.toJson(lists.lists)
+
+        //context will give us access to our local files directory
+        var context = applicationContext
+
+        val filename = "LISTS"
+        val directory = context.filesDir
+
+        //write the file LISTS to local directory
+        val file = File(directory, filename)
+        FileOutputStream(file).use {
+            it.write(userJson.toByteArray())
+        }
+    }
+
+    //deletes the file that contains list of lists data
+    fun deleteListsDataFile(){
+        //context will give us access to our local files directory
+        var context = applicationContext
+
+        val filename = "LISTS"
+        val directory = context.filesDir
+
+        //delete the LISTS file
+        File(directory, filename).delete()
     }
 }

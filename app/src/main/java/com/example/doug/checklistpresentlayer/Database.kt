@@ -90,8 +90,8 @@ class Database {
         return tasks
     }
 
-    fun RegisterUser(Username: String, Email: String, FName: String, LName: String, PW1: String) : String {
-        var error = ""
+    fun RegisterUser(Username: String, Email: String, FName: String, LName: String, PW1: String) : User {
+        var newUser = User(null, Username, FName, LName, PW1, "")
         runBlocking {
             //make a GET request to the api to see if a user with the given username already exists
             val (request, response, result) = Fuel.get("https://sockpuppeteerapi3.azurewebsites.net/Api/Users/GetString/$Username").awaitStringResponseResult()
@@ -99,26 +99,32 @@ class Database {
             //if the username is taken, set an error message
             //otherwise do nothing
             result.fold(
-                { error = "Username unavailable"}, {}
+                { newUser.Error = "Username unavailable"}, {}
             )
         }
 
         //if there is no error then this gets called
         //and we can post the data to the database
-        if (error == "") {
+        if (newUser.Error == "") {
             //create a json model of a user object
-            val newUser = User(null, Username, FName, LName, PW1, null)
             val gson = Gson()
             val json = gson.toJson(newUser)
 
-            //post the object to the database
-            Fuel.post("https://sockpuppeteerapi3.azurewebsites.net/api/users/")
-                .header("Content-Type" to "application/json")
-                .body(json.toString())
-                .response { req, res, result -> /* you could do something with the response here */ }
+            runBlocking{
+                //Make a post request
+                val (request, response, result) = Fuel.post("https://sockpuppeteerapi3.azurewebsites.net/api/users/")
+                    .header("Content-Type" to "application/json")
+                    .body(json.toString()).awaitStringResponseResult()
+
+                //if the post is successful, set the userID, otherwise set error
+                result.fold(
+                    { data -> newUser = gson.fromJson(data, User::class.java) },
+                    { newUser.Error = "Something unexpected happened" }
+                )
+            }
         }
 
-        return error
+        return newUser
     }
 
     fun PostTask(task: Task) : Int {
