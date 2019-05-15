@@ -517,7 +517,7 @@ class BaseChecklist : AppCompatActivity(){
                     val popup_edittext = popupView.PopupMainView.PopupEditText
 
                     //Retrieves the name of the task if the name is long enough
-                    if (popup_edittext.text.toString().length >= 1) {
+                    if (popup_edittext.text.toString().isNotEmpty() && popup_edittext.text.toString().length < 40) {
                         if (hasInternetConnection()) {
                             createNewTask(popup_edittext.text.toString(), false, 0/*needs to be something later*/)
                             //TODO make a popup to tell the user no internet
@@ -908,12 +908,12 @@ class BaseChecklist : AppCompatActivity(){
 
                     val newName = taskSettingsChangeNameLayoutView.NewNameText.text.toString()
 
-                    currentTask?.ChangeName(newName)
-
-                    currentChecklist.changeTaskName(taskCount, currentUser, newName)
+                    if (newName.length < 40){
+                        currentTask?.ChangeName(newName)
+                        currentChecklist.changeTaskName(taskCount, currentUser, newName)
+                    }
 
                     popupPresent = false
-
                     popupSettingsChangeNameWindow.dismiss()
                 }
 
