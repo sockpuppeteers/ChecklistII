@@ -57,25 +57,50 @@ class MainActivity : AppCompatActivity() {
                     startActivity(tempIntent)
                 }
 
-                //go to list of lists page
                 else {
-                    val tempIntent = Intent(this, BaseListofLists::class.java).apply {
+                    var lists = ListofLists(user.ViewUserName(), null, user.ViewID()!!)
+
+                    //create a new checklist
+                    lists.PostChecklist(ListClass(null, "My First List"))
+
+                    //update local file
+                    deleteListsDataFile()
+                    createListsFile(lists)
+
+                    //Go to the checklist page of the my first list
+                    val tempIntent = Intent(this, BaseChecklist::class.java).apply {
+                        putExtra("ListName", lists.lists[0].i_name)
+                        putExtra("UserName", user.ViewUserName())
+                        putExtra("ChecklistID", lists.lists[0].listID)
                         putExtra("uname", user.ViewUserName())
                         putExtra("fname", user.ViewFName())
                         putExtra("lname", user.ViewLName())
-                        putExtra("UserID",user.ViewID())
+                        putExtra("UserID", user.ViewID()!!)
                     }
                     startActivity(tempIntent)
                 }
             }
 
-            //go to list of lists page
+            //create a new checklist called "My First List"
             else {
-                val tempIntent = Intent(this, BaseListofLists::class.java).apply {
+                var lists = ListofLists(user.ViewUserName(), null, user.ViewID()!!)
+
+                //create a new checklist
+                lists.PostChecklist(ListClass(null, "My First List"))
+
+                //update local file
+                deleteListsDataFile()
+                createListsFile(lists)
+
+                //Go to the checklist page of the my first list
+                val tempIntent = Intent(this, BaseChecklist::class.java).apply {
+                    putExtra("ListName", lists.lists[0].i_name)
+                    putExtra("UserName", user.ViewUserName())
+                    putExtra("ChecklistID", lists.lists[0].listID)
                     putExtra("uname", user.ViewUserName())
                     putExtra("fname", user.ViewFName())
                     putExtra("lname", user.ViewLName())
-                    putExtra("UserID",user.ViewID())
+                    putExtra("UserID", user.ViewID()!!)
                 }
                 startActivity(tempIntent)
             }
@@ -112,14 +137,51 @@ class MainActivity : AppCompatActivity() {
                             //so that they won't have to login next time
                             saveLoginLocally(user)
 
-                            //Go to the list of lists page
-                            val tempIntent = Intent(ctext, BaseListofLists::class.java).apply {
-                                putExtra("uname", user.ViewUserName())
-                                putExtra("fname", user.ViewFName())
-                                putExtra("lname", user.ViewLName())
-                                putExtra("UserID", user.ViewID())
+                            var listofLists = db.GetListofLists(user.ViewUserName())
+
+                            if (listofLists.isEmpty()){
+                                var lists = ListofLists(user.ViewUserName(), null, user.ViewID()!!)
+
+                                //create a new checklist
+                                lists.PostChecklist(ListClass(null, "My First List"))
+
+                                //update local file
+                                deleteListsDataFile()
+                                createListsFile(lists)
+
+                                //Go to the checklist page of the my first list
+                                val tempIntent = Intent(ctext, BaseChecklist::class.java).apply {
+                                    putExtra("ListName", lists.lists[0].i_name)
+                                    putExtra("UserName", user.ViewUserName())
+                                    putExtra("ChecklistID", lists.lists[0].listID)
+                                    putExtra("uname", user.ViewUserName())
+                                    putExtra("fname", user.ViewFName())
+                                    putExtra("lname", user.ViewLName())
+                                    putExtra("UserID", user.ViewID()!!)
+                                }
+                                startActivity(tempIntent)
                             }
-                            startActivity(tempIntent)
+
+                            else {
+                                var lists = ListofLists(user.ViewUserName(), null, user.ViewID()!!)
+                                lists.lists = listofLists
+
+                                //update local file
+                                deleteListsDataFile()
+                                createListsFile(lists)
+
+                                //Go to the checklist page of the first checklist in lists
+                                val tempIntent = Intent(ctext, BaseChecklist::class.java).apply {
+                                    putExtra("ListName", lists.lists[0].i_name)
+                                    putExtra("UserName", user.ViewUserName())
+                                    putExtra("ChecklistID", lists.lists[0].listID)
+                                    putExtra("uname", user.ViewUserName())
+                                    putExtra("fname", user.ViewFName())
+                                    putExtra("lname", user.ViewLName())
+                                    putExtra("UserID", user.ViewID()!!)
+                                }
+                                startActivity(tempIntent)
+                            }
                         }
 
                         //turns on loading spinner
@@ -252,5 +314,23 @@ class MainActivity : AppCompatActivity() {
 
         //delete the file
         File(directory, filename).delete()
+    }
+
+    fun createListsFile(lists: ListofLists) {
+        //convert lists to a JSON string
+        val gson = Gson()
+        val userJson = gson.toJson(lists.lists)
+
+        //context will give us access to our local files directory
+        var context = applicationContext
+
+        val filename = "LISTS"
+        val directory = context.filesDir
+
+        //write the file LISTS to local directory
+        val file = File(directory, filename)
+        FileOutputStream(file).use {
+            it.write(userJson.toByteArray())
+        }
     }
 }
