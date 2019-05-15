@@ -17,7 +17,9 @@ import android.support.v7.widget.Toolbar
 import android.view.MenuItem
 import android.view.View
 import android.widget.TextView
+import com.google.gson.Gson
 import java.io.File
+import java.io.FileInputStream
 
 //This is actually the nav drawer functionality from user profile page
 class UserLogin : AppCompatActivity() {
@@ -50,6 +52,11 @@ class UserLogin : AppCompatActivity() {
             val tempIntent = Intent(this, MainActivity::class.java)
             startActivity(tempIntent)
         }
+
+        if (userFileExists()){
+            if (getUserFromFile().ViewUserName() != UName)
+                logout.visibility = View.INVISIBLE
+        }
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
@@ -77,5 +84,28 @@ class UserLogin : AppCompatActivity() {
 
         //delete the USERDATA file
         File(directory, filename).delete()
+    }
+
+    fun userFileExists() : Boolean {
+        return File(applicationContext.filesDir, "USERDATA").exists()
+    }
+
+    //we don't have to check if the file exists in this function
+    //because we call userFileExists() before calling this
+    //however, we might need some other error checking in here
+    fun getUserFromFile() : UserPage {
+        //context will give us access to our local files directory
+        var context = applicationContext
+
+        val filename = "USERDATA"
+        val directory = context.filesDir
+
+        //read from USERDATA and store it as a string
+        val file = File(directory, filename)
+        val fileData = FileInputStream(file).bufferedReader().use { it.readText() }
+
+        //create a UserPage object based on the JSON from the file
+        val gson = Gson()
+        return gson.fromJson(fileData, UserPage::class.java)
     }
 }

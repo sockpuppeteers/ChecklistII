@@ -36,7 +36,7 @@
     <string name="LIST_MENU_TITLE">Lists</string>
     <string name="SEARCH_TEXT">Search Users</string>
     <string name="LOGO_TEXT">Logo</string>
-    <string name="INCORRECT_TEXT">Incorrect username or password</string>
+    <string name="INCORRECT_TEXT"><font fgcolor='#FF0000'>Incorrect username or password</font></string>
     <string name="SOMETHING_TEXT">Something went wrong</string>
     <string name="LIST_TEXT">List of Lists</string>
     <string name="ADD_LIST_TEXT">New List...</string>
