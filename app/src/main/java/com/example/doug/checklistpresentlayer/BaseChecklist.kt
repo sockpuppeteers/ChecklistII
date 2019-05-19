@@ -17,6 +17,8 @@ import android.support.v4.view.GravityCompat
 import android.support.v4.widget.DrawerLayout
 import android.support.v7.app.ActionBar
 import android.support.v7.app.AppCompatActivity
+import android.support.v7.widget.LinearLayoutManager
+import android.support.v7.widget.RecyclerView
 import android.support.v7.widget.Toolbar
 import android.text.TextUtils.split
 import android.view.*
@@ -59,8 +61,9 @@ class BaseChecklist : AppCompatActivity(){
     var popupPresent = false
 
     var currentUser = User(1)
-    var currentTask: TaskBox? = null
+    var currentTask: ChecklistViewModel = ChecklistViewModel("")
     var currentListofLists = ListofLists("Your CheckLists", "none")
+    var currentListView: ArrayList<ChecklistViewModel> = ArrayList()
 
     private lateinit var userLayout: DrawerLayout
     private lateinit var rightnavigationView: NavigationView
@@ -71,6 +74,8 @@ class BaseChecklist : AppCompatActivity(){
     private lateinit var rightsubMenu: SubMenu
     private lateinit var leftsubMenu: SubMenu
     private lateinit var taskLayout: LinearLayout
+    private lateinit var adapter: ChecklistAdapter
+    private lateinit var recyclerView: RecyclerView
 
     //Intialize things here
     init {
@@ -103,7 +108,9 @@ class BaseChecklist : AppCompatActivity(){
         rightsubMenu = rightmenu.addSubMenu(getString(R.string.USER_MENU_TITLE))
         leftsubMenu = leftmenu.addSubMenu(getString(R.string.LIST_MENU_TITLE))
         userLayout = findViewById(R.id.user_drawer_layout)
-        taskLayout = findViewById(R.id.TaskLayout)
+        recyclerView = findViewById(R.id.checklist_recyclerview)
+        recyclerView.layoutManager = LinearLayoutManager(this)
+        recyclerView.setHasFixedSize(true)
 
         val spinner : ProgressBar = findViewById(R.id.progress_bar2)
 
@@ -139,6 +146,8 @@ class BaseChecklist : AppCompatActivity(){
                 else
                     addTaskFromList(Task)
             }
+            adapter = ChecklistAdapter(this, recyclerView, currentListView, this::popupPresent, layoutInflater, this::currentTask, this::currentChecklist, currentUser)
+            recyclerView.adapter = adapter
 
             println("loaded list from local file")
 
@@ -181,7 +190,7 @@ class BaseChecklist : AppCompatActivity(){
                     }
                     leftsubMenu.add(0, Menu.FIRST + ii + 1, Menu.FIRST, getString(R.string.ADD_LIST_TEXT)).setIcon(R.drawable.ic_add_box_black_24dp)
                     leftsubMenu.add(0, Menu.FIRST + ii + 2, Menu.FIRST, getString(R.string.DELETE_LIST_TEXT)).setIcon(R.drawable.ic_delete_black_24dp)
-                    taskLayout.removeAllViews()
+                    currentListView.removeAll(currentListView)
                     for (Task in currentChecklist.tasks)
                     {
                         if (Task.compdatetime != null && Task.isRecurring != false)
@@ -202,11 +211,11 @@ class BaseChecklist : AppCompatActivity(){
                         else if (Task.name != "")
                             addTaskFromList(Task)
                     }
+                    adapter.setDataset(currentListView)
                     spinner.visibility = View.INVISIBLE
                 }
                 deleteListDataFile()
                 createListFile(currentChecklist)
-
 
                 /*have a popup or something telling the user that the list has been updated*/
                 turnOnButtons()
@@ -244,6 +253,8 @@ class BaseChecklist : AppCompatActivity(){
                     addTask(Task)
 
             }
+            adapter = ChecklistAdapter(this, recyclerView, currentListView, this::popupPresent, layoutInflater, this::currentTask, this::currentChecklist, currentUser)
+            recyclerView.adapter = adapter
 
             //create a local file with the data
             GlobalScope.launch {
@@ -252,17 +263,6 @@ class BaseChecklist : AppCompatActivity(){
             spinner.visibility = View.INVISIBLE
 
         }
-
-
-        //allows the opening and closing of a nav drawer on the right side of the screen.
-//        val menuRight = findViewById<View>(R.id.menuRight) as ImageButton
-//        menuRight.setOnClickListener {
-//            if (userLayout.isDrawerOpen(GravityCompat.END)) {
-//                userLayout.closeDrawer(GravityCompat.END)
-//            } else {
-//                userLayout.openDrawer(GravityCompat.END)
-//            }
-//        }
 
         //populates the submenu with the usernames of everyone on the list (stored in mUserList)
         //Menu.FIRST + i gives each a unique ID, used later in the program.
@@ -326,7 +326,7 @@ class BaseChecklist : AppCompatActivity(){
                                     title = currentChecklist.i_name
                                     if (id < currentListofLists.lists.size && id >= 0) {
                                         val up = currentListofLists.lists[id]
-                                        taskLayout.removeAllViews()
+                                        currentListView.removeAll(currentListView)
                                         for (Task in currentChecklist.tasks) {
                                             if (Task.compdatetime != null) {
                                                 val now = LocalDate.now()
@@ -342,6 +342,7 @@ class BaseChecklist : AppCompatActivity(){
                                                 addTaskFromList(Task)
                                         }
                                     }
+                                    adapter.setDataset(currentListView)
                                     spinner.visibility = View.INVISIBLE
                                     // close drawer when item is tapped
                                 }
@@ -561,10 +562,10 @@ class BaseChecklist : AppCompatActivity(){
         //Create the click listener for the checkoff button
         val checkoffListener = View.OnClickListener {
             if (hasInternetConnection()) {
-                var taskCount = TaskLayout.childCount - 1
+                var taskCount = recyclerView.childCount - 1
                 //Checks all current gui elements to see if they are checked
                 while (taskCount >= 0) {
-                    val currentChild = TaskLayout.getChildAt(taskCount)
+                    val currentChild = recyclerView.getChildAt(taskCount)
 
                     if (currentChild is TaskBox) {
                         val taskSwitch = currentChild.getChildAt(0)
@@ -881,7 +882,7 @@ class BaseChecklist : AppCompatActivity(){
                 }
 
                 taskSettingsRecurringLayoutView.RecursionSwitch.isChecked =
-                    currentTask?.checkReccurring() != null && currentTask?.checkReccurring() == true
+                    currentTask?.isRecurring != null && currentTask?.isRecurring == true
 
 
                 popupSettingsRecurringWindow.setOnDismissListener {
@@ -909,7 +910,7 @@ class BaseChecklist : AppCompatActivity(){
                     val newName = taskSettingsChangeNameLayoutView.NewNameText.text.toString()
 
                     if (newName.length < 40){
-                        currentTask?.ChangeName(newName)
+                        currentTask?.ChecklistText = newName
                         currentChecklist.changeTaskName(taskCount, currentUser, newName)
                     }
 
@@ -941,7 +942,7 @@ class BaseChecklist : AppCompatActivity(){
                 popupPresent = false
             }
 
-            taskSettingsLayoutView.taskNameView.text = currentTask?.getTaskText()
+            taskSettingsLayoutView.taskNameView.text = currentTask?.ChecklistText
 
             popupSettingsWindow.isFocusable = true
 
@@ -962,17 +963,12 @@ class BaseChecklist : AppCompatActivity(){
     }
 
     fun createNewTask(TaskText: String, IsReaccuring: Boolean, taskID: Int?) {
-        var new_task_box = TaskBox(
-            this,
-            TaskText
-        )
+        var new_task_box = ChecklistViewModel(TaskText)
 
-        new_task_box.taskID = taskID
+        new_task_box.taskID = taskID as Int
 
         if(IsReaccuring)
             new_task_box.setRecurringIfNotComplete(IsReaccuring)
-
-        val mainView = findViewById<ScrollView>(R.id.TaskScrollView)
 
         //Adds the task to the checklist
         currentChecklist.createTask(TaskText, null, currentUser, null, currentChecklist.listID!!)
@@ -1004,24 +1000,13 @@ class BaseChecklist : AppCompatActivity(){
 
         //Sets the delete button to remove the task
         taskFunctionLayoutView.FunctionDeleteButton.setOnClickListener {
-            for(i in TaskLayout.childCount downTo 0 step 1)
-            {
-                val tempChild = TaskLayout.getChildAt(i)
-                if(tempChild is TaskBox)
-                {
-                    if(tempChild == currentTask)
-                    {
-                        TaskLayout.removeView(TaskLayout.getChildAt(i))
-                        //remove the task from the list, and delete it from the database
-                        currentChecklist.deleteTask(i, currentUser)
+            currentListView.remove(currentTask)
+            adapter.setDataset(currentListView)
 
                         //update the local file
-                        GlobalScope.launch {
-                            deleteListDataFile()
-                            createListFile(currentChecklist)
-                        }
-                    }
-                }
+            GlobalScope.launch {
+                deleteListDataFile()
+                createListFile(currentChecklist)
             }
 
             popupFunctionWindow.dismiss()
@@ -1037,42 +1022,15 @@ class BaseChecklist : AppCompatActivity(){
             }
         }
 
-        //Sets the on lick listener for the new task gui element
-        new_task_box.setOnClickListener{
+        //val taskLayout = findViewById<LinearLayout>(R.id.TaskLayout)
 
-            if(!popupPresent && taskFlag) {
-
-                popupPresent = true
-
-                popupFunctionWindow.isFocusable()
-
-                popupFunctionWindow.showAtLocation(mainView, Gravity.CENTER, 0, 0)
-
-                for(i in TaskLayout.childCount downTo 0 step 1)
-                {
-                    val tempChild = TaskLayout.getChildAt(i)
-                    if(tempChild is TaskBox)
-                    {
-                        if(tempChild == new_task_box) {
-                            currentTask = tempChild
-                        }
-                    }
-                }
-            }
-        }
-
-        val taskLayout = findViewById<LinearLayout>(R.id.TaskLayout)
-
-        taskLayout.addView(new_task_box)
+        currentListView.add(new_task_box)
     }
 
     fun addTask(task: Task) {
-        var new_task_box = TaskBox(
-            this,
-            task.name
-        )
+        var new_task_box = ChecklistViewModel(task.name)
 
-        new_task_box.taskID = task.TaskID
+        new_task_box.taskID = task.TaskID as Int
 
         var found = false
 
@@ -1096,8 +1054,6 @@ class BaseChecklist : AppCompatActivity(){
         }
         if (task.compdatetime != null)
             new_task_box.completeTask()
-
-        val mainView = findViewById<ScrollView>(R.id.TaskScrollView)
 
         //Adds the task to the checklist
         currentChecklist.tasks.add(task)
@@ -1123,18 +1079,8 @@ class BaseChecklist : AppCompatActivity(){
 
         //Sets the delete button to remove the task
         taskFunctionLayoutView.FunctionDeleteButton.setOnClickListener {
-            for(i in TaskLayout.childCount downTo 0 step 1)
-            {
-                val tempChild = TaskLayout.getChildAt(i)
-                if(tempChild is TaskBox)
-                {
-                    if(tempChild == currentTask)
-                    {
-                        TaskLayout.removeView(TaskLayout.getChildAt(i))
-                        currentChecklist.deleteTask(i, currentUser)
-                    }
-                }
-            }
+            currentListView.remove(currentTask)
+            adapter.setDataset(currentListView)
 
             popupFunctionWindow.dismiss()
 
@@ -1149,33 +1095,7 @@ class BaseChecklist : AppCompatActivity(){
             }
         }
 
-        //Sets the on lick listener for the new task gui element
-        new_task_box.setOnClickListener{
-
-            if(!popupPresent) {
-
-                popupPresent = true
-
-                popupFunctionWindow.isFocusable()
-
-                popupFunctionWindow.showAtLocation(mainView, Gravity.CENTER, 0, 0)
-
-                for(i in TaskLayout.childCount downTo 0 step 1)
-                {
-                    val tempChild = TaskLayout.getChildAt(i)
-                    if(tempChild is TaskBox)
-                    {
-                        if(tempChild == new_task_box) {
-                            currentTask = tempChild
-                        }
-                    }
-                }
-            }
-        }
-
-        val taskLayout = findViewById<LinearLayout>(R.id.TaskLayout)
-
-        taskLayout.addView(new_task_box)
+        currentListView.add(new_task_box)
 
         if(found) {
             var taskCount = 0
@@ -1197,14 +1117,11 @@ class BaseChecklist : AppCompatActivity(){
     }
 
     fun addTaskFromList(task: Task) {
-        var new_task_box = TaskBox(
-            this,
-            task.name
-        )
+        var new_task_box = ChecklistViewModel(task.name)
 
         var found = false
 
-        new_task_box.taskID = task.TaskID
+        new_task_box.taskID = task.TaskID as Int
 
         if(task.isRecurring == true)
         {
@@ -1229,8 +1146,6 @@ class BaseChecklist : AppCompatActivity(){
         if (task.compdatetime != null)
             new_task_box.completeTask()
 
-        val mainView = findViewById<ScrollView>(R.id.TaskScrollView)
-
         val popupFunctionWindow = PopupWindow(this)
 
         val taskFunctionLayoutView =
@@ -1252,23 +1167,13 @@ class BaseChecklist : AppCompatActivity(){
 
         //Sets the delete button to remove the task
         taskFunctionLayoutView.FunctionDeleteButton.setOnClickListener {
-            for(i in TaskLayout.childCount downTo 0 step 1)
-            {
-                val tempChild = TaskLayout.getChildAt(i)
-                if(tempChild is TaskBox)
-                {
-                    if(tempChild == currentTask)
-                    {
-                        TaskLayout.removeView(TaskLayout.getChildAt(i))
-                        currentChecklist.deleteTask(i, currentUser)
+            currentListView.remove(currentTask)
+            adapter.setDataset(currentListView)
 
-                        //remake the local file
-                        GlobalScope.launch {
-                            deleteListDataFile()
-                            createListFile(currentChecklist)
-                        }
-                    }
-                }
+            //update the local file
+            GlobalScope.launch {
+                deleteListDataFile()
+                createListFile(currentChecklist)
             }
 
             popupFunctionWindow.dismiss()
@@ -1284,33 +1189,7 @@ class BaseChecklist : AppCompatActivity(){
             }
         }
 
-        //Sets the on lick listener for the new task gui element
-        new_task_box.setOnClickListener{
-
-            if(!popupPresent) {
-
-                popupPresent = true
-
-                popupFunctionWindow.isFocusable()
-
-                popupFunctionWindow.showAtLocation(mainView, Gravity.CENTER, 0, 0)
-
-                for(i in TaskLayout.childCount downTo 0 step 1)
-                {
-                    val tempChild = TaskLayout.getChildAt(i)
-                    if(tempChild is TaskBox)
-                    {
-                        if(tempChild == new_task_box) {
-                            currentTask = tempChild
-                        }
-                    }
-                }
-            }
-        }
-
-        val taskLayout = findViewById<LinearLayout>(R.id.TaskLayout)
-
-        taskLayout.addView(new_task_box)
+        currentListView.add(new_task_box)
 
         if(found) {
             var taskCount = 0
