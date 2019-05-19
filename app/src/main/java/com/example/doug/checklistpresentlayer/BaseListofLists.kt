@@ -142,18 +142,18 @@ class BaseListofLists : AppCompatActivity(){
 
             //Set The action to be executed when the list in clicked
             tempBox.setOnClickListener{
-//                val tempIntent = Intent(this, BaseChecklist::class.java).apply {
-//                    putExtra("ListName", ListClass.i_name)
-//                    putExtra("UserName", UName)
-//                    putExtra("ChecklistID", ListClass.listID)
-//                    putExtra("uname", UName)
-//                    putExtra("fname", FName)
-//                    putExtra("lname", LName)
-//                    putExtra("UserID",intent.getIntExtra("UserID", 0))
-//                }
-//
-//                //Start the BaseChecklist Activity
-//                startActivity(tempIntent)
+                val tempIntent = Intent(this, BaseChecklist::class.java).apply {
+                    putExtra("ListName", ListClass.i_name)
+                    putExtra("UserName", UName)
+                    putExtra("ChecklistID", ListClass.listID)
+                    putExtra("uname", UName)
+                    putExtra("fname", FName)
+                    putExtra("lname", LName)
+                    putExtra("UserID",intent.getIntExtra("UserID", 0))
+                }
+
+                //Start the BaseChecklist Activity
+                startActivity(tempIntent)
             }
 
             //Add box to page
@@ -234,16 +234,16 @@ class BaseListofLists : AppCompatActivity(){
                             } }
 
                             new_list_box.setOnClickListener{
-//                                val tempIntent = Intent(this, BaseChecklist::class.java).apply {
-//                                    putExtra("ListName", popup_edittext.text.toString())
-//                                    putExtra("UserName", UName)
-//                                    putExtra("ChecklistID", currentListofLists.lists.last().listID)
-//                                    putExtra("uname", UName)
-//                                    putExtra("fname", FName)
-//                                    putExtra("lname", LName)
-//                                    putExtra("UserID",intent.getIntExtra("UserID", 0))
-//                                }
-//                                startActivity(tempIntent)
+                                val tempIntent = Intent(this, BaseChecklist::class.java).apply {
+                                    putExtra("ListName", popup_edittext.text.toString())
+                                    putExtra("UserName", UName)
+                                    putExtra("ChecklistID", currentListofLists.lists.last().listID)
+                                    putExtra("uname", UName)
+                                    putExtra("fname", FName)
+                                    putExtra("lname", LName)
+                                    putExtra("UserID",intent.getIntExtra("UserID", 0))
+                                }
+                                startActivity(tempIntent)
                             }
 
                             taskLayout.addView(new_list_box)

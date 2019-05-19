@@ -28,8 +28,8 @@ class MainActivity : AppCompatActivity() {
         JodaTimeAndroid.init(this)
         setContentView(R.layout.activity_login)
         val ctext = this
-        val tempIntent = Intent(this, TestActivity::class.java)
-        startActivity(tempIntent)
+//        val tempIntent = Intent(this, TestActivity::class.java)
+//        startActivity(tempIntent)
         var user: UserPage
         val spinner : ProgressBar = findViewById(R.id.progress_bar)
         val error1 : TextView = findViewById(R.id.WrongText)
