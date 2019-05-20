@@ -12,9 +12,11 @@ class ChecklistViewHolder(
     itemView: View
 ) : RecyclerView.ViewHolder(itemView) {
     val ChecklistTextView: TextView = itemView.findViewById(R.id.checklist_text)
-    private val ChecklistCheckView: CheckBox = itemView.findViewById(R.id.checkBox)
+    val ChecklistCheckView: CheckBox = itemView.findViewById(R.id.checkBox)
+    lateinit var vm: ChecklistViewModel
 
     fun bindData(viewModel: ChecklistViewModel) {
+        vm = viewModel
         ChecklistTextView.text = viewModel.ChecklistText
         if(viewModel.isRecurring)
             ChecklistTextView.setTextColor(Color.RED)
@@ -27,6 +29,12 @@ class ChecklistViewHolder(
                 )
             }
             ChecklistCheckView.visibility = View.INVISIBLE
+        }
+        else {
+            ChecklistTextView.apply {
+                ChecklistTextView.paintFlags = 0
+            }
+            ChecklistCheckView.visibility = View.VISIBLE
         }
     }
 

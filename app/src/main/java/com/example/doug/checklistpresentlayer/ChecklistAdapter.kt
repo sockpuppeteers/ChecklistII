@@ -33,6 +33,7 @@ class ChecklistAdapter(private var ctx: Context,
                     private val currentTask: KMutableProperty0<ChecklistViewModel>,
                     private val currentChecklist: KMutableProperty0<Checklist>,
                     private val currentUser: User) : RecyclerView.Adapter<ChecklistViewHolder>() {
+    lateinit var holder: ChecklistViewHolder
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ChecklistViewHolder {
         val view = LayoutInflater.from(parent.context).inflate(viewType, parent, false)
@@ -40,7 +41,11 @@ class ChecklistAdapter(private var ctx: Context,
     }
 
     override fun onBindViewHolder(holder: ChecklistViewHolder, position: Int) {
+        this.holder = holder
         holder.bindData(myDataset[position])
+        holder.ChecklistCheckView.setOnClickListener {
+            holder.vm.isChecked = !holder.vm.isChecked
+        }
         holder.ChecklistTextView.setOnClickListener {
             val popupFunctionWindow = PopupWindow(ctx)
             val taskFunctionLayoutView = layoutInflater.inflate(R.layout.task_functions_layout, null)
