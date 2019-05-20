@@ -20,9 +20,14 @@ class ChecklistViewHolder(
             ChecklistTextView.setTextColor(Color.RED)
         else
             ChecklistTextView.setTextColor(Color.BLACK)
-        if(viewModel.isComplete)
-            ChecklistTextView.apply { ChecklistTextView.paintFlags = ChecklistTextView.paintFlags!!.or(
-                Paint.STRIKE_THRU_TEXT_FLAG) }
+        if(viewModel.isComplete) {
+            ChecklistTextView.apply {
+                ChecklistTextView.paintFlags = ChecklistTextView.paintFlags!!.or(
+                    Paint.STRIKE_THRU_TEXT_FLAG
+                )
+            }
+            ChecklistCheckView.visibility = View.INVISIBLE
+        }
     }
 
     fun <T : RecyclerView.ViewHolder> T.listen(event: (position: Int, type: Int) -> Unit): T {
