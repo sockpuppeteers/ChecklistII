@@ -604,11 +604,10 @@ class BaseChecklist : AppCompatActivity(){
         //Set history button's click listener
 
         val historyListener = View.OnClickListener {
-            //Toast.makeText(this, "General Kenobi!", Toast.LENGTH_SHORT).show()
 
             if(!popupPresent) {
 
-                val mainViewHistory = findViewById<ScrollView>(R.id.TaskScrollView)
+                val mainViewHistory = findViewById<RecyclerView>(R.id.checklist_recyclerview)
 
                 val popupWindowHistory = PopupWindow(this)
 
@@ -681,17 +680,21 @@ class BaseChecklist : AppCompatActivity(){
                                     "\n\tAdded by: " + it.changedBy + "\n"
                         }
 
-                        checklistChangeTextView.text = toAddString
+                        if (toAddString != "Default"){
+                            checklistChangeTextView.text = toAddString
 
-                        checklistChangeTextView.setTextColor(Color.WHITE)
+                            checklistChangeTextView.setTextColor(Color.WHITE)
 
-                        checklistChangeTextView.textSize = 20f
-                        checklistChangeTextView.layoutParams = LinearLayout.LayoutParams(
-                            LinearLayout.LayoutParams.WRAP_CONTENT,
-                            ViewGroup.LayoutParams.WRAP_CONTENT
-                        )
+                            checklistChangeTextView.textSize = 20f
+                            checklistChangeTextView.layoutParams = LinearLayout.LayoutParams(
+                                LinearLayout.LayoutParams.MATCH_PARENT,
+                                ViewGroup.LayoutParams.MATCH_PARENT
+                            )
 
-                        historyLayout.addView(checklistChangeTextView)
+                            checklistChangeTextView.gravity = Gravity.LEFT
+
+                            historyLayout.addView(checklistChangeTextView)
+                        }
                     }
                 }
 
