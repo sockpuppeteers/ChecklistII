@@ -28,7 +28,7 @@ class ChecklistViewHolder(
         vm = viewModel
         ChecklistTextView.text = viewModel.ChecklistText
         if(viewModel.isRecurring)
-            ChecklistTextView.setTextColor(Color.RED)
+            ChecklistTextView.setTextColor(Color.parseColor("#038C65"))
         else
             ChecklistTextView.setTextColor(Color.BLACK)
         if(viewModel.isComplete) {

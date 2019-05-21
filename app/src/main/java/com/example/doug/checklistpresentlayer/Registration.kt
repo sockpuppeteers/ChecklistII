@@ -24,18 +24,24 @@ class Registration : AppCompatActivity() {
         //same as above for pw
         var pwAscii =  Charset.forName("US-ASCII").newEncoder().canEncode(rPW1.text.toString())
         register_button.setOnClickListener {
+            //reset the error message
+            rErrorText.text = ""
             //create a database object with the given username
             val db = Database()
             //checks to see if passwords match
             if (rPW1.text.toString() != rPW2.text.toString())
                 pwMatch = false
-            if (userAscii && pwAscii && pwMatch && pwStrong(rPW1.text.toString())) {
+            if (userAscii && pwAscii && pwMatch && pwStrong(rPW1.text.toString())
+                && rUserName.text.toString().length < 40 && rFName.text.toString().length < 20
+                && rLName.text.toString().length < 20 && rUserName.text.toString().length >= 4
+                && rFName.text.toString().isNotEmpty() && rLName.text.toString().isNotEmpty()
+            ) {
                 //error will be empty if everything was successful
                 var user: User = db.RegisterUser(rUserName.text.toString(),
                     rEmail.text.toString(), rFName.text.toString(), rLName.text.toString(),
                     rPW1.text.toString())
                 if (user.Error != "" && user.Error != null)
-                    rErrorText.text = user.Error
+                    rErrorText.text = ErrorText.text.toString() + user.Error + "\n"
 
                 //else will be called if there were no errors
                 else {
@@ -60,6 +66,30 @@ class Registration : AppCompatActivity() {
                     }
                     startActivity(tempIntent)
                 }
+            }
+
+            else{
+                if (rUserName.text.toString().length >= 40)
+                    rErrorText.text = rErrorText.text.toString() + "Username must be less than 40 characters\n"
+                if (rFName.text.toString().length >= 20)
+                    rErrorText.text = rErrorText.text.toString() + "First Name must be less than 20 characters\n"
+                if (rLName.text.toString().length >= 20)
+                    rErrorText.text = rErrorText.text.toString() + "Last Name must be less than 20 characters\n"
+                if (rPW1.text.toString() != rPW2.text.toString())
+                    rErrorText.text = rErrorText.text.toString() + "Passwords don't match\n"
+                if (!pwAscii)
+                    rErrorText.text = rErrorText.text.toString() + "Password contains unsupported characters\n"
+                if (!userAscii)
+                    rErrorText.text = rErrorText.text.toString() + "Username contains unsupported characters\n"
+                if (!pwStrong(rPW1.text.toString()))
+                    rErrorText.text = rErrorText.text.toString() + "Password must be at least 8 characters\n"
+                if (rFName.text.toString().isEmpty())
+                    rErrorText.text = rErrorText.text.toString() + "First name must be at least 1 character\n"
+                if (rLName.text.toString().isEmpty())
+                    rErrorText.text = rErrorText.text.toString() + "Last name must be at least 1 character\n"
+                if (rUserName.text.toString().length < 4)
+                    rErrorText.text = rErrorText.text.toString() + "Username must be at least 4 characters\n"
+
             }
         }
     }
