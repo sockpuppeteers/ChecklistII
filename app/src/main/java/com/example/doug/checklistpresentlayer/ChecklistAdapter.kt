@@ -33,7 +33,6 @@ class ChecklistAdapter(private var ctx: Context,
                     private val currentTask: KMutableProperty0<ChecklistViewModel>,
                     private val currentChecklist: KMutableProperty0<Checklist>,
                     private val currentUser: User) : RecyclerView.Adapter<ChecklistViewHolder>() {
-    lateinit var holder: ChecklistViewHolder
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ChecklistViewHolder {
         val view = LayoutInflater.from(parent.context).inflate(viewType, parent, false)
@@ -41,7 +40,6 @@ class ChecklistAdapter(private var ctx: Context,
     }
 
     override fun onBindViewHolder(holder: ChecklistViewHolder, position: Int) {
-        this.holder = holder
         holder.bindData(myDataset[position])
         holder.ChecklistCheckView.setOnClickListener {
             holder.vm.isChecked = !holder.vm.isChecked
@@ -61,7 +59,7 @@ class ChecklistAdapter(private var ctx: Context,
 
                 popupPresent.set(false)
 
-                createSettingsPopup()
+                createSettingsPopup(holder)
             }
 
             //Sets the delete button to remove the task
@@ -119,7 +117,7 @@ class ChecklistAdapter(private var ctx: Context,
         notifyDataSetChanged()
     }
 
-    private fun createSettingsPopup() {
+    private fun createSettingsPopup(holder: ChecklistViewHolder) {
         if (!popupPresent.get()) {
             popupPresent.set(true)
 
@@ -311,39 +309,41 @@ class ChecklistAdapter(private var ctx: Context,
 
                 popupSettingsWindow.dismiss()
 
-                val popupSettingsChangeNameWindow = PopupWindow(ctx)
+                holder.editName(this::currentChecklist, taskCount, currentUser)
 
-                val taskSettingsChangeNameLayoutView =
-                    layoutInflater.inflate(R.layout.task_settings_name_change_popup, null)
-
-                popupSettingsChangeNameWindow.contentView = taskSettingsChangeNameLayoutView
-
-                taskSettingsChangeNameLayoutView.ChangeNameButton.setOnClickListener {
-
-                    val newName = taskSettingsChangeNameLayoutView.NewNameText.text.toString()
-
-                    currentTask?.get().ChecklistText = newName
-
-                    currentChecklist.get().changeTaskName(taskCount, currentUser, newName)
-
-                    popupPresent.set(false)
-
-                    popupSettingsChangeNameWindow.dismiss()
-                }
-
-                popupSettingsChangeNameWindow.setOnDismissListener {
-                    popupPresent.set(false)
-                }
-
-                taskSettingsChangeNameLayoutView.ChangeNameCancelButton.setOnClickListener {
-                    popupPresent.set(false)
-
-                    popupSettingsChangeNameWindow.dismiss()
-                }
-
-                popupSettingsChangeNameWindow.isFocusable = true
-
-                popupSettingsChangeNameWindow.showAtLocation(mainView, Gravity.CENTER, 0, 0)
+//                val popupSettingsChangeNameWindow = PopupWindow(ctx)
+//
+//                val taskSettingsChangeNameLayoutView =
+//                    layoutInflater.inflate(R.layout.task_settings_name_change_popup, null)
+//
+//                popupSettingsChangeNameWindow.contentView = taskSettingsChangeNameLayoutView
+//
+//                taskSettingsChangeNameLayoutView.ChangeNameButton.setOnClickListener {
+//
+//                    val newName = taskSettingsChangeNameLayoutView.NewNameText.text.toString()
+//
+//                    currentTask?.get().ChecklistText = newName
+//
+//                    currentChecklist.get().changeTaskName(taskCount, currentUser, newName)
+//
+//                    popupPresent.set(false)
+//
+//                    popupSettingsChangeNameWindow.dismiss()
+//                }
+//
+//                popupSettingsChangeNameWindow.setOnDismissListener {
+//                    popupPresent.set(false)
+//                }
+//
+//                taskSettingsChangeNameLayoutView.ChangeNameCancelButton.setOnClickListener {
+//                    popupPresent.set(false)
+//
+//                    popupSettingsChangeNameWindow.dismiss()
+//                }
+//
+//                popupSettingsChangeNameWindow.isFocusable = true
+//
+//                popupSettingsChangeNameWindow.showAtLocation(mainView, Gravity.CENTER, 0, 0)
             }
 
             taskSettingsLayoutView.CloseButton.setOnClickListener {
