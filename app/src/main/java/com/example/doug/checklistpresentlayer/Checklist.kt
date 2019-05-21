@@ -54,7 +54,7 @@ class Checklist( var name: String, var cListID : Int? ) : ListClass(cListID, nam
     }
 
     fun setTaskRecursion(arrayIndex: Int, modifiedBy: User, toggle: Boolean?) {
-        if (arrayIndex >= 0 && arrayIndex < tasks.size) {
+        if (arrayIndex >= 0 && arrayIndex < tasks.size && tasks[arrayIndex].compdatetime.isNullOrEmpty()) {
             logChange(tasks[arrayIndex].TaskID!!, tasks[arrayIndex].name, modifiedBy, kAction.CHANGE_TASK_RECURRING);
             tasks[arrayIndex].isRecurring = toggle
             dbAccess.PutTask(tasks[arrayIndex])
@@ -63,7 +63,7 @@ class Checklist( var name: String, var cListID : Int? ) : ListClass(cListID, nam
 
 
     fun updateTaskRecurringDays(arrayIndex: Int, modifiedBy: User, dateString: String){
-        if (arrayIndex >= 0 && arrayIndex < tasks.size) {
+        if (arrayIndex >= 0 && arrayIndex < tasks.size && tasks[arrayIndex].compdatetime.isNullOrEmpty()) {
             logChange(tasks[arrayIndex].TaskID!!, tasks[arrayIndex].name, modifiedBy, kAction.CHANGE_RECURRING_DAYS)
             tasks[arrayIndex].recurringDays = dateString
 
@@ -72,7 +72,7 @@ class Checklist( var name: String, var cListID : Int? ) : ListClass(cListID, nam
     }
 
     fun updateTaskRecurringTime(arrayIndex: Int, modifiedBy: User, timeString: String){
-        if (arrayIndex >= 0 && arrayIndex < tasks.size) {
+        if (arrayIndex >= 0 && arrayIndex < tasks.size && tasks[arrayIndex].compdatetime.isNullOrEmpty()) {
             logChange(tasks[arrayIndex].TaskID!!, tasks[arrayIndex].name, modifiedBy, kAction.CHANGE_RECURRING_TIME)
             tasks[arrayIndex].recurringTime = timeString
 
@@ -134,7 +134,7 @@ class Checklist( var name: String, var cListID : Int? ) : ListClass(cListID, nam
      *      value. Shows which user modified it for logs.
      ***************************************************************/
     fun changeTaskName(arrayIndex: Int, modifiedBy: User, name: String) {
-        if (arrayIndex >= 0 && arrayIndex < tasks.size) {
+        if (arrayIndex >= 0 && arrayIndex < tasks.size && tasks[arrayIndex].compdatetime.isNullOrEmpty()) {
             logChange(tasks[arrayIndex].TaskID!!, tasks[arrayIndex].name, modifiedBy, kAction.CHANGE_TASK_NAME, name)
             tasks[arrayIndex].name = name
             GlobalScope.launch {
@@ -148,7 +148,7 @@ class Checklist( var name: String, var cListID : Int? ) : ListClass(cListID, nam
      *      Shows which user modified it for logs.
      ***************************************************************/
     fun changeTaskDeadline(arrayIndex: Int, modifiedBy: User, deadline: String) {
-        if (arrayIndex >= 0 && arrayIndex < tasks.size) {
+        if (arrayIndex >= 0 && arrayIndex < tasks.size && tasks[arrayIndex].compdatetime.isNullOrEmpty()) {
             logChange(tasks[arrayIndex].TaskID!!, tasks[arrayIndex].name, modifiedBy, kAction.CHANGE_TASK_DEADLINE, deadline)
             tasks[arrayIndex].Deadline = deadline
             GlobalScope.launch {
@@ -162,7 +162,7 @@ class Checklist( var name: String, var cListID : Int? ) : ListClass(cListID, nam
      *      as long as there is a deadline associated with it.
      ***************************************************************/
     fun removeDeadline(arrayIndex: Int, modifiedBy: User) {
-        if (arrayIndex >= 0 && arrayIndex < tasks.size) {
+        if (arrayIndex >= 0 && arrayIndex < tasks.size && tasks[arrayIndex].compdatetime.isNullOrEmpty()) {
             logChange(tasks[arrayIndex].TaskID!!, tasks[arrayIndex].name, modifiedBy, kAction.REMOVE_TASK_DEADLINE)
             tasks[arrayIndex].Deadline = null
             GlobalScope.launch {
