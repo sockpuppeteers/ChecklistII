@@ -1,5 +1,6 @@
 package com.example.doug.checklistpresentlayer
 
+import android.app.AlertDialog
 import android.content.Context
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
@@ -105,6 +106,16 @@ class MainActivity : AppCompatActivity() {
                 startActivity(tempIntent)
             }
         }
+        else
+        {
+            var alertDialog : AlertDialog = AlertDialog.Builder(this).create()
+
+            alertDialog.setTitle("Info");
+            alertDialog.setMessage("Internet not available, Cross check your internet connectivity and try again")
+            alertDialog.setIcon(android.R.drawable.ic_dialog_alert)
+
+            alertDialog.show()
+        }
 
         login_button.setOnClickListener {
             deleteListsDataFile()
@@ -192,7 +203,13 @@ class MainActivity : AppCompatActivity() {
 
             //this happens if they have no internet connection
             else{
-                //TODO add a popup or something here
+                var alertDialog : AlertDialog = AlertDialog.Builder(this).create()
+
+                alertDialog.setTitle("Info");
+                alertDialog.setMessage("Internet not available, Cross check your internet connectivity and try again")
+                alertDialog.setIcon(android.R.drawable.ic_dialog_alert)
+
+                alertDialog.show()
             }
         }
 
@@ -203,7 +220,13 @@ class MainActivity : AppCompatActivity() {
                 startActivity(tempIntent)
             }
             else{
-                //TODO add a popup or something here
+                var alertDialog : AlertDialog = AlertDialog.Builder(this).create()
+
+                alertDialog.setTitle("Info");
+                alertDialog.setMessage("Internet not available, Cross check your internet connectivity and try again")
+                alertDialog.setIcon(android.R.drawable.ic_dialog_alert)
+
+                alertDialog.show()
             }
         }
     }
