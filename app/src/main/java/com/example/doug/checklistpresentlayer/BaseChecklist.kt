@@ -1,6 +1,7 @@
 package com.example.doug.checklistpresentlayer
 
 import android.app.Activity
+import android.app.AlertDialog
 import android.app.SearchManager
 import android.content.ClipData
 import android.content.Context
@@ -523,7 +524,13 @@ class BaseChecklist : AppCompatActivity(){
                     if (popup_edittext.text.toString().isNotEmpty() && popup_edittext.text.toString().length < 40) {
                         if (hasInternetConnection()) {
                             createNewTask(popup_edittext.text.toString(), false, 0/*needs to be something later*/)
-                            //TODO make a popup to tell the user no internet
+                            var alertDialog : AlertDialog = AlertDialog.Builder(this).create()
+
+                            alertDialog.setTitle("Info");
+                            alertDialog.setMessage("Internet not available, Cross check your internet connectivity and try again")
+                            alertDialog.setIcon(android.R.drawable.ic_dialog_alert)
+
+                            alertDialog.show()
                         }
                     }
 
@@ -594,7 +601,13 @@ class BaseChecklist : AppCompatActivity(){
             }
             //this else clause happens when they have no internet connection
             else {
-                //TODO add a popup or something here
+                var alertDialog : AlertDialog = AlertDialog.Builder(this).create()
+
+                alertDialog.setTitle("Info");
+                alertDialog.setMessage("Internet not available, Cross check your internet connectivity and try again")
+                alertDialog.setIcon(android.R.drawable.ic_dialog_alert)
+
+                alertDialog.show()
             }
         }
 
