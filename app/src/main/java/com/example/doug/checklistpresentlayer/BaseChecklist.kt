@@ -973,7 +973,7 @@ class BaseChecklist : AppCompatActivity(){
             createListFile(currentChecklist)
         }
 
-        currentListView.add(new_task_box)
+        currentListView.add(0, new_task_box)
         adapter.setDataset(currentListView)
     }
 
