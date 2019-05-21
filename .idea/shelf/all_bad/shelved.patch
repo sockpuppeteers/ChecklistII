@@ -1,0 +1,818 @@
+Index: app/src/main/java/com/example/doug/checklistpresentlayer/BaseListofLists.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>/***************\n * note: most of this code is Emmett's\n */\npackage com.example.doug.checklistpresentlayer\n\nimport android.content.Intent\nimport android.content.pm.ActivityInfo\nimport khttp.*\nimport android.graphics.Color\nimport android.os.Bundle\nimport android.support.v7.app.ActionBar\nimport android.support.v7.app.AppCompatActivity\nimport android.support.v7.widget.Toolbar\nimport android.view.Gravity\nimport android.view.View\nimport android.view.ViewGroup\nimport android.widget.*\nimport kotlinx.android.synthetic.main.activity_base_checklist.*\nimport kotlinx.android.synthetic.main.history_popup.view.*\nimport kotlinx.android.synthetic.main.popup_layout.view.*\nimport kotlinx.android.synthetic.main.task_functions_layout.view.*\nimport android.support.v4.widget.DrawerLayout\nimport android.support.design.widget.NavigationView\nimport android.support.v4.view.GravityCompat\nimport android.support.v7.widget.RecyclerView\nimport android.view.MenuItem\nimport android.widget.*\nimport com.google.gson.Gson\nimport com.google.gson.reflect.TypeToken\nimport kotlinx.android.synthetic.main.activity_base_checklist.*\nimport kotlinx.android.synthetic.main.activity_base_listoflists.*\nimport kotlinx.android.synthetic.main.activity_main.*\nimport kotlinx.android.synthetic.main.history_popup.view.*\nimport kotlinx.android.synthetic.main.popup_delete_layout.view.*\nimport kotlinx.android.synthetic.main.popup_layout.view.*\nimport kotlinx.android.synthetic.main.task_functions_layout.view.*\nimport kotlinx.coroutines.GlobalScope\nimport kotlinx.coroutines.launch\nimport java.io.File\nimport java.io.FileInputStream\nimport java.io.FileOutputStream\n\n\nclass BaseListofLists : AppCompatActivity(){\n\n    var UName = \"\"\n    var FName = \"\"\n    var LName = \"\"\n    var currentListofLists = ListofLists(\"Your CheckLists\", \"none\")\n    //Flag to see if any popups are present\n    var popupPresent = false\n\n    private lateinit var drawerLayout: DrawerLayout\n\n    //Initialize things here\n    init { }\n\n    override fun onCreate(savedInstanceState: Bundle?) {\n        super.onCreate(savedInstanceState)\n        requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT\n        setContentView(R.layout.activity_base_listoflists)\n        currentListofLists.uID = intent.getIntExtra(\"UserID\", 0)\n        UName = intent.getStringExtra(\"uname\")\n        FName = intent.getStringExtra(\"fname\")\n        LName = intent.getStringExtra(\"lname\")\n\n\n        //Get layout of checklist names\n        val taskLayout = findViewById<LinearLayout>(R.id.TaskLayout)\n        var tempBox: ListBox\n        val cont = this\n\n        val spinner : ProgressBar = findViewById(R.id.lprogress_bar)\n        //if the lists are stored locally in the db\n        //then we can load it from there\n        if (listsFileExists()){\n            spinner.visibility = View.VISIBLE\n\n            currentListofLists.lists = getListFromFile()\n\n            //check the db to see if the user\n            GlobalScope.launch {\n                var db = Database()\n                var list = db.GetListofLists(UName)\n\n                if (!list.isEmpty())\n                    currentListofLists.lists = list\n\n                this@BaseListofLists.runOnUiThread {\n                    if (!list.isEmpty()){\n                        taskLayout.removeAllViews()\n                        for (ListClass in currentListofLists.lists) {\n                            //Fill box with checklist name\n                            tempBox = ListBox(\n                                cont,\n                                ListClass.i_name\n                            )\n\n                            //Set The action to be executed when the list in clicked\n                            tempBox.setOnClickListener{\n                                val tempIntent = Intent(cont, BaseChecklist::class.java).apply {\n                                    putExtra(\"ListName\", ListClass.i_name)\n                                    putExtra(\"UserName\", UName)\n                                    putExtra(\"ChecklistID\", ListClass.listID)\n                                    putExtra(\"uname\", UName)\n                                    putExtra(\"fname\", FName)\n                                    putExtra(\"lname\", LName)\n                                    putExtra(\"UserID\",intent.getIntExtra(\"UserID\", 0))\n                                }\n\n                                //Start the BaseChecklist Activity\n                                startActivity(tempIntent)\n                            }\n\n                            //Add box to page\n                            taskLayout.addView(tempBox)\n                        }\n                    }\n\n                    spinner.visibility = View.INVISIBLE\n                }\n            }\n        }\n        //otherwise query the api for our data\n        else{\n            //get the user's lists from the database\n            var db = Database()\n            currentListofLists.lists = db.GetListofLists(UName)\n\n            //put those lists in a local file\n            createListsFile(currentListofLists)\n\n            spinner.visibility = View.INVISIBLE\n        }\n\n        for (ListClass in currentListofLists.lists) {\n            //Fill box with checklist name\n            tempBox = ListBox(\n                this,\n                ListClass.i_name\n            )\n\n            //Set The action to be executed when the list in clicked\n            tempBox.setOnClickListener{\n                val tempIntent = Intent(this, BaseChecklist::class.java).apply {\n                    putExtra(\"ListName\", ListClass.i_name)\n                    putExtra(\"UserName\", UName)\n                    putExtra(\"ChecklistID\", ListClass.listID)\n                    putExtra(\"uname\", UName)\n                    putExtra(\"fname\", FName)\n                    putExtra(\"lname\", LName)\n                    putExtra(\"UserID\",intent.getIntExtra(\"UserID\", 0))\n                }\n\n                //Start the BaseChecklist Activity\n                startActivity(tempIntent)\n            }\n\n            //Add box to page\n            taskLayout.addView(tempBox)\n        }\n\n        drawerLayout = findViewById(R.id.drawer_layout)\n\n        val toolbar: Toolbar = findViewById(R.id.toolbar)\n        setSupportActionBar(toolbar)\n        val actionbar: ActionBar? = supportActionBar\n        actionbar?.apply {\n            setDisplayHomeAsUpEnabled(true)\n            setHomeAsUpIndicator(R.drawable.ic_menu_black_24dp)\n        }\n\n        val navigationView: NavigationView = findViewById(R.id.nav_view)\n        navigationView.setNavigationItemSelectedListener { menuItem ->\n            // set item as selected to persist highlight\n            menuItem.isChecked = true\n            onOptionsItemSelected(menuItem)\n            // close drawer when item is tapped\n            drawerLayout.closeDrawers()\n            // Add code here to update the UI based on the item selected\n            // For example, swap UI fragments here\n\n            true\n        }\n\n        val addButton = findViewById<Button>(R.id.AddListButton)\n\n        val addListener = View.OnClickListener {\n\n            if(!popupPresent) {\n\n                val mainView = findViewById<ScrollView>(R.id.TaskScrollView)\n\n                val popupWindow = PopupWindow(this)\n\n                val popupView = layoutInflater.inflate(R.layout.popup_layout, null)\n                popupView.PopupEditText.hint = \"Enter List Name\"\n\n                popupWindow.contentView = popupView\n\n                val acceptButton = popupView.PopupMainView.AcceptButton\n\n                //Creates and adds the on click action to the add button\n                acceptButton.setOnClickListener{\n\n\n                        val popup_edittext = popupView.PopupMainView.PopupEditText\n\n                        val taskLayout = findViewById<LinearLayout>(R.id.TaskLayout)\n\n                        if (popup_edittext.text.toString().length >= 1) {\n                            var new_list_box = ListBox(\n                                this,\n                                popup_edittext.text.toString()\n                            )\n\n                            GlobalScope.launch {\n                                //Create the new list and post it to the database\n                                currentListofLists.createList(popup_edittext.text.toString(),\n                                    User(intent.getIntExtra(\"UserID\", 0)))\n                            }\n\n                            popupWindow.dismiss()\n\n                            //create a new coroutine that will\n                            //update the local LIST file to be current\n                            GlobalScope.launch {\n                                deleteListsDataFile()\n                                createListsFile(currentListofLists)\n                            }\n\n                            popupWindow.setOnDismissListener { PopupWindow.OnDismissListener {\n                                popupPresent = false\n                            } }\n\n                            new_list_box.setOnClickListener{\n                                val tempIntent = Intent(this, BaseChecklist::class.java).apply {\n                                    putExtra(\"ListName\", popup_edittext.text.toString())\n                                    putExtra(\"UserName\", UName)\n                                    putExtra(\"ChecklistID\", currentListofLists.lists.last().listID)\n                                    putExtra(\"uname\", UName)\n                                    putExtra(\"fname\", FName)\n                                    putExtra(\"lname\", LName)\n                                    putExtra(\"UserID\",intent.getIntExtra(\"UserID\", 0))\n                                }\n                                startActivity(tempIntent)\n                            }\n\n                            taskLayout.addView(new_list_box)\n                        }\n                }\n\n                val cancelButton = popupView.PopupMainView.CancelButton\n\n                cancelButton.setOnClickListener{\n\n                    popupWindow.dismiss()\n\n                }\n\n                popupWindow.setOnDismissListener{\n                    val popupEdittext = popupView.PopupMainView.PopupEditText\n\n                    popupEdittext.text.clear()\n\n                    popupPresent = false\n                }\n\n                popupWindow.isFocusable = true\n\n                popupWindow.showAtLocation(mainView, Gravity.CENTER, 0, 0)\n\n                popupPresent = true\n\n            }\n        }\n\n        val DeleteListener = View.OnClickListener {\n            if(!popupPresent) {\n                val mainView = findViewById<ScrollView>(R.id.TaskScrollView)\n\n                val popupWindow = PopupWindow(this)\n\n                val popupView = layoutInflater.inflate(R.layout.popup_delete_layout, null)\n\n                popupWindow.contentView = popupView\n\n                for (ListClass in currentListofLists.lists) {\n                    var tempBox2 = ListBox(\n                        this,\n                        ListClass.i_name\n                    )\n\n                    //Set The action to be executed when the list is clicked\n                    tempBox2.setOnClickListener{\n                        for(i in popupView.DeleteLayout.childCount downTo 0 step 1)\n                        {\n                            val tempChild = popupView.DeleteLayout.getChildAt(i)\n                            if (tempChild is ListBox)\n                            {\n                                if (tempChild == tempBox2)\n                                {\n                                    taskLayout.removeView(taskLayout.getChildAt(i))\n\n                                    //delete the list's local file\n                                    GlobalScope.launch {\n                                        deleteListDataFile(currentListofLists.lists[i].i_name)\n                                    }\n\n                                    //remove the task from the list, and delete it from the database\n                                    currentListofLists.deleteList(i, User(1))\n\n                                    //update the list of lists local file to be current\n                                    GlobalScope.launch {\n                                        deleteListsDataFile()\n                                        createListsFile(currentListofLists)\n                                    }\n                                }\n                            }\n                        }\n\n                        popupPresent = false\n                        popupWindow.dismiss()\n                    }\n\n                    //Add box to page\n                    popupView.DeleteLayout.addView(tempBox2)\n                }\n\n                val closeButton = popupView.CloseButton\n\n                closeButton.setOnClickListener{\n                    popupWindow.dismiss()\n                }\n\n                popupWindow.setOnDismissListener{\n                    popupPresent = false\n                }\n\n                popupWindow.isFocusable = true\n\n                popupWindow.showAtLocation(mainView, Gravity.CENTER, 0, 0)\n\n                popupPresent = true\n            }\n        }\n\n        addButton.setOnClickListener(addListener)\n        DeleteListButton.setOnClickListener(DeleteListener)\n    }\n\n    override fun onOptionsItemSelected(item: MenuItem): Boolean {\n        return when (item.itemId) {\n            android.R.id.home -> {\n                drawerLayout.openDrawer(GravityCompat.START)\n                true\n            }\n//            R.id.dProfile -> {\n//                val tempIntent = Intent(this, UserLogin::class.java).apply {\n//                    putExtra(\"uname\", UName)\n//                    putExtra(\"fname\", FName)\n//                    putExtra(\"lname\", LName)\n//                }\n//                startActivity(tempIntent)\n//                true\n//            }\n//            R.id.dSettings -> {\n//                true\n//            }\n//            R.id.dLogOut -> {\n//                //delete local data files\n//                deleteUserDataFile()\n//                deleteListsDataFile()\n//\n//                //redirect to the login page\n//                val tempIntent = Intent(this, MainActivity::class.java)\n//                startActivity(tempIntent)\n//                true\n//            }\n            else -> super.onOptionsItemSelected(item)\n        }\n    }\n\n    fun createListsFile(lists: ListofLists) {\n        //convert lists to a JSON string\n        val gson = Gson()\n        val userJson = gson.toJson(lists.lists)\n\n        //context will give us access to our local files directory\n        var context = applicationContext\n\n        val filename = \"LISTS\"\n        val directory = context.filesDir\n\n        //write the file LISTS to local directory\n        val file = File(directory, filename)\n        FileOutputStream(file).use {\n            it.write(userJson.toByteArray())\n        }\n    }\n\n    fun listsFileExists() : Boolean {\n        return File(applicationContext.filesDir, \"LISTS\").exists()\n    }\n\n    //we don't have to check if the file exists in this function\n    //because we call listFileExists() before calling this\n    //however, we might need some other error checking in here\n    fun getListFromFile() : MutableList<ListClass> {\n        //context will give us access to our local files directory\n        var context = applicationContext\n\n        val filename = \"LISTS\"\n        val directory = context.filesDir\n\n        //read from LISTS and store it as a string\n        val file = File(directory, filename)\n        val fileData = FileInputStream(file).bufferedReader().use { it.readText() }\n\n        //create a MutableList<ListClass> object based on the JSON from the file\n        val gson = Gson()\n        return gson.fromJson(fileData, object : TypeToken<MutableList<ListClass>>() {}.type)\n    }\n\n    fun deleteUserDataFile(){\n        //context will give us access to our local files directory\n        var context = applicationContext\n\n        val filename = \"USERDATA\"\n        val directory = context.filesDir\n\n        //delete the USERDATA file\n        File(directory, filename).delete()\n    }\n\n    //deletes the file that contains list of lists data\n    fun deleteListsDataFile(){\n        //context will give us access to our local files directory\n        var context = applicationContext\n\n        val filename = \"LISTS\"\n        val directory = context.filesDir\n\n        //delete the LISTS file\n        File(directory, filename).delete()\n    }\n\n    //deletes the file with the given name.\n    //this should be an individual checklist's file, which is filled\n    //with task/change data\n    fun deleteListDataFile(filename: String){\n        //context will give us access to our local files directory\n        var context = applicationContext\n\n        val directory = context.filesDir\n\n        //delete the file\n        File(directory, filename).delete()\n    }\n}\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- app/src/main/java/com/example/doug/checklistpresentlayer/BaseListofLists.kt	(date 1557711288000)
++++ app/src/main/java/com/example/doug/checklistpresentlayer/BaseListofLists.kt	(date 1557863179253)
+@@ -160,28 +160,28 @@
+             taskLayout.addView(tempBox)
+         }
+ 
+-        drawerLayout = findViewById(R.id.drawer_layout)
++        //drawerLayout = findViewById(R.id.drawer_layout)
+ 
+         val toolbar: Toolbar = findViewById(R.id.toolbar)
+         setSupportActionBar(toolbar)
+         val actionbar: ActionBar? = supportActionBar
+         actionbar?.apply {
+             setDisplayHomeAsUpEnabled(true)
+-            setHomeAsUpIndicator(R.drawable.ic_menu_black_24dp)
++            //setHomeAsUpIndicator(R.drawable.ic_menu_black_24dp)
+         }
+ 
+-        val navigationView: NavigationView = findViewById(R.id.nav_view)
+-        navigationView.setNavigationItemSelectedListener { menuItem ->
+-            // set item as selected to persist highlight
+-            menuItem.isChecked = true
+-            onOptionsItemSelected(menuItem)
+-            // close drawer when item is tapped
+-            drawerLayout.closeDrawers()
+-            // Add code here to update the UI based on the item selected
+-            // For example, swap UI fragments here
+-
+-            true
+-        }
++        //val navigationView: NavigationView = findViewById(R.id.nav_view)
++//        navigationView.setNavigationItemSelectedListener { menuItem ->
++//            // set item as selected to persist highlight
++//            menuItem.isChecked = true
++//            onOptionsItemSelected(menuItem)
++//            // close drawer when item is tapped
++//            drawerLayout.closeDrawers()
++//            // Add code here to update the UI based on the item selected
++//            // For example, swap UI fragments here
++//
++//            true
++//        }
+ 
+         val addButton = findViewById<Button>(R.id.AddListButton)
+ 
+@@ -350,11 +350,11 @@
+     }
+ 
+     override fun onOptionsItemSelected(item: MenuItem): Boolean {
+-        return when (item.itemId) {
+-            android.R.id.home -> {
+-                drawerLayout.openDrawer(GravityCompat.START)
+-                true
+-            }
++//        return when (item.itemId) {
++//            android.R.id.home -> {
++//                drawerLayout.openDrawer(GravityCompat.START)
++//                true
++//            }
+ //            R.id.dProfile -> {
+ //                val tempIntent = Intent(this, UserLogin::class.java).apply {
+ //                    putExtra("uname", UName)
+@@ -377,8 +377,10 @@
+ //                startActivity(tempIntent)
+ //                true
+ //            }
+-            else -> super.onOptionsItemSelected(item)
+-        }
++//            else -> super.onOptionsItemSelected(item)
++//        }
++        this.onBackPressed()
++        return true
+     }
+ 
+     fun createListsFile(lists: ListofLists) {
+Index: app/src/main/res/drawable/ic_delete_black_24dp.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><vector xmlns:android=\"http://schemas.android.com/apk/res/android\"\n        android:width=\"24dp\"\n        android:height=\"24dp\"\n        android:viewportWidth=\"24.0\"\n        android:viewportHeight=\"24.0\">\n    <path\n        android:fillColor=\"#FF000000\"\n        android:pathData=\"M6,19c0,1.1 0.9,2 2,2h8c1.1,0 2,-0.9 2,-2V7H6v12zM19,4h-3.5l-1,-1h-5l-1,1H5v2h14V4z\"/>\n</vector>\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- app/src/main/res/drawable/ic_delete_black_24dp.xml	(date 1557711288000)
++++ app/src/main/res/drawable/ic_delete_black_24dp.xml	(date 1557866754378)
+@@ -4,6 +4,6 @@
+         android:viewportWidth="24.0"
+         android:viewportHeight="24.0">
+     <path
+-        android:fillColor="#FF000000"
++        android:fillColor="#FF0000"
+         android:pathData="M6,19c0,1.1 0.9,2 2,2h8c1.1,0 2,-0.9 2,-2V7H6v12zM19,4h-3.5l-1,-1h-5l-1,1H5v2h14V4z"/>
+ </vector>
+Index: app/src/main/res/layout/activity_base_checklist.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><?xml version=\"1.0\" encoding=\"utf-8\"?>\n<android.support.constraint.ConstraintLayout\n    xmlns:android=\"http://schemas.android.com/apk/res/android\"\n    xmlns:tools=\"http://schemas.android.com/tools\"\n    xmlns:app=\"http://schemas.android.com/apk/res-auto\"\n    android:layout_width=\"match_parent\"\n    android:layout_height=\"match_parent\"\n    tools:context=\".BaseChecklist\" android:id=\"@+id/BaseLayout\">\n    <android.support.v4.widget.DrawerLayout\n            android:id=\"@+id/user_drawer_layout\"\n            android:layout_width=\"match_parent\"\n            android:layout_height=\"match_parent\"\n            android:fitsSystemWindows=\"true\">\n        <FrameLayout\n                android:layout_width=\"match_parent\"\n                android:layout_height=\"match_parent\"\n                app:layout_constraintTop_toTopOf=\"parent\"\n                app:layout_constraintBottom_toBottomOf=\"parent\">\n            <android.support.constraint.ConstraintLayout\n                    android:layout_width=\"match_parent\"\n                    android:layout_height=\"match_parent\"\n                    tools:context=\".BaseListofLists\" android:id=\"@+id/BaseLayout2\">\n                <android.support.v7.widget.Toolbar\n                        android:id=\"@+id/toolbar\"\n                        android:layout_width=\"match_parent\"\n                        android:layout_height=\"wrap_content\"\n                        android:background=\"?attr/colorPrimary\"\n                        android:theme=\"@style/ThemeOverlay.AppCompat.ActionBar\"\n                        app:layout_constraintTop_toTopOf=\"parent\" app:layout_constraintStart_toStartOf=\"parent\"\n                        app:layout_constraintEnd_toEndOf=\"parent\"\n                        app:layout_constraintHorizontal_bias=\"0.0\"/>\n                <ProgressBar\n                        android:id=\"@+id/progress_bar2\"\n                        style=\"?android:attr/progressBarStyleLarge\"\n                        android:layout_width=\"55dp\"\n                        android:layout_height=\"56dp\"\n                        android:layout_centerHorizontal=\"true\"\n                        app:layout_constraintEnd_toEndOf=\"parent\"\n                        android:layout_marginEnd=\"8dp\" app:layout_constraintStart_toStartOf=\"parent\"\n                        android:layout_marginStart=\"8dp\"\n                        android:visibility=\"invisible\" app:layout_constraintTop_toTopOf=\"parent\"/>\n                <ScrollView\n                        android:layout_width=\"0dp\"\n                        android:layout_height=\"0dp\"\n                        app:layout_constraintStart_toStartOf=\"parent\"\n                        android:layout_marginStart=\"32dp\" app:layout_constraintEnd_toEndOf=\"parent\"\n                        android:layout_marginEnd=\"32dp\"\n                        android:id=\"@+id/TaskScrollView\"\n                        app:layout_constraintHorizontal_bias=\"1.0\" android:layout_marginBottom=\"8dp\"\n                        app:layout_constraintBottom_toTopOf=\"@+id/linearLayout\"\n                        app:layout_constraintTop_toBottomOf=\"@+id/toolbar\">\n                    <LinearLayout\n                            android:orientation=\"vertical\"\n                            android:layout_width=\"match_parent\"\n                            android:layout_height=\"wrap_content\" android:id=\"@+id/TaskLayout\"\n                            android:gravity=\"center_horizontal\">\n                    </LinearLayout>\n                </ScrollView>\n                <LinearLayout\n                        android:orientation=\"horizontal\"\n                        android:layout_height=\"wrap_content\" android:layout_marginBottom=\"8dp\"\n                        app:layout_constraintBottom_toBottomOf=\"parent\" android:layout_width=\"0dp\"\n                        app:layout_constraintTop_toBottomOf=\"@+id/TaskScrollView\"\n                        app:layout_constraintStart_toStartOf=\"parent\"\n                        android:layout_marginStart=\"8dp\" app:layout_constraintEnd_toEndOf=\"parent\"\n                        android:layout_marginEnd=\"8dp\"\n                        android:id=\"@+id/linearLayout\">\n                    <Button\n                            android:text=\"@string/ADD_BUTTON_STRING\"\n                            android:layout_width=\"wrap_content\"\n                            android:layout_height=\"wrap_content\"\n                            android:id=\"@+id/AddTaskButton\"\n                            app:layout_constraintBottom_toBottomOf=\"parent\" android:layout_marginBottom=\"18dp\"\n                            app:layout_constraintStart_toStartOf=\"parent\"\n                            android:layout_marginStart=\"8dp\"\n                            app:layout_constraintEnd_toStartOf=\"@+id/CheckoffButton\"\n                            android:textSize=\"13sp\"\n                            android:layout_marginTop=\"8dp\" app:layout_constraintTop_toBottomOf=\"@+id/TaskScrollView\"/>\n                    <Button\n                            android:text=\"@string/CHECKOFF_BUTTON_STRING\"\n                            android:layout_height=\"wrap_content\"\n                            android:id=\"@+id/CheckoffButton\"\n                            app:layout_constraintStart_toEndOf=\"@+id/AddTaskButton\"\n                            app:layout_constraintEnd_toStartOf=\"@+id/HistoryButton\"\n                            app:layout_constraintBottom_toBottomOf=\"parent\" android:layout_marginBottom=\"18dp\"\n                            android:layout_marginTop=\"8dp\" app:layout_constraintTop_toBottomOf=\"@+id/TaskScrollView\"\n                            android:textSize=\"13sp\" android:layout_width=\"wrap_content\"/>\n                    <Button\n                            android:text=\"@string/HISTORY_BUTTON_STRING\"\n                            android:layout_height=\"wrap_content\"\n                            android:id=\"@+id/HistoryButton\"\n                            app:layout_constraintStart_toEndOf=\"@+id/CheckoffButton\"\n                            android:layout_marginBottom=\"18dp\"\n                            app:layout_constraintBottom_toBottomOf=\"parent\"\n                            app:layout_constraintEnd_toStartOf=\"@+id/CheckoffButton\" android:layout_marginTop=\"8dp\"\n                            app:layout_constraintTop_toBottomOf=\"@+id/TaskScrollView\" android:textSize=\"13sp\"\n                            android:layout_width=\"wrap_content\"/>\n                </LinearLayout>\n            </android.support.constraint.ConstraintLayout>\n        </FrameLayout>\n        <android.support.design.widget.NavigationView\n                android:id=\"@+id/left_nav_view\"\n                android:layout_width=\"wrap_content\"\n                android:layout_height=\"match_parent\"\n                android:layout_gravity=\"start\"\n                android:fitsSystemWindows=\"true\"\n                app:menu=\"@menu/drawer_view\"/>\n        <android.support.design.widget.NavigationView\n            android:id=\"@+id/right_nav_view\"\n            android:layout_width=\"wrap_content\"\n            android:layout_height=\"match_parent\"\n            android:layout_gravity=\"end\"\n            android:fitsSystemWindows=\"true\"\n            app:menu=\"@menu/user_drawer_view\" />\n    </android.support.v4.widget.DrawerLayout>\n</android.support.constraint.ConstraintLayout>
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- app/src/main/res/layout/activity_base_checklist.xml	(date 1557711288000)
++++ app/src/main/res/layout/activity_base_checklist.xml	(date 1557864520423)
+@@ -39,13 +39,13 @@
+                         android:layout_marginEnd="8dp" app:layout_constraintStart_toStartOf="parent"
+                         android:layout_marginStart="8dp"
+                         android:visibility="invisible" app:layout_constraintTop_toTopOf="parent"/>
+-                <ScrollView
++                <android.support.v7.widget.RecyclerView
+                         android:layout_width="0dp"
+                         android:layout_height="0dp"
+                         app:layout_constraintStart_toStartOf="parent"
+                         android:layout_marginStart="32dp" app:layout_constraintEnd_toEndOf="parent"
+                         android:layout_marginEnd="32dp"
+-                        android:id="@+id/TaskScrollView"
++                        android:id="@+id/TaskRecyclerView"
+                         app:layout_constraintHorizontal_bias="1.0" android:layout_marginBottom="8dp"
+                         app:layout_constraintBottom_toTopOf="@+id/linearLayout"
+                         app:layout_constraintTop_toBottomOf="@+id/toolbar">
+@@ -55,7 +55,7 @@
+                             android:layout_height="wrap_content" android:id="@+id/TaskLayout"
+                             android:gravity="center_horizontal">
+                     </LinearLayout>
+-                </ScrollView>
++                </android.support.v7.widget.RecyclerView>
+                 <LinearLayout
+                         android:orientation="horizontal"
+                         android:layout_height="wrap_content" android:layout_marginBottom="8dp"
+Index: app/src/main/java/com/example/doug/checklistpresentlayer/BaseChecklist.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.example.doug.checklistpresentlayer\n\nimport android.app.Activity\nimport android.app.SearchManager\nimport android.content.ClipData\nimport android.content.Context\nimport android.content.Intent\nimport android.content.pm.ActivityInfo\nimport android.graphics.Color\nimport android.net.ConnectivityManager\nimport android.net.NetworkInfo\nimport android.os.Bundle\nimport android.support.constraint.ConstraintLayout\nimport android.support.design.widget.NavigationView\nimport android.support.v4.content.ContextCompat.startActivity\nimport android.support.v4.view.GravityCompat\nimport android.support.v4.widget.DrawerLayout\nimport android.support.v7.app.ActionBar\nimport android.support.v7.app.AppCompatActivity\nimport android.support.v7.widget.Toolbar\nimport android.text.TextUtils.split\nimport android.view.*\nimport android.view.inputmethod.InputMethodManager\nimport android.widget.*\nimport com.google.gson.Gson\nimport kotlinx.android.synthetic.main.activity_base_checklist.*\nimport kotlinx.android.synthetic.main.history_popup.view.*\nimport kotlinx.android.synthetic.main.popup_layout.view.*\nimport kotlinx.android.synthetic.main.task_functions_layout.view.*\nimport kotlinx.android.synthetic.main.task_settings_deadline_popup.view.*\nimport kotlinx.android.synthetic.main.task_settings_name_change_popup.view.*\nimport kotlinx.android.synthetic.main.task_settings_popup.view.*\nimport kotlinx.android.synthetic.main.task_settings_recursion_popup.view.*\nimport kotlinx.coroutines.GlobalScope\nimport kotlinx.coroutines.launch\nimport java.io.File\nimport java.io.FileInputStream\nimport java.io.FileOutputStream\nimport net.danlew.android.joda.DateUtils\n\nimport org.joda.time.DateTime\nimport org.joda.time.Duration\nimport org.joda.time.LocalDate\nimport kotlin.concurrent.thread\nimport android.widget.ImageButton\nimport com.google.gson.reflect.TypeToken\nimport org.jetbrains.anko.db.NULL\nimport org.jetbrains.anko.searchView\nimport org.joda.time.format.DateTimeFormat\nimport java.text.SimpleDateFormat\nimport java.time.format.DateTimeFormatter\n\nclass BaseChecklist : AppCompatActivity(){\n\n    var currentChecklist = Checklist(\"Your Checklist\", 0 )\n    var taskFlag = true\n    var deleteFlag = false\n    //Flag to see if any popups are present\n    var popupPresent = false\n\n    var currentUser = User(1)\n    var currentTask: TaskBox? = null\n    var currentListofLists = ListofLists(\"Your CheckLists\", \"none\")\n\n    private lateinit var userLayout: DrawerLayout\n    private lateinit var rightnavigationView: NavigationView\n    private lateinit var leftnavigationView: NavigationView\n    private lateinit var userButton: ClipData.Item\n    private lateinit var rightmenu: Menu\n    private lateinit var leftmenu: Menu\n    private lateinit var rightsubMenu: SubMenu\n    private lateinit var leftsubMenu: SubMenu\n    private lateinit var taskLayout: LinearLayout\n\n    //Intialize things here\n    init {\n    }\n\n    override fun onCreate(savedInstanceState: Bundle?) {\n        currentUser = User(intent.getIntExtra(\"UserID\", 0), intent.getStringExtra(\"UserName\"))\n        requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT\n        super.onCreate(savedInstanceState)\n        setContentView(R.layout.activity_base_checklist)\n        currentChecklist.listID = intent.getIntExtra(\"ChecklistID\", 0)\n        //line below gets the checklist name so that each checklist correctly\n        //displays their own tasks and no other checklist's tasks\n        currentChecklist.i_name = intent.getStringExtra(\"ListName\")\n        currentListofLists.uID = currentUser.UserID as Int\n\n        setSupportActionBar(findViewById(R.id.toolbar))\n        val actionbar: ActionBar? = supportActionBar\n        actionbar?.apply {\n            setDisplayHomeAsUpEnabled(true)\n            setHomeAsUpIndicator(R.drawable.ic_menu_black_24dp)\n        }\n        title = currentChecklist.i_name\n\n        //creates a submenu named user\n        rightnavigationView = findViewById(R.id.right_nav_view)\n        leftnavigationView = findViewById(R.id.left_nav_view)\n        rightmenu = rightnavigationView.menu\n        leftmenu = leftnavigationView.menu\n        rightsubMenu = rightmenu.addSubMenu(getString(R.string.USER_MENU_TITLE))\n        leftsubMenu = leftmenu.addSubMenu(getString(R.string.LIST_MENU_TITLE))\n        userLayout = findViewById(R.id.user_drawer_layout)\n        taskLayout = findViewById(R.id.TaskLayout)\n\n        val spinner : ProgressBar = findViewById(R.id.progress_bar2)\n\n        //create a database access object\n        var db = Database()\n        //deleteListDataFile()\n\n        //if there's a local file, populate our list from that\n        if (listFileExists()){\n            spinner.visibility = View.VISIBLE\n            currentChecklist.tasks = getListFromFile()\n            //Need to do things with this information TODO\n            //Currently this function recognizes if the completed\n            //time is 2 days old, but the compared string is never set\n            //and nothing is done\n            //add each task in currentChecklist to the page\n            for (Task in currentChecklist.tasks){\n                if (Task.compdatetime != null && Task.isRecurring != false)\n                {\n                    val now = LocalDate.now()\n                    val formatter = DateTimeFormat.forPattern(\"yyyy-MM-dd\")\n                    val dt = formatter.parseDateTime(Task.compdatetime)\n                    val dead = dt.plusDays(2)\n                    if (now.isEqual(dead.toLocalDate()))\n                    {\n                        //we don't want the task\n                    }\n                    else\n                    {\n                        addTaskFromList(Task)\n                    }\n                }\n                else\n                    addTaskFromList(Task)\n            }\n\n            println(\"loaded list from local file\")\n\n            //in a new thread, get checklist data from the database to see if any changes\n            //have happened since last opened.\n            //if there's only one user on the list, don't do anything\n            //if (currentChecklist.users.size > 1) {\n            GlobalScope.launch {\n                /*Right here start up a loading swirly*/\n\n                //disable certain actions while data is being loaded from database\n                turnOnButtons()\n                turnOffButtons()\n\n                val list = currentChecklist\n                list.tasks = db.GetTasks(currentChecklist.listID!!)\n                list.users = db.GetUsers(currentChecklist.listID!!)\n                list.changes = db.GetChanges(currentChecklist.listID!!)\n                currentListofLists.lists = db.GetListofLists(currentUser.Username)\n\n                currentChecklist.users = list.users\n                currentChecklist.tasks = list.tasks\n                currentChecklist.changes = list.changes\n\n                deleteListDataFile()\n                deleteListsDataFile()\n                createListFile(currentChecklist)\n                createListsFile(currentListofLists)\n\n                this@BaseChecklist.runOnUiThread {\n                    rightsubMenu.clear()\n                    for ((i, up) in currentChecklist.users.withIndex()) {\n                        rightsubMenu.add(0, Menu.FIRST + i, Menu.FIRST, up.Username)\n                    }\n                    leftsubMenu.clear()\n                    var ii = 0\n                    for ((i, lol) in currentListofLists.lists.withIndex()) {\n                        leftsubMenu.add(0, Menu.FIRST + i, Menu.FIRST, lol.i_name)\n                        ii = i\n                    }\n                    leftsubMenu.add(0, Menu.FIRST + ii + 1, Menu.FIRST, getString(R.string.ADD_LIST_TEXT)).setIcon(R.drawable.ic_add_box_black_24dp)\n                    leftsubMenu.add(0, Menu.FIRST + ii + 2, Menu.FIRST, getString(R.string.DELETE_LIST_TEXT)).setIcon(R.drawable.ic_delete_black_24dp)\n                    taskLayout.removeAllViews()\n                    for (Task in currentChecklist.tasks)\n                    {\n                        if (Task.compdatetime != null && Task.isRecurring != false)\n                        {\n                            val now = LocalDate.now()\n                            val formatter = DateTimeFormat.forPattern(\"yyyy-MM-dd\")\n                            val dt = formatter.parseDateTime(Task.compdatetime)\n                            val dead = dt.plusDays(2)\n                            if (now.isEqual(dead.toLocalDate()))\n                            {\n                                //we don't want the task\n                            }\n                            else\n                            {\n                                addTaskFromList(Task)\n                            }\n                        }\n                        else if (Task.name != \"\")\n                            addTaskFromList(Task)\n                    }\n                    spinner.visibility = View.INVISIBLE\n                }\n                deleteListDataFile()\n                createListFile(currentChecklist)\n\n\n                /*have a popup or something telling the user that the list has been updated*/\n                turnOnButtons()\n\n            }\n            //}\n        }\n\n        //if no local file exists, populate our list from the database\n        else{\n            spinner.visibility = View.VISIBLE\n            println(\"loaded list from database\")\n            var currentTasks = db.GetTasks(intent.getIntExtra(\"ChecklistID\", 0))\n            currentChecklist.users = db.GetUsers(intent.getIntExtra(\"ChecklistID\", 0))\n            currentChecklist.changes = db.GetChanges(intent.getIntExtra(\"ChecklistID\", 0))\n            //Same issue as \"Need to do things with this information\" TODO\n            for (Task in currentTasks)\n            {\n                if (Task.compdatetime != null && Task.isRecurring != false)\n                {\n                    val now = LocalDate.now()\n                    val formatter = DateTimeFormat.forPattern(\"yyyy-MM-dd\")\n                    val dt = formatter.parseDateTime(Task.compdatetime)\n                    val dead = dt.plusDays(2)\n                    if (now.isEqual(dead.toLocalDate()))\n                    {\n                        //we don't want the task\n                    }\n                    else\n                    {\n                        addTask(Task)\n                    }\n                }\n                else if (Task.name != \"\")\n                    addTask(Task)\n\n            }\n\n            //create a local file with the data\n            GlobalScope.launch {\n                createListFile(currentChecklist)\n            }\n            spinner.visibility = View.INVISIBLE\n\n        }\n\n\n        //allows the opening and closing of a nav drawer on the right side of the screen.\n//        val menuRight = findViewById<View>(R.id.menuRight) as ImageButton\n//        menuRight.setOnClickListener {\n//            if (userLayout.isDrawerOpen(GravityCompat.END)) {\n//                userLayout.closeDrawer(GravityCompat.END)\n//            } else {\n//                userLayout.openDrawer(GravityCompat.END)\n//            }\n//        }\n\n        //populates the submenu with the usernames of everyone on the list (stored in mUserList)\n        //Menu.FIRST + i gives each a unique ID, used later in the program.\n        for ((i, up) in currentChecklist.users.withIndex()) {\n            rightsubMenu.add(0, Menu.FIRST + i, Menu.FIRST, up.Username)\n        }\n\n        //gets called whenever any item is selected in the user nav menu\n        rightnavigationView.setNavigationItemSelectedListener { menuItem ->\n            //handles all items in nav drawer that are created at compile time\n            if (!onOptionsItemSelected(menuItem))\n            {\n                //handles all items in nav drawer that are created at run time\n                val id = menuItem.itemId - Menu.FIRST\n                if (id < currentChecklist.users.size && id >= 0) {\n                    val up = currentChecklist.users[id]\n                    val tempIntent = Intent(this, UserLogin::class.java).apply {\n                        putExtra(\"id\", up.UserID)\n                        putExtra(\"uname\", up.Username)\n                        putExtra(\"fname\", up.FName)\n                        putExtra(\"lname\", up.LName)\n                    }\n                    startActivity(tempIntent)\n                }\n            }\n            // close drawer when item is tapped\n            userLayout.closeDrawers()\n            // Add code here to update the UI based on the item selected\n            // For example, swap UI fragments here\n\n            true\n        }\n\n        //gets called whenever any item is selected in the user nav menu\n        leftnavigationView.setNavigationItemSelectedListener { menuItem ->\n            //handles all items in nav drawer that are created at compile time\n            val id = menuItem.itemId - Menu.FIRST\n            if (!deleteFlag) {\n                if (!onOptionsItemSelected(menuItem)) {\n                    if (id < currentListofLists.lists.size && id >= 0) {\n                        spinner.visibility = View.VISIBLE\n                        GlobalScope.launch {\n                            /*Right here start up a loading swirly*/\n\n                            //disable certain actions while data is being loaded from database\n                            turnOnButtons()\n                            turnOffButtons()\n\n                            currentChecklist.listID = currentListofLists.lists[id].listID\n                            currentChecklist.tasks = db.GetTasks(currentChecklist.listID!!)\n                            currentChecklist.users = db.GetUsers(currentChecklist.listID!!)\n                            currentChecklist.changes = db.GetChanges(currentChecklist.listID!!)\n                            currentChecklist.i_name = currentListofLists.lists[id].i_name\n                            currentListofLists.lists = db.GetListofLists(currentUser.Username)\n\n                            this@BaseChecklist.runOnUiThread {\n                                //replaces the tasks and title on screen\n                                title = currentChecklist.i_name\n                                if (id < currentListofLists.lists.size && id >= 0) {\n                                    val up = currentListofLists.lists[id]\n                                    taskLayout.removeAllViews()\n                                    for (Task in currentChecklist.tasks) {\n                                        if (Task.compdatetime != null) {\n                                            val now = LocalDate.now()\n                                            val formatter = DateTimeFormat.forPattern(\"yyyy-MM-dd\")\n                                            val dt = formatter.parseDateTime(Task.compdatetime)\n                                            val dead = dt.plusDays(2)\n                                            if (now.isEqual(dead.toLocalDate())) {\n                                                //we don't want the task\n                                            } else {\n                                                addTaskFromList(Task)\n                                            }\n                                        } else if (Task.name != \"\")\n                                            addTaskFromList(Task)\n                                    }\n                                }\n                                spinner.visibility = View.INVISIBLE\n                                // close drawer when item is tapped\n                                userLayout.closeDrawers()\n                            }\n                            turnOnButtons()\n                        }\n                    } else if (id < currentListofLists.lists.size + 2 && id >= 0) {\n                        if (id == currentListofLists.lists.size) {\n                            if (!popupPresent) {\n\n                                val mainView = findViewById<ScrollView>(R.id.TaskScrollView)\n\n                                val popupWindow = PopupWindow(this)\n\n                                val popupView = layoutInflater.inflate(R.layout.popup_layout, null)\n                                popupView.PopupEditText.hint = \"Enter List Name\"\n\n                                popupWindow.contentView = popupView\n\n                                val acceptButton = popupView.PopupMainView.AcceptButton\n\n                                //Creates and adds the on click action to the add button\n                                acceptButton.setOnClickListener {\n                                    val popup_edittext = popupView.PopupMainView.PopupEditText\n\n                                    val list_name = popup_edittext.text.toString()\n\n                                    if (list_name.length >= 1) {\n                                        spinner.visibility = View.VISIBLE\n                                        GlobalScope.launch {\n                                            //Create the new list and post it to the database\n                                            val length = currentListofLists.lists.size\n                                            currentListofLists.createList(\n                                                list_name, currentUser\n                                            )\n                                            while (currentListofLists.lists.size == length);\n                                            this@BaseChecklist.runOnUiThread {\n                                                leftsubMenu.clear()\n                                                var ii = 0\n                                                for ((i, lol) in currentListofLists.lists.withIndex()) {\n                                                    leftsubMenu.add(0, Menu.FIRST + i, Menu.FIRST, lol.i_name)\n                                                    ii = i\n                                                }\n                                                leftsubMenu.add(\n                                                    0, Menu.FIRST + ii + 1, Menu.FIRST,\n                                                    getString(R.string.ADD_LIST_TEXT)\n                                                ).setIcon(R.drawable.ic_add_box_black_24dp)\n                                                leftsubMenu.add(\n                                                    0,\n                                                    Menu.FIRST + ii + 2,\n                                                    Menu.FIRST,\n                                                    getString(R.string.DELETE_LIST_TEXT)\n                                                ).setIcon(R.drawable.ic_delete_black_24dp)\n                                                spinner.visibility = View.INVISIBLE\n                                            }\n                                        }\n\n                                        popupWindow.dismiss()\n\n                                        //create a new coroutine that will\n                                        //update the local LIST file to be current\n                                        GlobalScope.launch {\n                                            deleteListsDataFile()\n                                            createListsFile(currentListofLists)\n                                        }\n\n                                        popupWindow.setOnDismissListener {\n                                            PopupWindow.OnDismissListener {\n                                                popupPresent = false\n                                            }\n                                        }\n                                    }\n                                }\n\n                                val cancelButton = popupView.PopupMainView.CancelButton\n\n                                cancelButton.setOnClickListener {\n\n                                    popupWindow.dismiss()\n\n                                }\n\n                                popupWindow.setOnDismissListener {\n                                    val popupEdittext = popupView.PopupMainView.PopupEditText\n\n                                    popupEdittext.text.clear()\n\n                                    popupPresent = false\n                                }\n\n                                popupWindow.isFocusable = true\n\n                                popupWindow.showAtLocation(mainView, Gravity.CENTER, 0, 0)\n\n                                popupPresent = true\n\n                            }\n                        } else {\n                            leftsubMenu.clear()\n                            for ((i, lol) in currentListofLists.lists.withIndex()) {\n                                leftsubMenu.add(0, Menu.FIRST + i, Menu.FIRST, lol.i_name)\n                                    .setIcon(R.drawable.ic_cancel_black_24dp)\n                            }\n                            deleteFlag = true\n                        }\n                    }\n\n                }\n            }\n            else\n            {\n                if (id < currentListofLists.lists.size && id >= 0)\n                {\n                    GlobalScope.launch {\n                        deleteListDataFile(currentListofLists.lists[id].i_name)\n                    }\n\n                    //remove the task from the list, and delete it from the database\n                    currentListofLists.deleteList(id, User(1))\n\n                    //update the list of lists local file to be current\n                    GlobalScope.launch {\n                        deleteListsDataFile()\n                        createListsFile(currentListofLists)\n                    }\n\n                    leftsubMenu.clear()\n                    var ii = 0\n                    for ((i, lol) in currentListofLists.lists.withIndex()) {\n                        leftsubMenu.add(0, Menu.FIRST + i, Menu.FIRST, lol.i_name)\n                        ii = i\n                    }\n                    leftsubMenu.add(\n                        0, Menu.FIRST + ii + 1, Menu.FIRST,\n                        getString(R.string.ADD_LIST_TEXT)\n                    ).setIcon(R.drawable.ic_add_box_black_24dp)\n                    leftsubMenu.add(\n                        0,\n                        Menu.FIRST + ii + 2,\n                        Menu.FIRST,\n                        getString(R.string.DELETE_LIST_TEXT)\n                    ).setIcon(R.drawable.ic_delete_black_24dp)\n                    spinner.visibility = View.INVISIBLE\n\n                    deleteFlag = false\n                }\n            }\n            // Add code here to update the UI based on the item selected\n            // For example, swap UI fragments here\n\n            true\n        }\n\n        val addButton = findViewById<Button>(R.id.AddTaskButton)\n        val checkoffButton = findViewById<Button>(R.id.CheckoffButton)\n        val historyButton = findViewById<Button>(R.id.HistoryButton)\n\n        //Creates the click listener for the add button\n        val addListener = View.OnClickListener {\n\n            //If there is not a popup already [resent\n            if(!popupPresent) {\n\n                //Get the view containing all the tasks\n                val mainView = findViewById<ScrollView>(R.id.TaskScrollView)\n\n                val popupWindow = PopupWindow(this)\n                //Create a view that is of the popup_layout in resources\n                val popupView = layoutInflater.inflate(R.layout.popup_layout, null)\n                //Sets the content of the popup to the popup_layout\n                popupWindow.contentView = popupView\n                //Retrieves the acceptButton from the popup\n                val acceptButton = popupView.PopupMainView.AcceptButton\n\n                //Creates and adds the on click action to the add button\n                acceptButton.setOnClickListener{\n                    val popup_edittext = popupView.PopupMainView.PopupEditText\n\n                    //Retrieves the name of the task if the name is long enough\n                    if (popup_edittext.text.toString().length >= 1) {\n                        if (hasInternetConnection()) {\n                            createNewTask(popup_edittext.text.toString(), false, 0/*needs to be something later*/)\n                            //TODO make a popup to tell the user no internet\n                        }\n                    }\n\n                    //Set dismiss listener\n                    popupWindow.setOnDismissListener {\n                        popupPresent = false\n                    }\n                    //Dismisses the popup\n                    popupWindow.dismiss()\n                }\n                //Set cancel button to dismiss the popup\n                val cancelButton = popupView.PopupMainView.CancelButton\n\n                cancelButton.setOnClickListener(View.OnClickListener {\n\n                    popupWindow.dismiss()\n\n                })\n                //Have the popup clean up items when dismissed\n                popupWindow.setOnDismissListener(PopupWindow.OnDismissListener {\n                    val popupEdittext = popupView.PopupMainView.PopupEditText\n\n                    popupEdittext.text.clear()\n\n                    popupPresent = false\n                })\n\n                popupWindow.isFocusable = true\n\n                popupWindow.showAtLocation(mainView, Gravity.CENTER, 0, 0)\n\n                popupPresent = true\n\n            }\n        }\n\n        addButton.setOnClickListener(addListener)\n        //Create the click listener for the checkoff button\n        val checkoffListener = View.OnClickListener {\n            if (hasInternetConnection()) {\n                var taskCount = TaskLayout.childCount - 1\n                //Checks all current gui elements to see if they are checked\n                while (taskCount >= 0) {\n                    val currentChild = TaskLayout.getChildAt(taskCount)\n\n                    if (currentChild is TaskBox) {\n                        val taskSwitch = currentChild.getChildAt(0)\n\n                        if (taskSwitch is CheckBox) {\n                            if (taskSwitch.isChecked) {\n                                if (!currentChild.checkCompletion()) {\n                                    if (currentChild.checkReccurring()) {\n                                        /*createNewTask(\n                                            currentChild.getTaskText(),\n                                            true,\n                                            0/*needs to be something later*/\n                                        )*/\n                                        //currentChecklist.createTask(currentChild.getTaskText(), \"enable Later\", User(1))\n                                    }\n\n                                    currentChild.completeTask()\n\n                                    //TaskLayout.removeView(TaskLayout.getChildAt(taskCount))\n\n                                    currentChecklist.completeTask(taskCount, currentUser)\n                                }\n                            }\n                        }\n                    }\n\n                    taskCount--\n                }\n            }\n            //this else clause happens when they have no internet connection\n            else {\n                //TODO add a popup or something here\n            }\n        }\n\n        checkoffButton.setOnClickListener(checkoffListener)\n\n        //Set history button's click listener\n\n        val historyListener = View.OnClickListener {\n            //Toast.makeText(this, \"General Kenobi!\", Toast.LENGTH_SHORT).show()\n\n            if(!popupPresent) {\n\n                val mainViewHistory = findViewById<ScrollView>(R.id.TaskScrollView)\n\n                val popupWindowHistory = PopupWindow(this)\n\n                val popupViewHistory = layoutInflater.inflate(R.layout.history_popup, null)\n\n                popupWindowHistory.contentView = popupViewHistory\n\n\n                val cancelListener = View.OnClickListener {\n                    popupWindowHistory.dismiss()\n                }\n\n                val dismissListener = PopupWindow.OnDismissListener {\n                    popupPresent = false\n                }\n\n                popupWindowHistory.setOnDismissListener(dismissListener)\n\n                popupViewHistory.HistoryCloseButton.setOnClickListener(cancelListener)\n\n                popupPresent = true\n\n                popupWindowHistory.isFocusable = true\n\n                val historyIterator = currentChecklist.changes.iterator()\n\n                val historyLayout = popupViewHistory.HistoryLinearLayout\n\n                //Check to see if not changes have happened\n                //Displays a message for each change that has occurred\n                if(currentChecklist.changes.isEmpty()) {\n                    val checklistChangeTextView = TextView(this)\n\n                    var toAddString = \"No Changes in this checklist!\"\n\n                    checklistChangeTextView.text = toAddString\n\n                    checklistChangeTextView.setTextColor(Color.WHITE)\n\n                    checklistChangeTextView.textSize = 30f\n                    checklistChangeTextView.layoutParams = LinearLayout.LayoutParams(\n                        LinearLayout.LayoutParams.WRAP_CONTENT,\n                        ViewGroup.LayoutParams.WRAP_CONTENT\n                    )\n\n                    historyLayout.addView(checklistChangeTextView)\n                }\n                else {\n                    historyIterator.forEach {\n\n                        val checklistChangeTextView = TextView(this)\n\n                        var toAddString = \"Default\"\n\n                        when(it.changeType) {\n\n                            kAction.CREATE_TASK -> toAddString = \"--- Task Added: \" + it.taskName +\n                                    \"\\n\\tAdded By: \" +  it.changedBy + \"\\n\"\n                            kAction.DELETE_TASK -> toAddString = \"--- Task Deleted: \" + it.taskName +\n                                    \"\\n\\tDeleted By: \" + it.changedBy + \"\\n\"\n                            kAction.COMPLETE_TASK -> toAddString = \"--- Task Completed: \" + it.taskName +\n                                    \"\\n\\tCompleted By: \" + it.changedBy + \"\\n\"\n                            kAction.CHANGE_TASK_NAME -> toAddString = \"--- Task Edited: \" + it.taskName +\n                                    \"\\n\\tChanged To: \" + it.changedTo + \"\\n\\tEdited By: \" + it.changedBy + \"\\n\"\n                            kAction.CHANGE_TASK_DEADLINE -> toAddString = \"--- Deadline Changed: \" + it.taskName +\n                                    \"\\n\\tChanged to: \" + it.changedTo + \"\\n\\tEdited By: \" + it.changedBy + \"\\n\"\n                            kAction.REMOVE_TASK_DEADLINE -> toAddString + \"--- Deadline Removed: \" + it.taskName +\n                                    \"\\n\\tRemoved By: \" + it.changedBy  + \"\\n\"\n                            kAction.ADD_USER -> toAddString = \"--- User Added: \" + it.changedTo +\n                                    \"\\n\\tAdded by: \" + it.changedBy + \"\\n\"\n                        }\n\n                        checklistChangeTextView.text = toAddString\n\n                        checklistChangeTextView.setTextColor(Color.WHITE)\n\n                        checklistChangeTextView.textSize = 20f\n                        checklistChangeTextView.layoutParams = LinearLayout.LayoutParams(\n                            LinearLayout.LayoutParams.WRAP_CONTENT,\n                            ViewGroup.LayoutParams.WRAP_CONTENT\n                        )\n\n                        historyLayout.addView(checklistChangeTextView)\n                    }\n                }\n\n                popupWindowHistory.showAtLocation(mainViewHistory, Gravity.CENTER, 0, 0)\n            }\n        }\n\n        historyButton.setOnClickListener(historyListener)\n    }\n\n    private fun createSettingsPopup() {\n        if (!popupPresent ) {\n            popupPresent = true\n\n            val mainView = findViewById<ScrollView>(R.id.TaskScrollView)\n\n            val popupSettingsWindow = PopupWindow(this)\n\n            val taskSettingsLayoutView =\n                layoutInflater.inflate(R.layout.task_settings_popup, null)\n\n            var taskCount = 0\n            var found = false\n            //Checks all current gui elements to see if they are checked\n            while (taskCount < currentChecklist.tasks.count() && !found) {\n                if(currentChecklist.tasks[taskCount].TaskID == currentTask?.taskID)\n                {\n                    found = true\n\n                }\n                else\n                {\n                    taskCount++\n                }\n            }\n\n            popupSettingsWindow.contentView = taskSettingsLayoutView\n\n            /**************\n             *   Deadline Button Displays Deadline popup\n             ***************/\n            taskSettingsLayoutView.DeadlineButton.setOnClickListener {\n\n                popupSettingsWindow.dismiss()\n                var curDeadline = LocalDate.now().toString()\n                val popupSettingsDeadlineWindow = PopupWindow(this)\n\n                val taskSettingsDeadlineLayoutView =\n                    layoutInflater.inflate(R.layout.task_settings_deadline_popup, null)\n\n                var tempString = \"\"\n\n                popupSettingsDeadlineWindow.contentView = taskSettingsDeadlineLayoutView\n\n                if(currentChecklist.tasks[taskCount].Deadline != null) {\n                    tempString =\n                        getString(R.string.CURRENT_DEADLINE_TEXT) + \" \" + currentChecklist.tasks[taskCount].Deadline.toString()\n\n                    taskSettingsDeadlineLayoutView.CurrentDeadlineTextView.text = tempString\n                }\n                else {\n                    taskSettingsDeadlineLayoutView.CurrentDeadlineTextView.text = getString(R.string.NO_DEADLINE_TEXT)\n                }\n\n                taskSettingsDeadlineLayoutView.ClearDeadlineButton.setOnClickListener {\n                    taskSettingsDeadlineLayoutView.CurrentDeadlineTextView.text = getString(R.string.NO_DEADLINE_TEXT)\n\n                    currentChecklist.removeDeadline(taskCount, currentUser)\n                    curDeadline = LocalDate.now().minusDays(1).toString()\n                }\n\n                taskSettingsDeadlineLayoutView.DeadlineCalendarView.setOnDateChangeListener{_, year, month, day ->\n                    tempString =\n                        getString(R.string.CURRENT_DEADLINE_TEXT) + \" \" + year + \"-\" + month + \"-\" + day\n\n                    taskSettingsDeadlineLayoutView.CurrentDeadlineTextView.text = tempString\n\n                    curDeadline = \"$year-$month-$day\"\n                }\n\n                taskSettingsDeadlineLayoutView.closeDeadlineButton.setOnClickListener{\n\n                    popupSettingsDeadlineWindow.dismiss()\n\n                    popupPresent = false\n                }\n\n                popupSettingsDeadlineWindow.setOnDismissListener {\n                    if (curDeadline != LocalDate.now().minusDays(1).toString())\n                        currentChecklist.changeTaskDeadline(taskCount, currentUser, curDeadline)\n                    popupPresent = false\n                }\n\n                popupSettingsDeadlineWindow.isFocusable = true\n\n                popupSettingsDeadlineWindow.showAtLocation(mainView, Gravity.CENTER, 0, 0)\n            }\n\n            /**************\n             *   Recursion Button Displays Task Recursion popup\n             ***************/\n            taskSettingsLayoutView.RecursionButton.setOnClickListener {\n\n                popupSettingsWindow.dismiss()\n\n                val popupSettingsRecurringWindow = PopupWindow(this)\n\n                val taskSettingsRecurringLayoutView =\n                    layoutInflater.inflate(R.layout.task_settings_recursion_popup, null)\n\n                taskSettingsRecurringLayoutView.RecursionSwitch.setOnClickListener {\n                    currentTask?.setRecurringIfNotComplete(taskSettingsRecurringLayoutView.RecursionSwitch.isChecked)\n                }\n\n                taskSettingsRecurringLayoutView.CurrentDaysTextView.text = calcTempStringDays(taskCount)\n\n                taskSettingsRecurringLayoutView.CurrentTimeTextView.text = calcTempStringTime(taskCount)\n\n                popupSettingsRecurringWindow.contentView = taskSettingsRecurringLayoutView\n\n                popupSettingsRecurringWindow.setOnDismissListener {\n\n                    currentTask?.setRecurringIfNotComplete(taskSettingsRecurringLayoutView.RecursionSwitch.isChecked)\n\n                    popupPresent = false\n\n                }\n                taskSettingsRecurringLayoutView.RecursionSwitch.setOnClickListener {\n                    currentTask?.setRecurringIfNotComplete(taskSettingsRecurringLayoutView.RecursionSwitch.isChecked)\n                    currentChecklist.setTaskRecursion(taskCount, currentUser,\n                        taskSettingsRecurringLayoutView.RecursionSwitch.isChecked)\n                }\n\n                taskSettingsRecurringLayoutView.CloseRecurringButton.setOnClickListener{\n\n                    currentTask?.setRecurringIfNotComplete(taskSettingsRecurringLayoutView.RecursionSwitch.isChecked)\n\n                    popupSettingsRecurringWindow.dismiss()\n\n                    popupPresent = false\n                }\n\n                //********************************************************************\n                //Format for recurring date string is Day-Day-Day-.... ex. Mon-Tue-Fri\n                //\n                //Format for recurring time string is hour:minute AM\\PM\n                //********************************************************************\n                taskSettingsRecurringLayoutView.SaveRecurringSettingsButton.setOnClickListener {\n                    var dateString = \"\"\n\n                    if(taskSettingsRecurringLayoutView.SundaySwitch.isChecked)\n                        dateString += \"Sun-\"\n\n                    if(taskSettingsRecurringLayoutView.MondaySwitch.isChecked)\n                        dateString += \"Mon-\"\n\n                    if(taskSettingsRecurringLayoutView.TuesdaySwitch.isChecked)\n                        dateString += \"Tue-\"\n\n                    if(taskSettingsRecurringLayoutView.WednesdaySwitch.isChecked)\n                        dateString += \"Wed-\"\n\n                    if(taskSettingsRecurringLayoutView.ThursdaySwitch.isChecked)\n                        dateString += \"Thu-\"\n\n                    if(taskSettingsRecurringLayoutView.FridaySwitch.isChecked)\n                        dateString += \"Fri-\"\n\n                    if(taskSettingsRecurringLayoutView.SaturdaySwitch.isChecked)\n                        dateString += \"Sat-\"\n\n                    if(dateString != currentChecklist.tasks[taskCount].recurringDays)\n                        currentChecklist.updateTaskRecurringDays(taskCount, currentUser, dateString)\n\n                    var timeString =\n                        taskSettingsRecurringLayoutView.HourSpinner.selectedItem.toString() +\n                                \":\" + taskSettingsRecurringLayoutView.MinuteSpinner.selectedItem.toString() +\n                                \" \" + taskSettingsRecurringLayoutView.AmPmSpinner.selectedItem.toString()\n\n                    if(timeString != currentChecklist.tasks[taskCount].recurringTime)\n                        currentChecklist.updateTaskRecurringTime(taskCount, currentUser, timeString)\n\n                    taskSettingsRecurringLayoutView.CurrentDaysTextView.text = calcTempStringDays(taskCount)\n\n                    taskSettingsRecurringLayoutView.CurrentTimeTextView.text = calcTempStringTime(taskCount)\n                }\n\n                taskSettingsRecurringLayoutView.RecursionSwitch.isChecked =\n                    currentTask?.checkReccurring() != null && currentTask?.checkReccurring() == true\n\n\n                popupSettingsRecurringWindow.setOnDismissListener {\n                    popupPresent = false\n                }\n\n                popupSettingsRecurringWindow.isFocusable = true\n\n                popupSettingsRecurringWindow.showAtLocation(mainView, Gravity.CENTER, 0, 0)\n            }\n\n            taskSettingsLayoutView.ChangeNameSettingsButton.setOnClickListener {\n\n                popupSettingsWindow.dismiss()\n\n                val popupSettingsChangeNameWindow = PopupWindow(this)\n\n                val taskSettingsChangeNameLayoutView =\n                    layoutInflater.inflate(R.layout.task_settings_name_change_popup, null)\n\n                popupSettingsChangeNameWindow.contentView = taskSettingsChangeNameLayoutView\n\n                taskSettingsChangeNameLayoutView.ChangeNameButton.setOnClickListener {\n\n                    val newName = taskSettingsChangeNameLayoutView.NewNameText.text.toString()\n\n                    currentTask?.ChangeName(newName)\n\n                    currentChecklist.changeTaskName(taskCount, currentUser, newName)\n\n                    popupPresent = false\n\n                    popupSettingsChangeNameWindow.dismiss()\n                }\n\n                popupSettingsChangeNameWindow.setOnDismissListener {\n                    popupPresent = false\n                }\n\n                taskSettingsChangeNameLayoutView.ChangeNameCancelButton.setOnClickListener {\n                    popupPresent = false\n\n                    popupSettingsChangeNameWindow.dismiss()\n                }\n\n                popupSettingsChangeNameWindow.isFocusable = true\n\n                popupSettingsChangeNameWindow.showAtLocation(mainView, Gravity.CENTER, 0, 0)\n            }\n\n            taskSettingsLayoutView.CloseButton.setOnClickListener {\n                popupSettingsWindow.dismiss()\n                popupPresent = false\n            }\n\n            popupSettingsWindow.setOnDismissListener {\n                popupPresent = false\n            }\n\n            taskSettingsLayoutView.taskNameView.text = currentTask?.getTaskText()\n\n            popupSettingsWindow.isFocusable = true\n\n            popupSettingsWindow.showAtLocation(mainView, Gravity.CENTER, 0, 0)\n        }\n    }\n\n    private fun calcTempStringDays(index: Int) = when(currentChecklist.tasks[index].recurringDays != null) {\n        true -> getString(R.string.CURRENT_RECURRING_DAYS_TEXT) +\n                \" \" + currentChecklist.tasks[index].recurringDays\n        false -> \"No current recurring days\"\n    }\n\n    private fun calcTempStringTime(index: Int) = when(currentChecklist.tasks[index].recurringTime != null){\n        true -> getString(R.string.CURRENT_RECURRING_TIME_TEXT) +\n                \" \" + currentChecklist.tasks[index].recurringTime\n        false -> \"No current recurring time\"\n    }\n\n    fun createNewTask(TaskText: String, IsReaccuring: Boolean, taskID: Int?) {\n        var new_task_box = TaskBox(\n            this,\n            TaskText\n        )\n\n        new_task_box.taskID = taskID\n\n        if(IsReaccuring)\n            new_task_box.setRecurringIfNotComplete(IsReaccuring)\n\n        val mainView = findViewById<ScrollView>(R.id.TaskScrollView)\n\n        //Adds the task to the checklist\n        currentChecklist.createTask(TaskText, null, currentUser, null, currentChecklist.listID!!)\n\n        //rebuild the local file with the updated checklist\n        GlobalScope.launch {\n            deleteListDataFile()\n            createListFile(currentChecklist)\n        }\n\n        val popupFunctionWindow = PopupWindow(this)\n\n        val taskFunctionLayoutView =\n            layoutInflater.inflate(R.layout.task_functions_layout, null)\n\n        taskFunctionLayoutView.FunctionCloseButton.setOnClickListener {\n            popupFunctionWindow.dismiss()\n\n            popupPresent = false\n        }\n\n        taskFunctionLayoutView.FunctionSettingsButton.setOnClickListener {\n            popupFunctionWindow.dismiss()\n\n            popupPresent = false\n\n            createSettingsPopup()\n        }\n\n        //Sets the delete button to remove the task\n        taskFunctionLayoutView.FunctionDeleteButton.setOnClickListener {\n            for(i in TaskLayout.childCount downTo 0 step 1)\n            {\n                val tempChild = TaskLayout.getChildAt(i)\n                if(tempChild is TaskBox)\n                {\n                    if(tempChild == currentTask)\n                    {\n                        TaskLayout.removeView(TaskLayout.getChildAt(i))\n                        //remove the task from the list, and delete it from the database\n                        currentChecklist.deleteTask(i, currentUser)\n\n                        //update the local file\n                        GlobalScope.launch {\n                            deleteListDataFile()\n                            createListFile(currentChecklist)\n                        }\n                    }\n                }\n            }\n\n            popupFunctionWindow.dismiss()\n\n            popupPresent = false\n        }\n\n        popupFunctionWindow.contentView = taskFunctionLayoutView\n\n        popupFunctionWindow.setOnDismissListener {\n            PopupWindow.OnDismissListener {\n                popupPresent = false\n            }\n        }\n\n        //Sets the on lick listener for the new task gui element\n        new_task_box.setOnClickListener{\n\n            if(!popupPresent && taskFlag) {\n\n                popupPresent = true\n\n                popupFunctionWindow.isFocusable()\n\n                popupFunctionWindow.showAtLocation(mainView, Gravity.CENTER, 0, 0)\n\n                for(i in TaskLayout.childCount downTo 0 step 1)\n                {\n                    val tempChild = TaskLayout.getChildAt(i)\n                    if(tempChild is TaskBox)\n                    {\n                        if(tempChild == new_task_box) {\n                            currentTask = tempChild\n                        }\n                    }\n                }\n            }\n        }\n\n        val taskLayout = findViewById<LinearLayout>(R.id.TaskLayout)\n\n        taskLayout.addView(new_task_box)\n    }\n\n    fun addTask(task: Task) {\n        var new_task_box = TaskBox(\n            this,\n            task.name\n        )\n\n        new_task_box.taskID = task.TaskID\n\n        var found = false\n\n        if(task.isRecurring == true)\n        {\n            if(task.compdatetime != null) {\n                val recurringDays = split(\"-\", task.recurringDays)\n\n                 var today = DateTimeFormatter.ofPattern(\"EEE\")\n\n                 for (i in 0 until recurringDays.size - 1) {\n                     if (recurringDays[i] == today.toString()\n                         && task.compdatetime != LocalDate.now().toString()) {\n                         found = true\n                     }\n                 }\n            }\n            else {\n                new_task_box.setRecurringIfNotComplete(true)\n            }\n        }\n        if (task.compdatetime != null)\n            new_task_box.completeTask()\n\n        val mainView = findViewById<ScrollView>(R.id.TaskScrollView)\n\n        //Adds the task to the checklist\n        currentChecklist.tasks.add(task)\n\n        val popupFunctionWindow = PopupWindow(this)\n\n        val taskFunctionLayoutView =\n            layoutInflater.inflate(R.layout.task_functions_layout, null)\n\n        taskFunctionLayoutView.FunctionCloseButton.setOnClickListener {\n            popupFunctionWindow.dismiss()\n\n            popupPresent = false\n        }\n\n        taskFunctionLayoutView.FunctionSettingsButton.setOnClickListener {\n            popupFunctionWindow.dismiss()\n\n            popupPresent = false\n\n            createSettingsPopup()\n        }\n\n        //Sets the delete button to remove the task\n        taskFunctionLayoutView.FunctionDeleteButton.setOnClickListener {\n            for(i in TaskLayout.childCount downTo 0 step 1)\n            {\n                val tempChild = TaskLayout.getChildAt(i)\n                if(tempChild is TaskBox)\n                {\n                    if(tempChild == currentTask)\n                    {\n                        TaskLayout.removeView(TaskLayout.getChildAt(i))\n                        currentChecklist.deleteTask(i, currentUser)\n                    }\n                }\n            }\n\n            popupFunctionWindow.dismiss()\n\n            popupPresent = false\n        }\n\n        popupFunctionWindow.contentView = taskFunctionLayoutView\n\n        popupFunctionWindow.setOnDismissListener {\n            PopupWindow.OnDismissListener {\n                popupPresent = false\n            }\n        }\n\n        //Sets the on lick listener for the new task gui element\n        new_task_box.setOnClickListener{\n\n            if(!popupPresent) {\n\n                popupPresent = true\n\n                popupFunctionWindow.isFocusable()\n\n                popupFunctionWindow.showAtLocation(mainView, Gravity.CENTER, 0, 0)\n\n                for(i in TaskLayout.childCount downTo 0 step 1)\n                {\n                    val tempChild = TaskLayout.getChildAt(i)\n                    if(tempChild is TaskBox)\n                    {\n                        if(tempChild == new_task_box) {\n                            currentTask = tempChild\n                        }\n                    }\n                }\n            }\n        }\n\n        val taskLayout = findViewById<LinearLayout>(R.id.TaskLayout)\n\n        taskLayout.addView(new_task_box)\n\n        if(found) {\n            var taskCount = 0\n            var taskFound = false\n            //Checks all current gui elements to see if they are checked\n            while (taskCount < currentChecklist.tasks.count() && !taskFound) {\n                if(currentChecklist.tasks[taskCount].TaskID == currentTask?.taskID)\n                {\n                    taskFound = true\n                }\n                else\n                {\n                    taskCount++\n                }\n            }\n\n            currentChecklist.uncompleteTask(taskCount, currentUser)\n        }\n    }\n\n    fun addTaskFromList(task: Task) {\n        var new_task_box = TaskBox(\n            this,\n            task.name\n        )\n\n        var found = false\n\n        new_task_box.taskID = task.TaskID\n\n        if(task.isRecurring == true)\n        {\n            if(task.compdatetime != null) {\n\n                val recurringDays = split(\"-\", task.recurringDays)\n\n                var today = DateTimeFormatter.ofPattern(\"EEE\")\n\n                for (i in 0 until recurringDays.size - 1) {\n                    if (recurringDays[i] == today.toString()\n                        && task.compdatetime != LocalDate.now().toString()) {\n                        found = true\n                    }\n                }\n            }\n            else {\n                new_task_box.setRecurringIfNotComplete(true)\n            }\n        }\n\n        if (task.compdatetime != null)\n            new_task_box.completeTask()\n\n        val mainView = findViewById<ScrollView>(R.id.TaskScrollView)\n\n        val popupFunctionWindow = PopupWindow(this)\n\n        val taskFunctionLayoutView =\n            layoutInflater.inflate(R.layout.task_functions_layout, null)\n\n        taskFunctionLayoutView.FunctionCloseButton.setOnClickListener {\n            popupFunctionWindow.dismiss()\n\n            popupPresent = false\n        }\n\n        taskFunctionLayoutView.FunctionSettingsButton.setOnClickListener {\n            popupFunctionWindow.dismiss()\n\n            popupPresent = false\n\n            createSettingsPopup()\n        }\n\n        //Sets the delete button to remove the task\n        taskFunctionLayoutView.FunctionDeleteButton.setOnClickListener {\n            for(i in TaskLayout.childCount downTo 0 step 1)\n            {\n                val tempChild = TaskLayout.getChildAt(i)\n                if(tempChild is TaskBox)\n                {\n                    if(tempChild == currentTask)\n                    {\n                        TaskLayout.removeView(TaskLayout.getChildAt(i))\n                        currentChecklist.deleteTask(i, currentUser)\n\n                        //remake the local file\n                        GlobalScope.launch {\n                            deleteListDataFile()\n                            createListFile(currentChecklist)\n                        }\n                    }\n                }\n            }\n\n            popupFunctionWindow.dismiss()\n\n            popupPresent = false\n        }\n\n        popupFunctionWindow.contentView = taskFunctionLayoutView\n\n        popupFunctionWindow.setOnDismissListener {\n            PopupWindow.OnDismissListener {\n                popupPresent = false\n            }\n        }\n\n        //Sets the on lick listener for the new task gui element\n        new_task_box.setOnClickListener{\n\n            if(!popupPresent) {\n\n                popupPresent = true\n\n                popupFunctionWindow.isFocusable()\n\n                popupFunctionWindow.showAtLocation(mainView, Gravity.CENTER, 0, 0)\n\n                for(i in TaskLayout.childCount downTo 0 step 1)\n                {\n                    val tempChild = TaskLayout.getChildAt(i)\n                    if(tempChild is TaskBox)\n                    {\n                        if(tempChild == new_task_box) {\n                            currentTask = tempChild\n                        }\n                    }\n                }\n            }\n        }\n\n        val taskLayout = findViewById<LinearLayout>(R.id.TaskLayout)\n\n        taskLayout.addView(new_task_box)\n\n        if(found) {\n            var taskCount = 0\n            var taskFound = false\n            //Checks all current gui elements to see if they are checked\n            while (taskCount < currentChecklist.tasks.count() && !taskFound) {\n                if(currentChecklist.tasks[taskCount].TaskID == currentTask?.taskID)\n                {\n                    taskFound = true\n                }\n                else\n                {\n                    taskCount++\n                }\n            }\n\n            currentChecklist.uncompleteTask(taskCount, currentUser)\n        }\n    }\n\n    fun createListFile(list: Checklist) {\n        //convert list to a JSON string\n        val gson = Gson()\n        val userJson = gson.toJson(list.tasks)\n\n        //context will give us access to our local files directory\n        var context = applicationContext\n\n        val filename = list.i_name\n        val directory = context.filesDir\n\n        //write the file to local directory\n        //the filename will be the name of the list\n        val file = File(directory, filename)\n        FileOutputStream(file).use {\n            it.write(userJson.toByteArray())\n        }\n    }\n\n    fun listFileExists() : Boolean {\n        return File(applicationContext.filesDir, currentChecklist.i_name).exists()\n    }\n\n    fun createListsFile(lists: ListofLists) {\n        //convert lists to a JSON string\n        val gson = Gson()\n        val userJson = gson.toJson(lists.lists)\n\n        //context will give us access to our local files directory\n        var context = applicationContext\n\n        val filename = \"LISTS\"\n        val directory = context.filesDir\n\n        //write the file LISTS to local directory\n        val file = File(directory, filename)\n        FileOutputStream(file).use {\n            it.write(userJson.toByteArray())\n        }\n    }\n\n    fun listsFileExists() : Boolean {\n        return File(applicationContext.filesDir, \"LISTS\").exists()\n    }\n\n    //we don't have to check if the file exists in this function\n    //because we call listFileExists() before calling this\n    //however, we might need some other error checking in here\n    fun getListsFromFile() : MutableList<ListClass> {\n        //context will give us access to our local files directory\n        var context = applicationContext\n\n        val filename = \"LISTS\"\n        val directory = context.filesDir\n\n        //read from LISTS and store it as a string\n        val file = File(directory, filename)\n        val fileData = FileInputStream(file).bufferedReader().use { it.readText() }\n\n        //create a MutableList<ListClass> object based on the JSON from the file\n        val gson = Gson()\n        return gson.fromJson(fileData, object : TypeToken<MutableList<ListClass>>() {}.type)\n    }\n\n    fun deleteUserDataFile(){\n        //context will give us access to our local files directory\n        var context = applicationContext\n\n        val filename = \"USERDATA\"\n        val directory = context.filesDir\n\n        //delete the USERDATA file\n        File(directory, filename).delete()\n    }\n\n    //deletes the file that contains list of lists data\n    fun deleteListsDataFile(){\n        //context will give us access to our local files directory\n        var context = applicationContext\n\n        val filename = \"LISTS\"\n        val directory = context.filesDir\n\n        //delete the LISTS file\n        File(directory, filename).delete()\n    }\n\n    //deletes the file with the given name.\n    //this should be an individual checklist's file, which is filled\n    //with task/change data\n    fun deleteListDataFile(filename: String){\n        //context will give us access to our local files directory\n        var context = applicationContext\n\n        val directory = context.filesDir\n\n        //delete the file\n        File(directory, filename).delete()\n    }\n\n    //we don't have to check if the file exists in this function\n    //because we call listFileExists() before calling this\n    //however, we might need some other error checking in here\n    fun getListFromFile() : MutableList<Task> {\n        //context will give us access to our local files directory\n        val context = applicationContext\n\n        val filename = currentChecklist.i_name\n        val directory = context.filesDir\n\n        //read from the file and store it as a string\n        val file = File(directory, filename)\n        val fileData = FileInputStream(file).bufferedReader().use { it.readText() }\n\n        //create a Checklist object based on the JSON from the file\n        val gson = Gson()\n        return gson.fromJson(fileData, object : TypeToken<MutableList<Task>>() {}.type)\n    }\n\n    fun deleteListDataFile(){\n        //context will give us access to our local files directory\n        val context = applicationContext\n\n        val filename = currentChecklist.i_name\n        val directory = context.filesDir\n\n        //delete the file\n        File(directory, filename).delete()\n    }\n\n    override fun onOptionsItemSelected(item: MenuItem): Boolean {\n        //handles all nav drawer activity that was added at run time.\n        return when (item.itemId) {\n            android.R.id.home -> {\n                userLayout.openDrawer(GravityCompat.START)\n                if (deleteFlag)\n                {\n                    leftsubMenu.clear()\n                    var ii = 0\n                    for ((i, lol) in currentListofLists.lists.withIndex()) {\n                        leftsubMenu.add(0, Menu.FIRST + i, Menu.FIRST, lol.i_name)\n                        ii = i\n                    }\n                    leftsubMenu.add(\n                        0, Menu.FIRST + ii + 1, Menu.FIRST,\n                        getString(R.string.ADD_LIST_TEXT)\n                    ).setIcon(R.drawable.ic_add_box_black_24dp)\n                    leftsubMenu.add(\n                        0,\n                        Menu.FIRST + ii + 2,\n                        Menu.FIRST,\n                        getString(R.string.DELETE_LIST_TEXT)\n                    ).setIcon(R.drawable.ic_delete_black_24dp)\n                    deleteFlag = false\n                }\n                true\n            }\n            R.id.users_drawer -> {\n                if (userLayout.isDrawerOpen(GravityCompat.END)) {\n                    userLayout.closeDrawer(GravityCompat.END)\n                } else {\n                    userLayout.openDrawer(GravityCompat.END)\n                }\n                //userLayout.openDrawer(GravityCompat.START)\n                true\n            }\n            R.id.oUser -> {\n                val tempIntent = Intent(this, UserLogin::class.java).apply {\n                    putExtra(\"uname\", currentUser.Username)\n                    putExtra(\"fname\", currentUser.FName)\n                    putExtra(\"lname\", currentUser.LName)\n                    putExtra(\"UserID\", currentUser.UserID)\n                }\n                startActivity(tempIntent)\n                true\n            }\n            else -> super.onOptionsItemSelected(item)\n        }\n    }\n\n    override fun onCreateOptionsMenu(menu: Menu): Boolean {\n        if (hasInternetConnection()) {\n            // Inflate the options menu from XML\n            val inflater = menuInflater\n            val db = Database()\n            inflater.inflate(R.menu.options_menu, menu)\n\n            val searchItem = menu.findItem(R.id.search)\n            if (searchItem != null) {\n                val searchView = searchItem.actionView as SearchView\n\n                searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {\n                    override fun onQueryTextSubmit(query: String?): Boolean {\n                        val u = db.GetUser(query as String)\n                        if (u.UserID != -1) {\n                            db.AddUserToList(u.UserID as Int, currentChecklist.listID as Int)\n                            rightsubMenu.add(0, Menu.FIRST + 7, Menu.FIRST, u.Username)\n                        }\n                        searchItem.collapseActionView()\n                        val activity: Activity = this@BaseChecklist\n                        val imm = activity.getSystemService(Activity.INPUT_METHOD_SERVICE) as InputMethodManager\n                        //Find the currently focused view, so we can grab the correct window token from it.\n                        var view = activity.currentFocus\n                        //If no view currently has focus, create a new one, just so we can grab a window token from it\n                        if (view == null) {\n                            view = View(activity)\n                        }\n                        imm.hideSoftInputFromWindow(view.windowToken, 0)\n                        return true\n                    }\n\n                    override fun onQueryTextChange(newText: String?): Boolean {\n                        return true\n                    }\n\n                })\n            }\n\n            return super.onCreateOptionsMenu(menu)\n        }\n\n        //this clause happens if they have no internet connection\n        else {\n            return false\n        }\n    }\n\n    private fun turnOffButtons() {\n        val turnOff: Button = findViewById(R.id.AddTaskButton)\n        turnOff.isClickable = false\n        val turnOff2 : Button = findViewById(R.id.CheckoffButton)\n        turnOff2.isClickable = false\n        taskFlag = false\n    }\n\n    private fun turnOnButtons() {\n\n        var turnOn : Button = findViewById(R.id.AddTaskButton)\n        turnOn.isClickable = true\n        turnOn = findViewById(R.id.CheckoffButton)\n        turnOn.isClickable = true\n        taskFlag = true\n    }\n\n    private fun hasInternetConnection() : Boolean {\n        val connectivityManager = this.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager\n        val activeNetwork: NetworkInfo? = connectivityManager.activeNetworkInfo\n        val isConnected: Boolean = activeNetwork?.isConnectedOrConnecting == true\n\n        return isConnected\n    }\n}\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- app/src/main/java/com/example/doug/checklistpresentlayer/BaseChecklist.kt	(date 1557711288000)
++++ app/src/main/java/com/example/doug/checklistpresentlayer/BaseChecklist.kt	(date 1557865120044)
+@@ -17,6 +17,8 @@
+ import android.support.v4.widget.DrawerLayout
+ import android.support.v7.app.ActionBar
+ import android.support.v7.app.AppCompatActivity
++import android.support.v7.widget.LinearLayoutManager
++import android.support.v7.widget.RecyclerView
+ import android.support.v7.widget.Toolbar
+ import android.text.TextUtils.split
+ import android.view.*
+@@ -62,6 +64,10 @@
+     var currentTask: TaskBox? = null
+     var currentListofLists = ListofLists("Your CheckLists", "none")
+ 
++    private lateinit var recyclerView: RecyclerView
++    private lateinit var viewAdapter: RecyclerView.Adapter<*>
++    private lateinit var viewManager: RecyclerView.LayoutManager
++
+     private lateinit var userLayout: DrawerLayout
+     private lateinit var rightnavigationView: NavigationView
+     private lateinit var leftnavigationView: NavigationView
+@@ -86,6 +92,21 @@
+         //displays their own tasks and no other checklist's tasks
+         currentChecklist.i_name = intent.getStringExtra("ListName")
+         currentListofLists.uID = currentUser.UserID as Int
++//        viewManager = LinearLayoutManager(this)
++//        viewAdapter = MyAdapter(myDataset)
++//
++//        recyclerView = findViewById<RecyclerView>(R.id.TaskRecyclerView).apply {
++//            // use this setting to improve performance if you know that changes
++//            // in content do not change the layout size of the RecyclerView
++//            setHasFixedSize(true)
++//
++//            // use a linear layout manager
++//            layoutManager = viewManager
++//
++//            // specify an viewAdapter (see also next example)
++//            adapter = viewAdapter
++//
++//        }
+ 
+         setSupportActionBar(findViewById(R.id.toolbar))
+         val actionbar: ActionBar? = supportActionBar
+@@ -299,191 +320,190 @@
+         //gets called whenever any item is selected in the user nav menu
+         leftnavigationView.setNavigationItemSelectedListener { menuItem ->
+             //handles all items in nav drawer that are created at compile time
+-            val id = menuItem.itemId - Menu.FIRST
+-            if (!deleteFlag) {
+-                if (!onOptionsItemSelected(menuItem)) {
+-                    if (id < currentListofLists.lists.size && id >= 0) {
+-                        spinner.visibility = View.VISIBLE
+-                        GlobalScope.launch {
+-                            /*Right here start up a loading swirly*/
++            if (hasInternetConnection()) {
++                val id = menuItem.itemId - Menu.FIRST
++                if (!deleteFlag) {
++                    if (!onOptionsItemSelected(menuItem)) {
++                        if (id < currentListofLists.lists.size && id >= 0) {
++                            spinner.visibility = View.VISIBLE
++                            userLayout.closeDrawers()
++                            GlobalScope.launch {
++                                /*Right here start up a loading swirly*/
+ 
+-                            //disable certain actions while data is being loaded from database
+-                            turnOnButtons()
+-                            turnOffButtons()
++                                //disable certain actions while data is being loaded from database
++                                turnOnButtons()
++                                turnOffButtons()
+ 
+-                            currentChecklist.listID = currentListofLists.lists[id].listID
+-                            currentChecklist.tasks = db.GetTasks(currentChecklist.listID!!)
+-                            currentChecklist.users = db.GetUsers(currentChecklist.listID!!)
+-                            currentChecklist.changes = db.GetChanges(currentChecklist.listID!!)
+-                            currentChecklist.i_name = currentListofLists.lists[id].i_name
+-                            currentListofLists.lists = db.GetListofLists(currentUser.Username)
++                                currentChecklist.listID = currentListofLists.lists[id].listID
++                                currentChecklist.tasks = db.GetTasks(currentChecklist.listID!!)
++                                currentChecklist.users = db.GetUsers(currentChecklist.listID!!)
++                                currentChecklist.changes = db.GetChanges(currentChecklist.listID!!)
++                                currentChecklist.i_name = currentListofLists.lists[id].i_name
++                                currentListofLists.lists = db.GetListofLists(currentUser.Username)
+ 
+-                            this@BaseChecklist.runOnUiThread {
+-                                //replaces the tasks and title on screen
+-                                title = currentChecklist.i_name
+-                                if (id < currentListofLists.lists.size && id >= 0) {
+-                                    val up = currentListofLists.lists[id]
+-                                    taskLayout.removeAllViews()
+-                                    for (Task in currentChecklist.tasks) {
+-                                        if (Task.compdatetime != null) {
+-                                            val now = LocalDate.now()
+-                                            val formatter = DateTimeFormat.forPattern("yyyy-MM-dd")
+-                                            val dt = formatter.parseDateTime(Task.compdatetime)
+-                                            val dead = dt.plusDays(2)
+-                                            if (now.isEqual(dead.toLocalDate())) {
+-                                                //we don't want the task
+-                                            } else {
+-                                                addTaskFromList(Task)
+-                                            }
+-                                        } else if (Task.name != "")
+-                                            addTaskFromList(Task)
+-                                    }
+-                                }
+-                                spinner.visibility = View.INVISIBLE
+-                                // close drawer when item is tapped
+-                                userLayout.closeDrawers()
+-                            }
+-                            turnOnButtons()
+-                        }
+-                    } else if (id < currentListofLists.lists.size + 2 && id >= 0) {
+-                        if (id == currentListofLists.lists.size) {
+-                            if (!popupPresent) {
++                                this@BaseChecklist.runOnUiThread {
++                                    //replaces the tasks and title on screen
++                                    title = currentChecklist.i_name
++                                    if (id < currentListofLists.lists.size && id >= 0) {
++                                        val up = currentListofLists.lists[id]
++                                        taskLayout.removeAllViews()
++                                        for (Task in currentChecklist.tasks) {
++                                            if (Task.compdatetime != null) {
++                                                val now = LocalDate.now()
++                                                val formatter = DateTimeFormat.forPattern("yyyy-MM-dd")
++                                                val dt = formatter.parseDateTime(Task.compdatetime)
++                                                val dead = dt.plusDays(2)
++                                                if (now.isEqual(dead.toLocalDate())) {
++                                                    //we don't want the task
++                                                } else {
++                                                    addTaskFromList(Task)
++                                                }
++                                            } else if (Task.name != "")
++                                                addTaskFromList(Task)
++                                        }
++                                    }
++                                    spinner.visibility = View.INVISIBLE
++                                    // close drawer when item is tapped
++                                }
++                                turnOnButtons()
++                            }
++                        } else if (id < currentListofLists.lists.size + 2 && id >= 0) {
++                            if (id == currentListofLists.lists.size) {
++                                if (!popupPresent) {
+ 
+-                                val mainView = findViewById<ScrollView>(R.id.TaskScrollView)
++                                    val mainView = findViewById<ScrollView>(R.id.TaskScrollView)
+ 
+-                                val popupWindow = PopupWindow(this)
++                                    val popupWindow = PopupWindow(this)
+ 
+-                                val popupView = layoutInflater.inflate(R.layout.popup_layout, null)
+-                                popupView.PopupEditText.hint = "Enter List Name"
++                                    val popupView = layoutInflater.inflate(R.layout.popup_layout, null)
++                                    popupView.PopupEditText.hint = "Enter List Name"
+ 
+-                                popupWindow.contentView = popupView
++                                    popupWindow.contentView = popupView
+ 
+-                                val acceptButton = popupView.PopupMainView.AcceptButton
++                                    val acceptButton = popupView.PopupMainView.AcceptButton
+ 
+-                                //Creates and adds the on click action to the add button
+-                                acceptButton.setOnClickListener {
+-                                    val popup_edittext = popupView.PopupMainView.PopupEditText
++                                    //Creates and adds the on click action to the add button
++                                    acceptButton.setOnClickListener {
++                                        val popup_edittext = popupView.PopupMainView.PopupEditText
+ 
+-                                    val list_name = popup_edittext.text.toString()
++                                        val list_name = popup_edittext.text.toString()
+ 
+-                                    if (list_name.length >= 1) {
+-                                        spinner.visibility = View.VISIBLE
+-                                        GlobalScope.launch {
+-                                            //Create the new list and post it to the database
+-                                            val length = currentListofLists.lists.size
+-                                            currentListofLists.createList(
+-                                                list_name, currentUser
+-                                            )
+-                                            while (currentListofLists.lists.size == length);
+-                                            this@BaseChecklist.runOnUiThread {
+-                                                leftsubMenu.clear()
+-                                                var ii = 0
+-                                                for ((i, lol) in currentListofLists.lists.withIndex()) {
+-                                                    leftsubMenu.add(0, Menu.FIRST + i, Menu.FIRST, lol.i_name)
+-                                                    ii = i
+-                                                }
+-                                                leftsubMenu.add(
+-                                                    0, Menu.FIRST + ii + 1, Menu.FIRST,
+-                                                    getString(R.string.ADD_LIST_TEXT)
+-                                                ).setIcon(R.drawable.ic_add_box_black_24dp)
+-                                                leftsubMenu.add(
+-                                                    0,
+-                                                    Menu.FIRST + ii + 2,
+-                                                    Menu.FIRST,
+-                                                    getString(R.string.DELETE_LIST_TEXT)
+-                                                ).setIcon(R.drawable.ic_delete_black_24dp)
+-                                                spinner.visibility = View.INVISIBLE
+-                                            }
+-                                        }
++                                        if (list_name.length >= 1) {
++                                            spinner.visibility = View.VISIBLE
++                                            GlobalScope.launch {
++                                                //Create the new list and post it to the database
++                                                val length = currentListofLists.lists.size
++                                                currentListofLists.createList(
++                                                    list_name, currentUser
++                                                )
++                                                while (currentListofLists.lists.size == length);
++                                                this@BaseChecklist.runOnUiThread {
++                                                    leftsubMenu.clear()
++                                                    var ii = 0
++                                                    for ((i, lol) in currentListofLists.lists.withIndex()) {
++                                                        leftsubMenu.add(0, Menu.FIRST + i, Menu.FIRST, lol.i_name)
++                                                        ii = i
++                                                    }
++                                                    leftsubMenu.add(
++                                                        0, Menu.FIRST + ii + 1, Menu.FIRST,
++                                                        getString(R.string.ADD_LIST_TEXT)
++                                                    ).setIcon(R.drawable.ic_add_box_black_24dp)
++                                                    leftsubMenu.add(
++                                                        0,
++                                                        Menu.FIRST + ii + 2,
++                                                        Menu.FIRST,
++                                                        getString(R.string.DELETE_LIST_TEXT)
++                                                    ).setIcon(R.drawable.ic_delete_black_24dp)
++                                                    spinner.visibility = View.INVISIBLE
++                                                }
++                                            }
+ 
+-                                        popupWindow.dismiss()
++                                            popupWindow.dismiss()
+ 
+-                                        //create a new coroutine that will
+-                                        //update the local LIST file to be current
+-                                        GlobalScope.launch {
+-                                            deleteListsDataFile()
+-                                            createListsFile(currentListofLists)
+-                                        }
++                                            //create a new coroutine that will
++                                            //update the local LIST file to be current
++                                            GlobalScope.launch {
++                                                deleteListsDataFile()
++                                                createListsFile(currentListofLists)
++                                            }
+ 
+-                                        popupWindow.setOnDismissListener {
+-                                            PopupWindow.OnDismissListener {
+-                                                popupPresent = false
+-                                            }
+-                                        }
+-                                    }
+-                                }
++                                            popupWindow.setOnDismissListener {
++                                                PopupWindow.OnDismissListener {
++                                                    popupPresent = false
++                                                }
++                                            }
++                                        }
++                                    }
+ 
+-                                val cancelButton = popupView.PopupMainView.CancelButton
++                                    val cancelButton = popupView.PopupMainView.CancelButton
+ 
+-                                cancelButton.setOnClickListener {
++                                    cancelButton.setOnClickListener {
+ 
+-                                    popupWindow.dismiss()
++                                        popupWindow.dismiss()
+ 
+-                                }
++                                    }
+ 
+-                                popupWindow.setOnDismissListener {
+-                                    val popupEdittext = popupView.PopupMainView.PopupEditText
++                                    popupWindow.setOnDismissListener {
++                                        val popupEdittext = popupView.PopupMainView.PopupEditText
+ 
+-                                    popupEdittext.text.clear()
++                                        popupEdittext.text.clear()
+ 
+-                                    popupPresent = false
+-                                }
++                                        popupPresent = false
++                                    }
+ 
+-                                popupWindow.isFocusable = true
++                                    popupWindow.isFocusable = true
+ 
+-                                popupWindow.showAtLocation(mainView, Gravity.CENTER, 0, 0)
++                                    popupWindow.showAtLocation(mainView, Gravity.CENTER, 0, 0)
+ 
+-                                popupPresent = true
++                                    popupPresent = true
+ 
+-                            }
+-                        } else {
+-                            leftsubMenu.clear()
+-                            for ((i, lol) in currentListofLists.lists.withIndex()) {
+-                                leftsubMenu.add(0, Menu.FIRST + i, Menu.FIRST, lol.i_name)
+-                                    .setIcon(R.drawable.ic_cancel_black_24dp)
+-                            }
+-                            deleteFlag = true
+-                        }
+-                    }
++                                }
++                            } else {
++                                leftsubMenu.clear()
++                                for ((i, lol) in currentListofLists.lists.withIndex()) {
++                                    leftsubMenu.add(0, Menu.FIRST + i, Menu.FIRST, lol.i_name)
++                                        .setIcon(R.drawable.ic_cancel_black_24dp)
++                                }
++                                deleteFlag = true
++                            }
++                        }
+ 
+-                }
+-            }
+-            else
+-            {
+-                if (id < currentListofLists.lists.size && id >= 0)
+-                {
+-                    GlobalScope.launch {
+-                        deleteListDataFile(currentListofLists.lists[id].i_name)
+-                    }
++                    }
++                } else {
++                    if (id < currentListofLists.lists.size && id >= 0) {
++                        GlobalScope.launch {
++                            deleteListDataFile(currentListofLists.lists[id].i_name)
++                        }
+ 
+-                    //remove the task from the list, and delete it from the database
+-                    currentListofLists.deleteList(id, User(1))
++                        //remove the task from the list, and delete it from the database
++                        currentListofLists.deleteList(id, User(1))
+ 
+-                    //update the list of lists local file to be current
+-                    GlobalScope.launch {
+-                        deleteListsDataFile()
+-                        createListsFile(currentListofLists)
+-                    }
++                        //update the list of lists local file to be current
++                        GlobalScope.launch {
++                            deleteListsDataFile()
++                            createListsFile(currentListofLists)
++                        }
+ 
+-                    leftsubMenu.clear()
+-                    var ii = 0
+-                    for ((i, lol) in currentListofLists.lists.withIndex()) {
+-                        leftsubMenu.add(0, Menu.FIRST + i, Menu.FIRST, lol.i_name)
+-                        ii = i
+-                    }
+-                    leftsubMenu.add(
+-                        0, Menu.FIRST + ii + 1, Menu.FIRST,
+-                        getString(R.string.ADD_LIST_TEXT)
+-                    ).setIcon(R.drawable.ic_add_box_black_24dp)
+-                    leftsubMenu.add(
+-                        0,
+-                        Menu.FIRST + ii + 2,
+-                        Menu.FIRST,
+-                        getString(R.string.DELETE_LIST_TEXT)
+-                    ).setIcon(R.drawable.ic_delete_black_24dp)
+-                    spinner.visibility = View.INVISIBLE
++                        leftsubMenu.clear()
++                        var ii = 0
++                        for ((i, lol) in currentListofLists.lists.withIndex()) {
++                            leftsubMenu.add(0, Menu.FIRST + i, Menu.FIRST, lol.i_name)
++                            ii = i
++                        }
++                        leftsubMenu.add(
++                            0, Menu.FIRST + ii + 1, Menu.FIRST,
++                            getString(R.string.ADD_LIST_TEXT)
++                        ).setIcon(R.drawable.ic_add_box_black_24dp)
++                        leftsubMenu.add(
++                            0,
++                            Menu.FIRST + ii + 2,
++                            Menu.FIRST,
++                            getString(R.string.DELETE_LIST_TEXT)
++                        ).setIcon(R.drawable.ic_delete_black_24dp)
++                        spinner.visibility = View.INVISIBLE
+ 
+-                    deleteFlag = false
++                        deleteFlag = false
++                    }
+                 }
+             }
+             // Add code here to update the UI based on the item selected
+Index: app/src/main/res/layout/my_text_view.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- app/src/main/res/layout/my_text_view.xml	(date 1557866349156)
++++ app/src/main/res/layout/my_text_view.xml	(date 1557866349156)
+@@ -0,0 +1,17 @@
++<?xml version="1.0" encoding="utf-8"?>
++<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
++                                             android:layout_width="match_parent"
++                                             android:layout_height="match_parent">
++    <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
++                 xmlns:tools="http://schemas.android.com/tools"
++                 android:layout_width="wrap_content"
++                 android:layout_height="wrap_content"
++                 android:layout_margin="8dp">
++
++        <TextView
++                android:id="@+id/simple_text"
++                android:layout_width="wrap_content"
++                android:layout_height="wrap_content"
++                tools:text="This is some temp text" />
++    </FrameLayout>
++</android.support.constraint.ConstraintLayout>
+\ No newline at end of file
+Index: app/src/main/java/com/example/doug/checklistpresentlayer/TaskAdapter.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- app/src/main/java/com/example/doug/checklistpresentlayer/TaskAdapter.kt	(date 1557866777847)
++++ app/src/main/java/com/example/doug/checklistpresentlayer/TaskAdapter.kt	(date 1557866777847)
+@@ -0,0 +1,36 @@
++package com.example.doug.checklistpresentlayer
++
++import android.support.v7.widget.RecyclerView
++import android.view.LayoutInflater
++import android.view.ViewGroup
++import android.widget.TextView
++
++class TaskAdapter(private val myDataset: Array<String>) :
++    RecyclerView.Adapter<TaskAdapter.MyViewHolder>() {
++
++    // Provide a reference to the views for each data item
++    // Complex data items may need more than one view per item, and
++    // you provide access to all the views for a data item in a view holder.
++    // Each data item is just a string in this case that is shown in a TextView.
++    class MyViewHolder(val textView: TextView) : RecyclerView.ViewHolder(textView)
++
++
++    // Create new views (invoked by the layout manager)
++    override fun onCreateViewHolder(parent: ViewGroup,
++                                    viewType: Int): TaskAdapter.MyViewHolder {
++        // create a new view
++        val textView = LayoutInflater.from(parent.context)
++            .inflate(viewType, parent, false) as TextView
++        return MyViewHolder(textView)
++    }
++
++    // Replace the contents of a view (invoked by the layout manager)
++    override fun onBindViewHolder(holder: MyViewHolder, position: Int) {
++        // - get element from your dataset at this position
++        // - replace the contents of the view with that element
++        holder.textView.text = myDataset[position]
++    }
++
++    // Return the size of your dataset (invoked by the layout manager)
++    override fun getItemCount() = myDataset.size
++}
+\ No newline at end of file
+Index: app/src/main/res/layout/activity_base_listoflists.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><?xml version=\"1.0\" encoding=\"utf-8\"?>\n<android.support.constraint.ConstraintLayout\n        xmlns:android=\"http://schemas.android.com/apk/res/android\"\n        xmlns:tools=\"http://schemas.android.com/tools\"\n        xmlns:app=\"http://schemas.android.com/apk/res-auto\"\n        android:layout_width=\"match_parent\"\n        android:layout_height=\"match_parent\"\n        tools:context=\".BaseListofLists\" android:id=\"@+id/BaseLayout\">\n    <android.support.v4.widget.DrawerLayout\n            android:id=\"@+id/drawer_layout\"\n            android:layout_width=\"match_parent\"\n            android:layout_height=\"match_parent\"\n            android:fitsSystemWindows=\"true\">\n        <FrameLayout\n                android:layout_width=\"match_parent\"\n                android:layout_height=\"match_parent\"\n                app:layout_constraintTop_toTopOf=\"parent\"\n                app:layout_constraintBottom_toBottomOf=\"parent\">\n\n            <android.support.constraint.ConstraintLayout\n                    android:layout_width=\"match_parent\"\n                    android:layout_height=\"match_parent\"\n                    tools:context=\".BaseListofLists\" android:id=\"@+id/BaseLayout2\">\n\n                <android.support.v7.widget.Toolbar\n                        android:id=\"@+id/toolbar\"\n                        android:layout_width=\"match_parent\"\n                        android:layout_height=\"?attr/actionBarSize\"\n                        android:background=\"?attr/colorPrimary\"\n                        android:theme=\"@style/ThemeOverlay.AppCompat.ActionBar\"\n                        app:layout_constraintTop_toTopOf=\"parent\" app:layout_constraintStart_toStartOf=\"parent\"\n                        app:layout_constraintEnd_toEndOf=\"parent\"\n                        app:layout_constraintHorizontal_bias=\"0.0\"/>\n                <ProgressBar\n                        android:id=\"@+id/lprogress_bar\"\n                        style=\"?android:attr/progressBarStyleLarge\"\n                        android:layout_width=\"55dp\"\n                        android:layout_height=\"56dp\"\n                        android:layout_centerHorizontal=\"true\"\n                        app:layout_constraintEnd_toEndOf=\"parent\"\n                        android:layout_marginEnd=\"8dp\" app:layout_constraintStart_toStartOf=\"parent\"\n                        android:layout_marginStart=\"8dp\"\n                        android:visibility=\"invisible\"\n                        app:layout_constraintTop_toTopOf=\"parent\"/>\n                <ScrollView\n                        android:layout_width=\"0dp\"\n                        android:layout_height=\"0dp\"\n                        app:layout_constraintStart_toStartOf=\"parent\"\n                        android:layout_marginStart=\"24dp\"\n                        android:id=\"@+id/TaskScrollView\"\n                        android:layout_marginBottom=\"2dp\"\n                        app:layout_constraintBottom_toTopOf=\"@+id/linearLayout\"\n                        app:layout_constraintEnd_toEndOf=\"parent\"\n                        android:layout_marginEnd=\"24dp\" app:layout_constraintTop_toBottomOf=\"@+id/toolbar\"\n                        app:layout_constraintHorizontal_bias=\"0.473\">\n                    <LinearLayout\n                            android:orientation=\"vertical\"\n                            android:layout_width=\"match_parent\"\n                            android:layout_height=\"wrap_content\" android:id=\"@+id/TaskLayout\"\n                            android:gravity=\"start\"/>\n                </ScrollView>\n                <LinearLayout\n                        android:orientation=\"horizontal\"\n                        android:layout_height=\"wrap_content\" android:layout_marginBottom=\"8dp\"\n                        app:layout_constraintBottom_toBottomOf=\"parent\" android:layout_width=\"0dp\"\n                        android:layout_marginTop=\"8dp\"\n                        app:layout_constraintTop_toBottomOf=\"@+id/TaskScrollView\"\n                        app:layout_constraintStart_toStartOf=\"parent\"\n                        android:layout_marginStart=\"8dp\" app:layout_constraintEnd_toEndOf=\"parent\"\n                        android:layout_marginEnd=\"8dp\"\n                        android:id=\"@+id/linearLayout\">\n                    <Button\n                            android:text=\"@string/ADD_BUTTON_STRING\"\n                            android:layout_width=\"179dp\"\n                            android:layout_height=\"wrap_content\"\n                            android:id=\"@+id/AddListButton\"\n                            app:layout_constraintBottom_toBottomOf=\"parent\" android:layout_marginBottom=\"18dp\"\n                            app:layout_constraintStart_toStartOf=\"parent\"\n                            android:layout_marginStart=\"8dp\"\n                            app:layout_constraintEnd_toStartOf=\"@+id/CheckoffButton\"\n                            android:textSize=\"13sp\"\n                            android:layout_marginTop=\"8dp\" app:layout_constraintTop_toBottomOf=\"@+id/TaskScrollView\"\n                            style=\"@style/Widget.AppCompat.Button\"/>\n                    <Button\n                            android:text=\"@string/FUNCTION_POPUP_DELETE_TEXT\"\n                            android:layout_width=\"0dp\"\n                            android:layout_height=\"wrap_content\"\n                            android:id=\"@+id/DeleteListButton\"\n                            app:layout_constraintBottom_toBottomOf=\"parent\" android:layout_marginBottom=\"18dp\"\n                            app:layout_constraintStart_toStartOf=\"parent\"\n                            android:layout_marginStart=\"8dp\"\n                            app:layout_constraintEnd_toStartOf=\"@+id/CheckoffButton\"\n                            android:textSize=\"13sp\"\n                            android:layout_marginTop=\"8dp\" app:layout_constraintTop_toBottomOf=\"@+id/TaskScrollView\"\n                            style=\"@style/Widget.AppCompat.Button\" android:layout_weight=\"1\"/>\n                </LinearLayout>\n\n            </android.support.constraint.ConstraintLayout>\n        </FrameLayout>\n        <android.support.design.widget.NavigationView\n                android:id=\"@+id/nav_view\"\n                android:layout_width=\"wrap_content\"\n                android:layout_height=\"match_parent\"\n                android:layout_gravity=\"start\"\n                android:fitsSystemWindows=\"true\"\n                app:menu=\"@menu/drawer_view\">\n                </android.support.design.widget.NavigationView>\n\n    </android.support.v4.widget.DrawerLayout>\n\n</android.support.constraint.ConstraintLayout>
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- app/src/main/res/layout/activity_base_listoflists.xml	(date 1557711288000)
++++ app/src/main/res/layout/activity_base_listoflists.xml	(date 1557863018277)
+@@ -6,106 +6,90 @@
+         android:layout_width="match_parent"
+         android:layout_height="match_parent"
+         tools:context=".BaseListofLists" android:id="@+id/BaseLayout">
+-    <android.support.v4.widget.DrawerLayout
+-            android:id="@+id/drawer_layout"
+-            android:layout_width="match_parent"
+-            android:layout_height="match_parent"
+-            android:fitsSystemWindows="true">
+-        <FrameLayout
+-                android:layout_width="match_parent"
+-                android:layout_height="match_parent"
+-                app:layout_constraintTop_toTopOf="parent"
+-                app:layout_constraintBottom_toBottomOf="parent">
++    <FrameLayout
++            android:layout_width="match_parent"
++            android:layout_height="match_parent"
++            app:layout_constraintTop_toTopOf="parent"
++            app:layout_constraintBottom_toBottomOf="parent">
+ 
+-            <android.support.constraint.ConstraintLayout
+-                    android:layout_width="match_parent"
+-                    android:layout_height="match_parent"
+-                    tools:context=".BaseListofLists" android:id="@+id/BaseLayout2">
++        <android.support.constraint.ConstraintLayout
++                android:layout_width="match_parent"
++                android:layout_height="match_parent"
++                tools:context=".BaseListofLists" android:id="@+id/BaseLayout2">
+ 
+-                <android.support.v7.widget.Toolbar
+-                        android:id="@+id/toolbar"
+-                        android:layout_width="match_parent"
+-                        android:layout_height="?attr/actionBarSize"
+-                        android:background="?attr/colorPrimary"
+-                        android:theme="@style/ThemeOverlay.AppCompat.ActionBar"
+-                        app:layout_constraintTop_toTopOf="parent" app:layout_constraintStart_toStartOf="parent"
+-                        app:layout_constraintEnd_toEndOf="parent"
+-                        app:layout_constraintHorizontal_bias="0.0"/>
+-                <ProgressBar
+-                        android:id="@+id/lprogress_bar"
+-                        style="?android:attr/progressBarStyleLarge"
+-                        android:layout_width="55dp"
+-                        android:layout_height="56dp"
+-                        android:layout_centerHorizontal="true"
+-                        app:layout_constraintEnd_toEndOf="parent"
+-                        android:layout_marginEnd="8dp" app:layout_constraintStart_toStartOf="parent"
+-                        android:layout_marginStart="8dp"
+-                        android:visibility="invisible"
+-                        app:layout_constraintTop_toTopOf="parent"/>
+-                <ScrollView
+-                        android:layout_width="0dp"
+-                        android:layout_height="0dp"
+-                        app:layout_constraintStart_toStartOf="parent"
+-                        android:layout_marginStart="24dp"
+-                        android:id="@+id/TaskScrollView"
+-                        android:layout_marginBottom="2dp"
+-                        app:layout_constraintBottom_toTopOf="@+id/linearLayout"
+-                        app:layout_constraintEnd_toEndOf="parent"
+-                        android:layout_marginEnd="24dp" app:layout_constraintTop_toBottomOf="@+id/toolbar"
+-                        app:layout_constraintHorizontal_bias="0.473">
+-                    <LinearLayout
+-                            android:orientation="vertical"
+-                            android:layout_width="match_parent"
+-                            android:layout_height="wrap_content" android:id="@+id/TaskLayout"
+-                            android:gravity="start"/>
+-                </ScrollView>
+-                <LinearLayout
+-                        android:orientation="horizontal"
+-                        android:layout_height="wrap_content" android:layout_marginBottom="8dp"
+-                        app:layout_constraintBottom_toBottomOf="parent" android:layout_width="0dp"
+-                        android:layout_marginTop="8dp"
+-                        app:layout_constraintTop_toBottomOf="@+id/TaskScrollView"
+-                        app:layout_constraintStart_toStartOf="parent"
+-                        android:layout_marginStart="8dp" app:layout_constraintEnd_toEndOf="parent"
+-                        android:layout_marginEnd="8dp"
+-                        android:id="@+id/linearLayout">
+-                    <Button
+-                            android:text="@string/ADD_BUTTON_STRING"
+-                            android:layout_width="179dp"
+-                            android:layout_height="wrap_content"
+-                            android:id="@+id/AddListButton"
+-                            app:layout_constraintBottom_toBottomOf="parent" android:layout_marginBottom="18dp"
+-                            app:layout_constraintStart_toStartOf="parent"
+-                            android:layout_marginStart="8dp"
+-                            app:layout_constraintEnd_toStartOf="@+id/CheckoffButton"
+-                            android:textSize="13sp"
+-                            android:layout_marginTop="8dp" app:layout_constraintTop_toBottomOf="@+id/TaskScrollView"
+-                            style="@style/Widget.AppCompat.Button"/>
+-                    <Button
+-                            android:text="@string/FUNCTION_POPUP_DELETE_TEXT"
+-                            android:layout_width="0dp"
+-                            android:layout_height="wrap_content"
+-                            android:id="@+id/DeleteListButton"
+-                            app:layout_constraintBottom_toBottomOf="parent" android:layout_marginBottom="18dp"
+-                            app:layout_constraintStart_toStartOf="parent"
+-                            android:layout_marginStart="8dp"
+-                            app:layout_constraintEnd_toStartOf="@+id/CheckoffButton"
+-                            android:textSize="13sp"
+-                            android:layout_marginTop="8dp" app:layout_constraintTop_toBottomOf="@+id/TaskScrollView"
+-                            style="@style/Widget.AppCompat.Button" android:layout_weight="1"/>
+-                </LinearLayout>
++            <android.support.v7.widget.Toolbar
++                    android:id="@+id/toolbar"
++                    android:layout_width="match_parent"
++                    android:layout_height="?attr/actionBarSize"
++                    android:background="?attr/colorPrimary"
++                    android:theme="@style/ThemeOverlay.AppCompat.ActionBar"
++                    app:layout_constraintTop_toTopOf="parent" app:layout_constraintStart_toStartOf="parent"
++                    app:layout_constraintEnd_toEndOf="parent"
++                    app:layout_constraintHorizontal_bias="0.0"/>
++            <ProgressBar
++                    android:id="@+id/lprogress_bar"
++                    style="?android:attr/progressBarStyleLarge"
++                    android:layout_width="55dp"
++                    android:layout_height="56dp"
++                    android:layout_centerHorizontal="true"
++                    app:layout_constraintEnd_toEndOf="parent"
++                    android:layout_marginEnd="8dp" app:layout_constraintStart_toStartOf="parent"
++                    android:layout_marginStart="8dp"
++                    android:visibility="invisible"
++                    app:layout_constraintTop_toTopOf="parent"/>
++            <ScrollView
++                    android:layout_width="0dp"
++                    android:layout_height="0dp"
++                    app:layout_constraintStart_toStartOf="parent"
++                    android:layout_marginStart="24dp"
++                    android:id="@+id/TaskScrollView"
++                    android:layout_marginBottom="2dp"
++                    app:layout_constraintBottom_toTopOf="@+id/linearLayout"
++                    app:layout_constraintEnd_toEndOf="parent"
++                    android:layout_marginEnd="24dp" app:layout_constraintTop_toBottomOf="@+id/toolbar"
++                    app:layout_constraintHorizontal_bias="0.473">
++                <LinearLayout
++                        android:orientation="vertical"
++                        android:layout_width="match_parent"
++                        android:layout_height="wrap_content" android:id="@+id/TaskLayout"
++                        android:gravity="start"/>
++            </ScrollView>
++            <LinearLayout
++                    android:orientation="horizontal"
++                    android:layout_height="wrap_content" android:layout_marginBottom="8dp"
++                    app:layout_constraintBottom_toBottomOf="parent" android:layout_width="0dp"
++                    android:layout_marginTop="8dp"
++                    app:layout_constraintTop_toBottomOf="@+id/TaskScrollView"
++                    app:layout_constraintStart_toStartOf="parent"
++                    android:layout_marginStart="8dp" app:layout_constraintEnd_toEndOf="parent"
++                    android:layout_marginEnd="8dp"
++                    android:id="@+id/linearLayout">
++                <Button
++                        android:text="@string/ADD_BUTTON_STRING"
++                        android:layout_width="179dp"
++                        android:layout_height="wrap_content"
++                        android:id="@+id/AddListButton"
++                        app:layout_constraintBottom_toBottomOf="parent" android:layout_marginBottom="18dp"
++                        app:layout_constraintStart_toStartOf="parent"
++                        android:layout_marginStart="8dp"
++                        app:layout_constraintEnd_toStartOf="@+id/CheckoffButton"
++                        android:textSize="13sp"
++                        android:layout_marginTop="8dp" app:layout_constraintTop_toBottomOf="@+id/TaskScrollView"
++                        style="@style/Widget.AppCompat.Button"/>
++                <Button
++                        android:text="@string/FUNCTION_POPUP_DELETE_TEXT"
++                        android:layout_width="0dp"
++                        android:layout_height="wrap_content"
++                        android:id="@+id/DeleteListButton"
++                        app:layout_constraintBottom_toBottomOf="parent" android:layout_marginBottom="18dp"
++                        app:layout_constraintStart_toStartOf="parent"
++                        android:layout_marginStart="8dp"
++                        app:layout_constraintEnd_toStartOf="@+id/CheckoffButton"
++                        android:textSize="13sp"
++                        android:layout_marginTop="8dp" app:layout_constraintTop_toBottomOf="@+id/TaskScrollView"
++                        style="@style/Widget.AppCompat.Button" android:layout_weight="1"/>
++            </LinearLayout>
+ 
+-            </android.support.constraint.ConstraintLayout>
+-        </FrameLayout>
+-        <android.support.design.widget.NavigationView
+-                android:id="@+id/nav_view"
+-                android:layout_width="wrap_content"
+-                android:layout_height="match_parent"
+-                android:layout_gravity="start"
+-                android:fitsSystemWindows="true"
+-                app:menu="@menu/drawer_view">
+-                </android.support.design.widget.NavigationView>
+-
+-    </android.support.v4.widget.DrawerLayout>
+-
++        </android.support.constraint.ConstraintLayout>
++    </FrameLayout>
+ </android.support.constraint.ConstraintLayout>
+\ No newline at end of file
+Index: app/src/main/res/drawable/ic_cancel_black_24dp.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><vector xmlns:android=\"http://schemas.android.com/apk/res/android\"\n        android:width=\"24dp\"\n        android:height=\"24dp\"\n        android:viewportWidth=\"24.0\"\n        android:viewportHeight=\"24.0\">\n    <path\n        android:fillColor=\"#FF000000\"\n        android:pathData=\"M12,2C6.47,2 2,6.47 2,12s4.47,10 10,10 10,-4.47 10,-10S17.53,2 12,2zM17,15.59L15.59,17 12,13.41 8.41,17 7,15.59 10.59,12 7,8.41 8.41,7 12,10.59 15.59,7 17,8.41 13.41,12 17,15.59z\"/>\n</vector>\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- app/src/main/res/drawable/ic_cancel_black_24dp.xml	(date 1557711288000)
++++ app/src/main/res/drawable/ic_cancel_black_24dp.xml	(date 1557866759176)
+@@ -4,6 +4,6 @@
+         android:viewportWidth="24.0"
+         android:viewportHeight="24.0">
+     <path
+-        android:fillColor="#FF000000"
++        android:fillColor="#FF0000"
+         android:pathData="M12,2C6.47,2 2,6.47 2,12s4.47,10 10,10 10,-4.47 10,-10S17.53,2 12,2zM17,15.59L15.59,17 12,13.41 8.41,17 7,15.59 10.59,12 7,8.41 8.41,7 12,10.59 15.59,7 17,8.41 13.41,12 17,15.59z"/>
+ </vector>
