@@ -992,16 +992,22 @@ class BaseChecklist : AppCompatActivity(){
         if(task.isRecurring == true)
         {
             if(task.compdatetime != null) {
-                val recurringDays = split("-", task.recurringDays)
 
-                 var today = DateTimeFormatter.ofPattern("EEE")
+                val recurringDays = split(task.recurringDays, "-")
 
-                 for (i in 0 until recurringDays.size - 1) {
-                     if (recurringDays[i] == today.toString()
-                         && task.compdatetime != LocalDate.now().toString()) {
-                         found = true
-                     }
-                 }
+                var today = DateTimeFormat.forPattern("E")
+                val now = LocalDate.now().dayOfWeek().asShortText
+
+                val nowOther = LocalDate.now()
+                val formatter = DateTimeFormat.forPattern("yyyy-MM-dd")
+                val dt = formatter.parseDateTime(task.compdatetime)
+
+                for (i in 0 until recurringDays.size - 1) {
+                    if (recurringDays[i] == now
+                        && nowOther.isAfter(dt.toLocalDate())) {
+                        found = true
+                    }
+                }
             }
             else {
                 new_task_box.setRecurringIfNotComplete(true)
@@ -1020,7 +1026,7 @@ class BaseChecklist : AppCompatActivity(){
             var taskFound = false
             //Checks all current gui elements to see if they are checked
             while (taskCount < currentChecklist.tasks.count() && !taskFound) {
-                if(currentChecklist.tasks[taskCount].TaskID == currentTask?.taskID)
+                if(currentChecklist.tasks[taskCount].TaskID == task.TaskID)
                 {
                     taskFound = true
                 }
@@ -1045,13 +1051,18 @@ class BaseChecklist : AppCompatActivity(){
         {
             if(task.compdatetime != null) {
 
-                val recurringDays = split("-", task.recurringDays)
+                val recurringDays = split(task.recurringDays, "-")
 
-                var today = DateTimeFormatter.ofPattern("EEE")
+                var today = DateTimeFormat.forPattern("E")
+                val now = LocalDate.now().dayOfWeek().asShortText
+
+                val nowOther = LocalDate.now()
+                val formatter = DateTimeFormat.forPattern("yyyy-MM-dd")
+                val dt = formatter.parseDateTime(task.compdatetime)
 
                 for (i in 0 until recurringDays.size - 1) {
-                    if (recurringDays[i] == today.toString()
-                        && task.compdatetime != LocalDate.now().toString()) {
+                    if (recurringDays[i] == now
+                        && nowOther.isAfter(dt.toLocalDate())) {
                         found = true
                     }
                 }
@@ -1071,7 +1082,7 @@ class BaseChecklist : AppCompatActivity(){
             var taskFound = false
             //Checks all current gui elements to see if they are checked
             while (taskCount < currentChecklist.tasks.count() && !taskFound) {
-                if(currentChecklist.tasks[taskCount].TaskID == currentTask?.taskID)
+                if(currentChecklist.tasks[taskCount].TaskID == task.TaskID)
                 {
                     taskFound = true
                 }
