@@ -346,6 +346,10 @@ class BaseChecklist : AppCompatActivity(){
                                         }
                                     }
                                     adapter.setDataset(currentListView)
+                                    rightsubMenu.clear()
+                                    for ((i, up) in currentChecklist.users.withIndex()) {
+                                        rightsubMenu.add(0, Menu.FIRST + i, Menu.FIRST, up.Username)
+                                    }
                                     spinner.visibility = View.INVISIBLE
                                     // close drawer when item is tapped
                                 }
