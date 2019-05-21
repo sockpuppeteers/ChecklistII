@@ -992,7 +992,6 @@ class BaseChecklist : AppCompatActivity(){
         {
             if(task.compdatetime != null) {
 
-                var today = DateTimeFormatter.ofPattern("EEE") //TODO change this to joda
                 val recurringDays = split(task.recurringDays, "-")
 
                 val now = LocalDate.now().dayOfWeek().asShortText
@@ -1052,7 +1051,6 @@ class BaseChecklist : AppCompatActivity(){
 
                 val recurringDays = split(task.recurringDays, "-")
 
-                var today = DateTimeFormat.forPattern("E") //TODO change this nto joda
                 val now = LocalDate.now().dayOfWeek().asShortText
 
                 val nowOther = LocalDate.now()
