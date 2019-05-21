@@ -608,7 +608,7 @@ class BaseChecklist : AppCompatActivity(){
 
             if(!popupPresent) {
 
-                val mainViewHistory = findViewById<ScrollView>(R.id.TaskScrollView)
+                val mainViewHistory = findViewById<RecyclerView>(R.id.checklist_recyclerview)
 
                 val popupWindowHistory = PopupWindow(this)
 
@@ -991,7 +991,8 @@ class BaseChecklist : AppCompatActivity(){
             if(task.compdatetime != null) {
                 val recurringDays = split("-", task.recurringDays)
 
-                 var today = DateTimeFormatter.ofPattern("EEE")
+//                 var today = DateTimeFormatter.ofPattern("EEE")
+                var today = "Sun"
 
                  for (i in 0 until recurringDays.size - 1) {
                      if (recurringDays[i] == today.toString()
@@ -1044,7 +1045,8 @@ class BaseChecklist : AppCompatActivity(){
 
                 val recurringDays = split("-", task.recurringDays)
 
-                var today = DateTimeFormatter.ofPattern("EEE")
+//                var today = DateTimeFormatter.ofPattern("EEE")
+                var today = "Sun"
 
                 for (i in 0 until recurringDays.size - 1) {
                     if (recurringDays[i] == today.toString()
