@@ -329,7 +329,6 @@ class BaseChecklist : AppCompatActivity(){
                                     //replaces the tasks and title on screen
                                     title = currentChecklist.i_name
                                     if (id < currentListofLists.lists.size && id >= 0) {
-                                        val up = currentListofLists.lists[id]
                                         currentListView.removeAll(currentListView)
                                         for (Task in currentChecklist.tasks) {
                                             if (Task.compdatetime != null) {
@@ -534,19 +533,19 @@ class BaseChecklist : AppCompatActivity(){
                 //Set cancel button to dismiss the popup
                 val cancelButton = popupView.PopupMainView.CancelButton
 
-                cancelButton.setOnClickListener(View.OnClickListener {
+                cancelButton.setOnClickListener {
 
                     popupWindow.dismiss()
 
-                })
+                }
                 //Have the popup clean up items when dismissed
-                popupWindow.setOnDismissListener(PopupWindow.OnDismissListener {
+                popupWindow.setOnDismissListener {
                     val popupEdittext = popupView.PopupMainView.PopupEditText
 
                     popupEdittext.text.clear()
 
                     popupPresent = false
-                })
+                }
 
                 popupWindow.isFocusable = true
 
@@ -566,26 +565,22 @@ class BaseChecklist : AppCompatActivity(){
                 while (taskCount >= 0) {
                     val currentChild = currentListView[taskCount]
 
-                    if (currentChild is ChecklistViewModel) {
-
-
-                        if (currentChild.isChecked) {
-                            if (!currentChild.isComplete) {
-                                if (currentChild.isRecurring) {
-                                    /*createNewTask(
-                                        currentChild.getTaskText(),
-                                        true,
-                                        0/*needs to be something later*/
-                                    )*/
-                                    //currentChecklist.createTask(currentChild.getTaskText(), "enable Later", User(1))
-                                }
-
-                                currentChild.completeTask()
-
-                                //TaskLayout.removeView(TaskLayout.getChildAt(taskCount))
-
-                                currentChecklist.completeTask(taskCount, currentUser)
+                    if (currentChild.isChecked) {
+                        if (!currentChild.isComplete) {
+                            if (currentChild.isRecurring) {
+                                /*createNewTask(
+                                    currentChild.getTaskText(),
+                                    true,
+                                    0/*needs to be something later*/
+                                )*/
+                                //currentChecklist.createTask(currentChild.getTaskText(), "enable Later", User(1))
                             }
+
+                            currentChild.completeTask()
+
+                            //TaskLayout.removeView(TaskLayout.getChildAt(taskCount))
+
+                            currentChecklist.completeTask(taskCount, currentUser)
                         }
                     }
 
@@ -743,7 +738,7 @@ class BaseChecklist : AppCompatActivity(){
                 val taskSettingsDeadlineLayoutView =
                     layoutInflater.inflate(R.layout.task_settings_deadline_popup, null)
 
-                var tempString = ""
+                var tempString: String
 
                 popupSettingsDeadlineWindow.contentView = taskSettingsDeadlineLayoutView
 
@@ -995,7 +990,6 @@ class BaseChecklist : AppCompatActivity(){
 
                 val recurringDays = split(task.recurringDays, "-")
 
-                var today = DateTimeFormat.forPattern("E")
                 val now = LocalDate.now().dayOfWeek().asShortText
 
                 val nowOther = LocalDate.now()
