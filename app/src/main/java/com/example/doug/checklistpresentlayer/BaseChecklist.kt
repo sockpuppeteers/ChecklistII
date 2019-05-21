@@ -101,6 +101,7 @@ class BaseChecklist : AppCompatActivity(){
         }
         title = currentChecklist.i_name
 
+
         //creates a submenu named user
         rightnavigationView = findViewById(R.id.right_nav_view)
         leftnavigationView = findViewById(R.id.left_nav_view)
@@ -284,10 +285,10 @@ class BaseChecklist : AppCompatActivity(){
                 if (id < currentChecklist.users.size && id >= 0) {
                     val up = currentChecklist.users[id]
                     val tempIntent = Intent(this, UserLogin::class.java).apply {
-                        putExtra("id", up.UserID)
-                        putExtra("uname", up.Username)
-                        putExtra("fname", up.FName)
-                        putExtra("lname", up.LName)
+                        putExtra("uname", currentUser.Username)
+                        putExtra("fname", currentUser.FName)
+                        putExtra("lname", currentUser.LName)
+                        putExtra("UserID", currentUser.UserID!!)
                     }
                     startActivity(tempIntent)
                 }
