@@ -686,11 +686,18 @@ class BaseChecklist : AppCompatActivity(){
                             kAction.CHANGE_TASK_NAME -> toAddString = "--- Task Edited: " + it.taskName +
                                     "\n\tChanged To: " + it.changedTo + "\n\tEdited By: " + it.changedBy + "\n"
                             kAction.CHANGE_TASK_DEADLINE -> toAddString = "--- Deadline Changed: " + it.taskName +
-                                    "\n\tChanged to: " + it.changedTo + "\n\tEdited By: " + it.changedBy + "\n"
+                                    "\n\tChanged To: " + it.changedTo + "\n\tEdited By: " + it.changedBy + "\n"
                             kAction.REMOVE_TASK_DEADLINE -> toAddString + "--- Deadline Removed: " + it.taskName +
                                     "\n\tRemoved By: " + it.changedBy  + "\n"
                             kAction.ADD_USER -> toAddString = "--- User Added: " + it.changedTo +
-                                    "\n\tAdded by: " + it.changedBy + "\n"
+                                    "\n\tAdded By: " + it.changedBy + "\n"
+                            kAction.CHANGE_TASK_RECURRING -> toAddString = "--- Recursion Changed: " + it.taskName +
+                                    "\n\tChanged To: " + it.changedTo + "\n\tEdited By: " + it.changedBy + "\n"
+                            kAction.TASK_RECURRED -> "\n\tChanged To: " + it.changedTo
+                            kAction.CHANGE_RECURRING_TIME -> toAddString = "--- Recursion Changed: " + it.taskName +
+                                    "\n\tChanged To: " + it.changedTo + "\n\tEdited By: " + it.changedBy + "\n"
+                            kAction.CHANGE_RECURRING_DAYS -> toAddString = "--- Recursion Changed: " + it.taskName +
+                                    "\n\tChanged To: " + it.changedTo + "\n\tEdited By: " + it.changedBy + "\n"
                         }
 
                         if (toAddString != "Default"){
