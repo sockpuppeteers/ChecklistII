@@ -84,7 +84,8 @@ class BaseChecklist : AppCompatActivity(){
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        currentUser = User(intent.getIntExtra("UserID", 0), intent.getStringExtra("UserName"))
+        currentUser = User(intent.getIntExtra("UserID", 0), intent.getStringExtra("UserName"),
+            intent.getStringExtra("fname"), intent.getStringExtra("lname"))
         requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_base_checklist)
@@ -286,10 +287,10 @@ class BaseChecklist : AppCompatActivity(){
                 if (id < currentChecklist.users.size && id >= 0) {
                     val up = currentChecklist.users[id]
                     val tempIntent = Intent(this, UserLogin::class.java).apply {
-                        putExtra("uname", currentUser.Username)
-                        putExtra("fname", currentUser.FName)
-                        putExtra("lname", currentUser.LName)
-                        putExtra("UserID", currentUser.UserID!!)
+                        putExtra("uname", currentChecklist.users[id].Username)
+                        putExtra("fname", currentChecklist.users[id].FName)
+                        putExtra("lname", currentChecklist.users[id].LName)
+                        putExtra("UserID", currentChecklist.users[id].UserID!!)
                     }
                     startActivity(tempIntent)
                 }
@@ -348,6 +349,7 @@ class BaseChecklist : AppCompatActivity(){
                                         }
                                     }
                                     adapter.setDataset(currentListView)
+                                    runLayoutAnimation()
                                     rightsubMenu.clear()
                                     for ((i, up) in currentChecklist.users.withIndex()) {
                                         rightsubMenu.add(0, Menu.FIRST + i, Menu.FIRST, up.Username)
@@ -1364,5 +1366,13 @@ class BaseChecklist : AppCompatActivity(){
         val isConnected: Boolean = activeNetwork?.isConnectedOrConnecting == true
 
         return isConnected
+    }
+
+    fun runLayoutAnimation() {
+        val context : Context = recyclerView.context
+        val controller = AnimationUtils.loadLayoutAnimation(context, R.anim.layout_animation_fall_down)
+        recyclerView.layoutAnimation = controller
+        recyclerView.adapter?.notifyDataSetChanged()
+        recyclerView.scheduleLayoutAnimation()
     }
 }

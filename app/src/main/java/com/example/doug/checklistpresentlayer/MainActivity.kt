@@ -108,13 +108,15 @@ class MainActivity : AppCompatActivity() {
         }
         else
         {
-            var alertDialog : AlertDialog = AlertDialog.Builder(this).create()
+            if (!hasInternetConnection()) {
+                var alertDialog: AlertDialog = AlertDialog.Builder(this).create()
 
-            alertDialog.setTitle("Info");
-            alertDialog.setMessage("Internet not available, Cross check your internet connectivity and try again")
-            alertDialog.setIcon(android.R.drawable.ic_dialog_alert)
+                alertDialog.setTitle("Info");
+                alertDialog.setMessage("Internet not available, Cross check your internet connectivity and try again")
+                alertDialog.setIcon(android.R.drawable.ic_dialog_alert)
 
-            alertDialog.show()
+                alertDialog.show()
+            }
         }
 
         login_button.setOnClickListener {
