@@ -6,29 +6,39 @@ import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.content.Intent
 import android.content.pm.ActivityInfo
+import android.graphics.drawable.AnimationDrawable
 import android.net.ConnectivityManager
 import android.net.NetworkInfo
 import android.view.View
+import android.widget.ImageView
 import android.widget.ProgressBar
 import android.widget.TextView
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import kotlinx.android.synthetic.main.activity_login.*
 import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
 import net.danlew.android.joda.JodaTimeAndroid
+import android.view.animation.AlphaAnimation
+import android.view.animation.Animation
+
+
 
 //This is actually the user login page functionality
 class MainActivity : AppCompatActivity() {
+    var lightsAnimation: AnimationDrawable? = null
     override fun onCreate(savedInstanceState: Bundle?) {
         requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
         super.onCreate(savedInstanceState)
         JodaTimeAndroid.init(this)
         setContentView(R.layout.activity_login)
         val ctext = this
+        val lights = findViewById<ImageView>(R.id.imageView)
+        lightsAnimation = lights.drawable as AnimationDrawable
 
         var user: UserPage
         val spinner : ProgressBar = findViewById(R.id.progress_bar)
@@ -116,6 +126,18 @@ class MainActivity : AppCompatActivity() {
                 alertDialog.setIcon(android.R.drawable.ic_dialog_alert)
 
                 alertDialog.show()
+            }
+        }
+        var an = findViewById<TextView>(R.id.AppName)
+        an.visibility = View.INVISIBLE
+        lightsAnimation!!.start()
+        GlobalScope.launch {
+            delay(1500)
+            this@MainActivity.runOnUiThread {
+                val `in` = AlphaAnimation(0.0f, 1.0f)
+                `in`.duration = 3000
+                an.startAnimation(`in`)
+                an.visibility = View.VISIBLE
             }
         }
 
