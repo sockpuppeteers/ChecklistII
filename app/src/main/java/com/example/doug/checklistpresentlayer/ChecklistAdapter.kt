@@ -310,40 +310,6 @@ class ChecklistAdapter(private var ctx: Context,
                 popupSettingsWindow.dismiss()
 
                 holder.editName(this::currentChecklist, taskCount, currentUser)
-
-//                val popupSettingsChangeNameWindow = PopupWindow(ctx)
-//
-//                val taskSettingsChangeNameLayoutView =
-//                    layoutInflater.inflate(R.layout.task_settings_name_change_popup, null)
-//
-//                popupSettingsChangeNameWindow.contentView = taskSettingsChangeNameLayoutView
-//
-//                taskSettingsChangeNameLayoutView.ChangeNameButton.setOnClickListener {
-//
-//                    val newName = taskSettingsChangeNameLayoutView.NewNameText.text.toString()
-//
-//                    currentTask?.get().ChecklistText = newName
-//
-//                    currentChecklist.get().changeTaskName(taskCount, currentUser, newName)
-//
-//                    popupPresent.set(false)
-//
-//                    popupSettingsChangeNameWindow.dismiss()
-//                }
-//
-//                popupSettingsChangeNameWindow.setOnDismissListener {
-//                    popupPresent.set(false)
-//                }
-//
-//                taskSettingsChangeNameLayoutView.ChangeNameCancelButton.setOnClickListener {
-//                    popupPresent.set(false)
-//
-//                    popupSettingsChangeNameWindow.dismiss()
-//                }
-//
-//                popupSettingsChangeNameWindow.isFocusable = true
-//
-//                popupSettingsChangeNameWindow.showAtLocation(mainView, Gravity.CENTER, 0, 0)
             }
 
             taskSettingsLayoutView.CloseButton.setOnClickListener {

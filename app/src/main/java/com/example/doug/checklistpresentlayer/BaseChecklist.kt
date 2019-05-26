@@ -84,8 +84,11 @@ class BaseChecklist : AppCompatActivity(){
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        currentUser = User(intent.getIntExtra("UserID", 0), intent.getStringExtra("UserName"),
-            intent.getStringExtra("fname"), intent.getStringExtra("lname"))
+        currentUser = User(
+            intent.getIntExtra("UserID", 0), intent.getStringExtra("UserName"),
+            intent.getStringExtra("fname"), intent.getStringExtra("lname")
+        )
+        //sets the orientation to portrait permanently
         requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_base_checklist)
@@ -95,6 +98,7 @@ class BaseChecklist : AppCompatActivity(){
         currentChecklist.i_name = intent.getStringExtra("ListName")
         currentListofLists.uID = currentUser.UserID as Int
 
+        //creates the top bar and changes the left most icon to the left nav drawers icon
         setSupportActionBar(findViewById(R.id.toolbar))
         val actionbar: ActionBar? = supportActionBar
         actionbar?.apply {
@@ -104,7 +108,7 @@ class BaseChecklist : AppCompatActivity(){
         title = currentChecklist.i_name
 
 
-        //creates a submenu named user
+        //big mess of initializer.
         rightnavigationView = findViewById(R.id.right_nav_view)
         leftnavigationView = findViewById(R.id.left_nav_view)
         rightmenu = rightnavigationView.menu
@@ -115,18 +119,20 @@ class BaseChecklist : AppCompatActivity(){
         recyclerView = findViewById(R.id.checklist_recyclerview)
         recyclerView.layoutManager = LinearLayoutManager(this)
         recyclerView.setHasFixedSize(true)
-        val resId = R.anim.layout_animation_fall_down;
+
+        //loads the animation for recyclerview. The cascading list items one.
+        val resId = R.anim.layout_animation_fall_down
         val animation = AnimationUtils.loadLayoutAnimation(this, resId)
         recyclerView.layoutAnimation = animation
 
-        val spinner : ProgressBar = findViewById(R.id.progress_bar2)
+        val spinner: ProgressBar = findViewById(R.id.progress_bar2)
 
         //create a database access object
         var db = Database()
         //deleteListDataFile()
 
         //if there's a local file, populate our list from that
-        if (listFileExists()){
+        if (listFileExists()) {
             spinner.visibility = View.VISIBLE
             currentChecklist.tasks = getListFromFile()
             //Need to do things with this information TODO
@@ -134,26 +140,29 @@ class BaseChecklist : AppCompatActivity(){
             //time is 2 days old, but the compared string is never set
             //and nothing is done
             //add each task in currentChecklist to the page
-            for (Task in currentChecklist.tasks){
-                if (Task.compdatetime != null && Task.isRecurring != false)
-                {
+            for (Task in currentChecklist.tasks) {
+                if (Task.compdatetime != null && Task.isRecurring != false) {
                     val now = LocalDate.now()
                     val formatter = DateTimeFormat.forPattern("yyyy-MM-dd")
                     val dt = formatter.parseDateTime(Task.compdatetime)
                     val dead = dt.plusDays(2)
-                    if (now.isEqual(dead.toLocalDate()))
-                    {
-                        //we don't want the task
-                    }
-                    else
-                    {
+                    if (!now.isEqual(dead.toLocalDate())) {
                         addTaskFromList(Task)
                     }
-                }
-                else
+                } else
                     addTaskFromList(Task)
             }
-            adapter = ChecklistAdapter(this, recyclerView, currentListView, this::popupPresent, layoutInflater, this::currentTask, this::currentChecklist, currentUser)
+            //sets the recyclerview adapter. This handles all recyclerview events, see "ChecklistAdapter for details.
+            adapter = ChecklistAdapter(
+                this,
+                recyclerView,
+                currentListView,
+                this::popupPresent,
+                layoutInflater,
+                this::currentTask,
+                this::currentChecklist,
+                currentUser
+            )
             recyclerView.adapter = adapter
 
             println("loaded list from local file")
@@ -169,15 +178,11 @@ class BaseChecklist : AppCompatActivity(){
                 turnOnButtons()
                 turnOffButtons()
 
-                val list = currentChecklist
-                list.tasks = db.GetTasks(currentChecklist.listID!!)
-                list.users = db.GetUsers(currentChecklist.listID!!)
-                list.changes = db.GetChanges(currentChecklist.listID!!)
+                //mess of database calls
+                currentChecklist.tasks = db.GetTasks(currentChecklist.listID!!)
+                currentChecklist.users = db.GetUsers(currentChecklist.listID!!)
+                currentChecklist.changes = db.GetChanges(currentChecklist.listID!!)
                 currentListofLists.lists = db.GetListofLists(currentUser.Username)
-
-                currentChecklist.users = list.users
-                currentChecklist.tasks = list.tasks
-                currentChecklist.changes = list.changes
 
                 deleteListDataFile()
                 deleteListsDataFile()
@@ -185,42 +190,45 @@ class BaseChecklist : AppCompatActivity(){
                 createListsFile(currentListofLists)
 
                 this@BaseChecklist.runOnUiThread {
+                    //clears the user nav drawer
                     rightsubMenu.clear()
+                    //fills the user nav drawer with info from database
                     for ((i, up) in currentChecklist.users.withIndex()) {
                         rightsubMenu.add(0, Menu.FIRST + i, Menu.FIRST, up.Username)
                     }
+                    //clears the list of list nav drawer
                     leftsubMenu.clear()
                     var ii = 0
+                    //fills list of list nav drawer with info from server
                     for ((i, lol) in currentListofLists.lists.withIndex()) {
                         leftsubMenu.add(0, Menu.FIRST + i, Menu.FIRST, lol.i_name)
                         ii = i
                     }
-                    leftsubMenu.add(0, Menu.FIRST + ii + 1, Menu.FIRST, getString(R.string.ADD_LIST_TEXT)).setIcon(R.drawable.ic_add_box_black_24dp)
-                    leftsubMenu.add(0, Menu.FIRST + ii + 2, Menu.FIRST, getString(R.string.DELETE_LIST_TEXT)).setIcon(R.drawable.ic_delete_black_24dp)
+                    //adds the "New List..." button to list of list nav drawer
+                    leftsubMenu.add(0, Menu.FIRST + ii + 1, Menu.FIRST, getString(R.string.ADD_LIST_TEXT))
+                        .setIcon(R.drawable.ic_add_box_black_24dp)
+                    //adds the "Delete List..." button to list of list nav drawer
+                    leftsubMenu.add(0, Menu.FIRST + ii + 2, Menu.FIRST, getString(R.string.DELETE_LIST_TEXT))
+                        .setIcon(R.drawable.ic_delete_black_24dp)
                     currentListView.removeAll(currentListView)
-                    for (Task in currentChecklist.tasks)
-                    {
-                        if (Task.compdatetime != null && Task.isRecurring != false)
-                        {
+                    //add each task in currentChecklist to the page
+                    for (Task in currentChecklist.tasks) {
+                        if (Task.compdatetime != null && Task.isRecurring != false) {
                             val now = LocalDate.now()
                             val formatter = DateTimeFormat.forPattern("yyyy-MM-dd")
                             val dt = formatter.parseDateTime(Task.compdatetime)
                             val dead = dt.plusDays(2)
-                            if (now.isEqual(dead.toLocalDate()))
-                            {
-                                //we don't want the task
-                            }
-                            else
-                            {
+                            if (!now.isEqual(dead.toLocalDate())) {
                                 addTaskFromList(Task)
                             }
-                        }
-                        else if (Task.name != "")
+                        } else
                             addTaskFromList(Task)
                     }
+                    //changes the dataset in the adapter to the one from the database
                     adapter.setDataset(currentListView)
                     spinner.visibility = View.INVISIBLE
                 }
+                //remakes the local files
                 deleteListDataFile()
                 createListFile(currentChecklist)
 
@@ -232,42 +240,74 @@ class BaseChecklist : AppCompatActivity(){
         }
 
         //if no local file exists, populate our list from the database
-        else{
+        else {
             spinner.visibility = View.VISIBLE
             println("loaded list from database")
-            var currentTasks = db.GetTasks(intent.getIntExtra("ChecklistID", 0))
-            currentChecklist.users = db.GetUsers(intent.getIntExtra("ChecklistID", 0))
-            currentChecklist.changes = db.GetChanges(intent.getIntExtra("ChecklistID", 0))
-            //Same issue as "Need to do things with this information" TODO
-            for (Task in currentTasks)
-            {
-                if (Task.compdatetime != null && Task.isRecurring != false)
-                {
-                    val now = LocalDate.now()
-                    val formatter = DateTimeFormat.forPattern("yyyy-MM-dd")
-                    val dt = formatter.parseDateTime(Task.compdatetime)
-                    val dead = dt.plusDays(2)
-                    if (now.isEqual(dead.toLocalDate()))
-                    {
-                        //we don't want the task
-                    }
-                    else
-                    {
-                        addTask(Task)
-                    }
-                }
-                else if (Task.name != "")
-                    addTask(Task)
-
-            }
-            adapter = ChecklistAdapter(this, recyclerView, currentListView, this::popupPresent, layoutInflater, this::currentTask, this::currentChecklist, currentUser)
-            recyclerView.adapter = adapter
-
-            //create a local file with the data
+            //sets the recyclerview adapter. This handles all recyclerview events, see "ChecklistAdapter for details.
+            adapter = ChecklistAdapter(
+                this,
+                recyclerView,
+                currentListView,
+                this::popupPresent,
+                layoutInflater,
+                this::currentTask,
+                this::currentChecklist,
+                currentUser
+            )
+            //new thread
             GlobalScope.launch {
-                createListFile(currentChecklist)
+                //database calls
+                currentChecklist.tasks = db.GetTasks(intent.getIntExtra("ChecklistID", 0))
+                currentChecklist.users = db.GetUsers(intent.getIntExtra("ChecklistID", 0))
+                currentChecklist.changes = db.GetChanges(intent.getIntExtra("ChecklistID", 0))
+
+                //do things in the GUI thread
+                this@BaseChecklist.runOnUiThread {
+                    //Same issue as "Need to do things with this information" TODO
+                    //add each task in currentChecklist to the page
+                    for (Task in currentChecklist.tasks) {
+                        if (Task.compdatetime != null && Task.isRecurring != false) {
+                            val now = LocalDate.now()
+                            val formatter = DateTimeFormat.forPattern("yyyy-MM-dd")
+                            val dt = formatter.parseDateTime(Task.compdatetime)
+                            val dead = dt.plusDays(2)
+                            if (!now.isEqual(dead.toLocalDate())) {
+                                addTaskFromList(Task)
+                            }
+                        } else
+                            addTaskFromList(Task)
+                    }
+                    //clears the user nav drawer
+                    rightsubMenu.clear()
+                    //fills the user nav drawer with info from database
+                    for ((i, up) in currentChecklist.users.withIndex()) {
+                        rightsubMenu.add(0, Menu.FIRST + i, Menu.FIRST, up.Username)
+                    }
+                    //clears the list of list nav drawer
+                    leftsubMenu.clear()
+                    var ii = 0
+                    //fills list of list nav drawer with info from server
+                    for ((i, lol) in currentListofLists.lists.withIndex()) {
+                        leftsubMenu.add(0, Menu.FIRST + i, Menu.FIRST, lol.i_name)
+                        ii = i
+                    }
+                    //adds the "New List..." button to list of list nav drawer
+                    leftsubMenu.add(0, Menu.FIRST + ii + 1, Menu.FIRST, getString(R.string.ADD_LIST_TEXT))
+                        .setIcon(R.drawable.ic_add_box_black_24dp)
+                    //adds the "Delete List..." button to list of list nav drawer
+                    leftsubMenu.add(0, Menu.FIRST + ii + 2, Menu.FIRST, getString(R.string.DELETE_LIST_TEXT))
+                        .setIcon(R.drawable.ic_delete_black_24dp)
+
+                    //sets the recyclerview adapter. This handles all recyclerview events, see "ChecklistAdapter for details.
+                    recyclerView.adapter = adapter
+
+                    //create a local file with the data
+                    GlobalScope.launch {
+                        createListFile(currentChecklist)
+                    }
+                    spinner.visibility = View.INVISIBLE
+                }
             }
-            spinner.visibility = View.INVISIBLE
 
         }
 
@@ -280,12 +320,12 @@ class BaseChecklist : AppCompatActivity(){
         //gets called whenever any item is selected in the user nav menu
         rightnavigationView.setNavigationItemSelectedListener { menuItem ->
             //handles all items in nav drawer that are created at compile time
-            if (!onOptionsItemSelected(menuItem))
-            {
+            if (!onOptionsItemSelected(menuItem)) {
                 //handles all items in nav drawer that are created at run time
                 val id = menuItem.itemId - Menu.FIRST
+                //when a user taps a button in the user list this makes sure that the button is actually in the list
+                //and then jumps to the user page with the name of the person pressed
                 if (id < currentChecklist.users.size && id >= 0) {
-                    val up = currentChecklist.users[id]
                     val tempIntent = Intent(this, UserLogin::class.java).apply {
                         putExtra("uname", currentChecklist.users[id].Username)
                         putExtra("fname", currentChecklist.users[id].FName)
@@ -306,14 +346,25 @@ class BaseChecklist : AppCompatActivity(){
         //gets called whenever any item is selected in the user nav menu
         leftnavigationView.setNavigationItemSelectedListener { menuItem ->
 
+            //makes sure the database is accessible
             if (hasInternetConnection()) {
                 //handles all items in nav drawer that are created at compile time
+
+                //when the item in a nav drawer is created it adds an incrementing number to Menu.FIRST. this assures a
+                //diffrent number for every item that need it.
                 val id = menuItem.itemId - Menu.FIRST
+                //checks if the user is trying to delete a list
                 if (!deleteFlag) {
+                    //runs a function and doesn't run the next few line if anything was done in that function
                     if (!onOptionsItemSelected(menuItem)) {
+                        //checks to make sure that the item pressed is a list and not add or delete
+                        //if this runs then the user tapped a list and wants to switch to that list
                         if (id < currentListofLists.lists.size && id >= 0) {
+                            //makes the loading spinner visible
                             spinner.visibility = View.VISIBLE
+                            //closes the nav drawer
                             userLayout.closeDrawers()
+                            //makes a new thread
                             GlobalScope.launch {
                                 /*Right here start up a loading swirly*/
 
@@ -321,6 +372,7 @@ class BaseChecklist : AppCompatActivity(){
                                 turnOnButtons()
                                 turnOffButtons()
 
+                                //mess of database calls
                                 currentChecklist.listID = currentListofLists.lists[id].listID
                                 currentChecklist.tasks = db.GetTasks(currentChecklist.listID!!)
                                 currentChecklist.users = db.GetUsers(currentChecklist.listID!!)
@@ -328,28 +380,31 @@ class BaseChecklist : AppCompatActivity(){
                                 currentChecklist.i_name = currentListofLists.lists[id].i_name
                                 currentListofLists.lists = db.GetListofLists(currentUser.Username)
 
+                                //runs on the GUI thread
                                 this@BaseChecklist.runOnUiThread {
                                     //replaces the tasks and title on screen
                                     title = currentChecklist.i_name
-                                    if (id < currentListofLists.lists.size && id >= 0) {
-                                        currentListView.removeAll(currentListView)
-                                        for (Task in currentChecklist.tasks) {
-                                            if (Task.compdatetime != null) {
-                                                val now = LocalDate.now()
-                                                val formatter = DateTimeFormat.forPattern("yyyy-MM-dd")
-                                                val dt = formatter.parseDateTime(Task.compdatetime)
-                                                val dead = dt.plusDays(2)
-                                                if (now.isEqual(dead.toLocalDate())) {
-                                                    //we don't want the task
-                                                } else {
-                                                    addTaskFromList(Task)
-                                                }
-                                            } else if (Task.name != "")
+
+                                    currentListView.removeAll(currentListView)
+                                    //add each task in currentChecklist to the page
+                                    for (Task in currentChecklist.tasks) {
+                                        if (Task.compdatetime != null && Task.isRecurring != false) {
+                                            val now = LocalDate.now()
+                                            val formatter = DateTimeFormat.forPattern("yyyy-MM-dd")
+                                            val dt = formatter.parseDateTime(Task.compdatetime)
+                                            val dead = dt.plusDays(2)
+                                            if (!now.isEqual(dead.toLocalDate())) {
                                                 addTaskFromList(Task)
-                                        }
+                                            }
+                                        } else
+                                            addTaskFromList(Task)
                                     }
+                                    //changes the data set in the adapter, changing whats in recyclerview
                                     adapter.setDataset(currentListView)
+                                    //runs the cascading list animation
                                     runLayoutAnimation()
+
+                                    //replaces the user nav drawer items with the users in this list
                                     rightsubMenu.clear()
                                     for ((i, up) in currentChecklist.users.withIndex()) {
                                         rightsubMenu.add(0, Menu.FIRST + i, Menu.FIRST, up.Username)
@@ -357,12 +412,16 @@ class BaseChecklist : AppCompatActivity(){
                                     spinner.visibility = View.INVISIBLE
                                     // close drawer when item is tapped
                                 }
+                                //turns the buttons back on
                                 turnOnButtons()
                             }
-                        } else if (id < currentListofLists.lists.size + 2 && id >= 0) {
+                            //checks if the selected item is the two items right after the list of list
+                        } else if (id < currentListofLists.lists.size + 2 && id >= currentListofLists.lists.size) {
+                            //checks if the selected item is the one right after the last list
                             if (id == currentListofLists.lists.size) {
+                                //if this code runs then the user wants to make a new list
                                 if (!popupPresent) {
-
+                                    //the following code makes a pop up with an edit field, add button, and close button
                                     val popupWindow = PopupWindow(this)
 
                                     val popupView = layoutInflater.inflate(R.layout.popup_layout, null)
@@ -449,7 +508,10 @@ class BaseChecklist : AppCompatActivity(){
 
                                 }
                             } else {
+                                //if this code runs then the user wants to delete a list
                                 leftsubMenu.clear()
+                                //replaces all the list of list items with ones with an x next to them so the user knows
+                                // they can delete them when they tap an item. the add and delete buttons disapear.
                                 for ((i, lol) in currentListofLists.lists.withIndex()) {
                                     leftsubMenu.add(0, Menu.FIRST + i, Menu.FIRST, lol.i_name)
                                         .setIcon(R.drawable.ic_cancel_black_24dp)
@@ -460,6 +522,8 @@ class BaseChecklist : AppCompatActivity(){
 
                     }
                 } else {
+                    //if the delete flag is set run this
+                    //if this runs the user wants to delete a list
                     if (id < currentListofLists.lists.size && id >= 0) {
                         GlobalScope.launch {
                             deleteListDataFile(currentListofLists.lists[id].i_name)
@@ -495,8 +559,6 @@ class BaseChecklist : AppCompatActivity(){
                         deleteFlag = false
                     }
                 }
-                // Add code here to update the UI based on the item selected
-                // For example, swap UI fragments here
             }
             true
         }
@@ -509,7 +571,7 @@ class BaseChecklist : AppCompatActivity(){
         val addListener = View.OnClickListener {
 
             //If there is not a popup already [resent
-            if(!popupPresent) {
+            if (!popupPresent) {
 
                 val popupWindow = PopupWindow(this)
                 //Create a view that is of the popup_layout in resources
@@ -520,14 +582,17 @@ class BaseChecklist : AppCompatActivity(){
                 val acceptButton = popupView.PopupMainView.AcceptButton
 
                 //Creates and adds the on click action to the add button
-                acceptButton.setOnClickListener{
+                acceptButton.setOnClickListener {
                     val popup_edittext = popupView.PopupMainView.PopupEditText
 
                     //Retrieves the name of the task if the name is long enough
                     if (popup_edittext.text.toString().isNotEmpty() && popup_edittext.text.toString().length < 40) {
                         if (hasInternetConnection()) {
                             createNewTask(popup_edittext.text.toString(), false, 0/*needs to be something later*/)
-                            var alertDialog : AlertDialog = AlertDialog.Builder(this).create()
+                        }
+                        else
+                        {
+                            var alertDialog: AlertDialog = AlertDialog.Builder(this).create()
 
                             alertDialog.setTitle("Info");
                             alertDialog.setMessage("Internet not available, Cross check your internet connectivity and try again")
@@ -604,7 +669,7 @@ class BaseChecklist : AppCompatActivity(){
             }
             //this else clause happens when they have no internet connection
             else {
-                var alertDialog : AlertDialog = AlertDialog.Builder(this).create()
+                var alertDialog: AlertDialog = AlertDialog.Builder(this).create()
 
                 alertDialog.setTitle("Info");
                 alertDialog.setMessage("Internet not available, Cross check your internet connectivity and try again")
@@ -620,7 +685,7 @@ class BaseChecklist : AppCompatActivity(){
 
         val historyListener = View.OnClickListener {
 
-            if(!popupPresent) {
+            if (!popupPresent) {
 
                 val mainViewHistory = findViewById<RecyclerView>(R.id.checklist_recyclerview)
 
@@ -653,7 +718,7 @@ class BaseChecklist : AppCompatActivity(){
 
                 //Check to see if not changes have happened
                 //Displays a message for each change that has occurred
-                if(currentChecklist.changes.isEmpty()) {
+                if (currentChecklist.changes.isEmpty()) {
                     val checklistChangeTextView = TextView(this)
 
                     var toAddString = "No Changes in this checklist!"
@@ -669,18 +734,17 @@ class BaseChecklist : AppCompatActivity(){
                     )
 
                     historyLayout.addView(checklistChangeTextView)
-                }
-                else {
+                } else {
                     historyIterator.forEach {
 
                         val checklistChangeTextView = TextView(this)
 
                         var toAddString = "Default"
 
-                        when(it.changeType) {
+                        when (it.changeType) {
 
                             kAction.CREATE_TASK -> toAddString = "--- Task Added: " + it.taskName +
-                                    "\n\tAdded By: " +  it.changedBy + "\n"
+                                    "\n\tAdded By: " + it.changedBy + "\n"
                             kAction.DELETE_TASK -> toAddString = "--- Task Deleted: " + it.taskName +
                                     "\n\tDeleted By: " + it.changedBy + "\n"
                             kAction.COMPLETE_TASK -> toAddString = "--- Task Completed: " + it.taskName +
@@ -690,7 +754,7 @@ class BaseChecklist : AppCompatActivity(){
                             kAction.CHANGE_TASK_DEADLINE -> toAddString = "--- Deadline Changed: " + it.taskName +
                                     "\n\tChanged To: " + it.changedTo + "\n\tEdited By: " + it.changedBy + "\n"
                             kAction.REMOVE_TASK_DEADLINE -> toAddString + "--- Deadline Removed: " + it.taskName +
-                                    "\n\tRemoved By: " + it.changedBy  + "\n"
+                                    "\n\tRemoved By: " + it.changedBy + "\n"
                             kAction.ADD_USER -> toAddString = "--- User Added: " + it.changedTo +
                                     "\n\tAdded By: " + it.changedBy + "\n"
                             kAction.CHANGE_TASK_RECURRING -> toAddString = "--- Recursion Changed: " + it.taskName +
@@ -702,7 +766,7 @@ class BaseChecklist : AppCompatActivity(){
                                     "\n\tChanged To: " + it.changedTo + "\n\tEdited By: " + it.changedBy + "\n"
                         }
 
-                        if (toAddString != "Default"){
+                        if (toAddString != "Default") {
                             checklistChangeTextView.text = toAddString
 
                             checklistChangeTextView.setTextColor(Color.WHITE)
@@ -725,262 +789,6 @@ class BaseChecklist : AppCompatActivity(){
         }
 
         historyButton.setOnClickListener(historyListener)
-    }
-
-    private fun createSettingsPopup() {
-        if (!popupPresent ) {
-            popupPresent = true
-
-            val popupSettingsWindow = PopupWindow(this)
-
-            val taskSettingsLayoutView =
-                layoutInflater.inflate(R.layout.task_settings_popup, null)
-
-            var taskCount = 0
-            var found = false
-            //Checks all current gui elements to see if they are checked
-            while (taskCount < currentChecklist.tasks.count() && !found) {
-                if(currentChecklist.tasks[taskCount].TaskID == currentTask?.taskID)
-                {
-                    found = true
-
-                }
-                else
-                {
-                    taskCount++
-                }
-            }
-
-            popupSettingsWindow.contentView = taskSettingsLayoutView
-
-            /**************
-             *   Deadline Button Displays Deadline popup
-             ***************/
-            taskSettingsLayoutView.DeadlineButton.setOnClickListener {
-
-                popupSettingsWindow.dismiss()
-                var curDeadline = LocalDate.now().toString()
-                val popupSettingsDeadlineWindow = PopupWindow(this)
-
-                val taskSettingsDeadlineLayoutView =
-                    layoutInflater.inflate(R.layout.task_settings_deadline_popup, null)
-
-                var tempString: String
-
-                popupSettingsDeadlineWindow.contentView = taskSettingsDeadlineLayoutView
-
-                if(currentChecklist.tasks[taskCount].Deadline != null) {
-                    tempString =
-                        getString(R.string.CURRENT_DEADLINE_TEXT) + " " + currentChecklist.tasks[taskCount].Deadline.toString()
-
-                    taskSettingsDeadlineLayoutView.CurrentDeadlineTextView.text = tempString
-                }
-                else {
-                    taskSettingsDeadlineLayoutView.CurrentDeadlineTextView.text = getString(R.string.NO_DEADLINE_TEXT)
-                }
-
-                taskSettingsDeadlineLayoutView.ClearDeadlineButton.setOnClickListener {
-                    taskSettingsDeadlineLayoutView.CurrentDeadlineTextView.text = getString(R.string.NO_DEADLINE_TEXT)
-
-                    currentChecklist.removeDeadline(taskCount, currentUser)
-                    curDeadline = LocalDate.now().minusDays(1).toString()
-                }
-
-                taskSettingsDeadlineLayoutView.DeadlineCalendarView.setOnDateChangeListener{_, year, month, day ->
-                    tempString =
-                        getString(R.string.CURRENT_DEADLINE_TEXT) + " " + year + "-" + month + "-" + day
-
-                    taskSettingsDeadlineLayoutView.CurrentDeadlineTextView.text = tempString
-
-                    curDeadline = "$year-$month-$day"
-                }
-
-                taskSettingsDeadlineLayoutView.closeDeadlineButton.setOnClickListener{
-
-                    popupSettingsDeadlineWindow.dismiss()
-
-                    popupPresent = false
-                }
-
-                popupSettingsDeadlineWindow.setOnDismissListener {
-                    if (curDeadline != LocalDate.now().minusDays(1).toString())
-                        currentChecklist.changeTaskDeadline(taskCount, currentUser, curDeadline)
-                    popupPresent = false
-                }
-
-                popupSettingsDeadlineWindow.isFocusable = true
-
-                popupSettingsDeadlineWindow.showAtLocation(recyclerView, Gravity.CENTER, 0, 0)
-            }
-
-            /**************
-             *   Recursion Button Displays Task Recursion popup
-             ***************/
-            taskSettingsLayoutView.RecursionButton.setOnClickListener {
-
-                popupSettingsWindow.dismiss()
-
-                val popupSettingsRecurringWindow = PopupWindow(this)
-
-                val taskSettingsRecurringLayoutView =
-                    layoutInflater.inflate(R.layout.task_settings_recursion_popup, null)
-
-                taskSettingsRecurringLayoutView.RecursionSwitch.setOnClickListener {
-                    currentTask?.setRecurringIfNotComplete(taskSettingsRecurringLayoutView.RecursionSwitch.isChecked)
-                }
-
-                taskSettingsRecurringLayoutView.CurrentDaysTextView.text = calcTempStringDays(taskCount)
-
-                taskSettingsRecurringLayoutView.CurrentTimeTextView.text = calcTempStringTime(taskCount)
-
-                popupSettingsRecurringWindow.contentView = taskSettingsRecurringLayoutView
-
-                popupSettingsRecurringWindow.setOnDismissListener {
-
-                    currentTask?.setRecurringIfNotComplete(taskSettingsRecurringLayoutView.RecursionSwitch.isChecked)
-
-                    popupPresent = false
-
-                }
-                taskSettingsRecurringLayoutView.RecursionSwitch.setOnClickListener {
-                    currentTask?.setRecurringIfNotComplete(taskSettingsRecurringLayoutView.RecursionSwitch.isChecked)
-                    currentChecklist.setTaskRecursion(taskCount, currentUser,
-                        taskSettingsRecurringLayoutView.RecursionSwitch.isChecked)
-                }
-
-                taskSettingsRecurringLayoutView.CloseRecurringButton.setOnClickListener{
-
-                    currentTask?.setRecurringIfNotComplete(taskSettingsRecurringLayoutView.RecursionSwitch.isChecked)
-
-                    popupSettingsRecurringWindow.dismiss()
-
-                    popupPresent = false
-                }
-
-                //********************************************************************
-                //Format for recurring date string is Day-Day-Day-.... ex. Mon-Tue-Fri
-                //
-                //Format for recurring time string is hour:minute AM\PM
-                //********************************************************************
-                taskSettingsRecurringLayoutView.SaveRecurringSettingsButton.setOnClickListener {
-                    var dateString = ""
-
-                    if(taskSettingsRecurringLayoutView.SundaySwitch.isChecked)
-                        dateString += "Sun-"
-
-                    if(taskSettingsRecurringLayoutView.MondaySwitch.isChecked)
-                        dateString += "Mon-"
-
-                    if(taskSettingsRecurringLayoutView.TuesdaySwitch.isChecked)
-                        dateString += "Tue-"
-
-                    if(taskSettingsRecurringLayoutView.WednesdaySwitch.isChecked)
-                        dateString += "Wed-"
-
-                    if(taskSettingsRecurringLayoutView.ThursdaySwitch.isChecked)
-                        dateString += "Thu-"
-
-                    if(taskSettingsRecurringLayoutView.FridaySwitch.isChecked)
-                        dateString += "Fri-"
-
-                    if(taskSettingsRecurringLayoutView.SaturdaySwitch.isChecked)
-                        dateString += "Sat-"
-
-                    if(dateString != currentChecklist.tasks[taskCount].recurringDays)
-                        currentChecklist.updateTaskRecurringDays(taskCount, currentUser, dateString)
-
-                    var timeString =
-                        taskSettingsRecurringLayoutView.HourSpinner.selectedItem.toString() +
-                                ":" + taskSettingsRecurringLayoutView.MinuteSpinner.selectedItem.toString() +
-                                " " + taskSettingsRecurringLayoutView.AmPmSpinner.selectedItem.toString()
-
-                    if(timeString != currentChecklist.tasks[taskCount].recurringTime)
-                        currentChecklist.updateTaskRecurringTime(taskCount, currentUser, timeString)
-
-                    taskSettingsRecurringLayoutView.CurrentDaysTextView.text = calcTempStringDays(taskCount)
-
-                    taskSettingsRecurringLayoutView.CurrentTimeTextView.text = calcTempStringTime(taskCount)
-                }
-
-                taskSettingsRecurringLayoutView.RecursionSwitch.isChecked =
-                    currentTask?.isRecurring != null && currentTask?.isRecurring == true
-
-
-                popupSettingsRecurringWindow.setOnDismissListener {
-                    popupPresent = false
-                }
-
-                popupSettingsRecurringWindow.isFocusable = true
-
-                popupSettingsRecurringWindow.showAtLocation(recyclerView, Gravity.CENTER, 0, 0)
-            }
-
-            taskSettingsLayoutView.ChangeNameSettingsButton.setOnClickListener {
-
-                popupSettingsWindow.dismiss()
-
-                val popupSettingsChangeNameWindow = PopupWindow(this)
-
-                val taskSettingsChangeNameLayoutView =
-                    layoutInflater.inflate(R.layout.task_settings_name_change_popup, null)
-
-                popupSettingsChangeNameWindow.contentView = taskSettingsChangeNameLayoutView
-
-                taskSettingsChangeNameLayoutView.ChangeNameButton.setOnClickListener {
-
-                    val newName = taskSettingsChangeNameLayoutView.NewNameText.text.toString()
-
-                    if (newName.length < 40){
-                        currentTask?.ChecklistText = newName
-                        currentChecklist.changeTaskName(taskCount, currentUser, newName)
-                    }
-
-                    popupPresent = false
-                    popupSettingsChangeNameWindow.dismiss()
-                }
-
-                popupSettingsChangeNameWindow.setOnDismissListener {
-                    popupPresent = false
-                }
-
-                taskSettingsChangeNameLayoutView.ChangeNameCancelButton.setOnClickListener {
-                    popupPresent = false
-
-                    popupSettingsChangeNameWindow.dismiss()
-                }
-
-                popupSettingsChangeNameWindow.isFocusable = true
-
-                popupSettingsChangeNameWindow.showAtLocation(recyclerView, Gravity.CENTER, 0, 0)
-            }
-
-            taskSettingsLayoutView.CloseButton.setOnClickListener {
-                popupSettingsWindow.dismiss()
-                popupPresent = false
-            }
-
-            popupSettingsWindow.setOnDismissListener {
-                popupPresent = false
-            }
-
-            taskSettingsLayoutView.taskNameView.text = currentTask?.ChecklistText
-
-            popupSettingsWindow.isFocusable = true
-
-            popupSettingsWindow.showAtLocation(recyclerView, Gravity.CENTER, 0, 0)
-        }
-    }
-
-    private fun calcTempStringDays(index: Int) = when(currentChecklist.tasks[index].recurringDays != null) {
-        true -> getString(R.string.CURRENT_RECURRING_DAYS_TEXT) +
-                " " + currentChecklist.tasks[index].recurringDays
-        false -> "No current recurring days"
-    }
-
-    private fun calcTempStringTime(index: Int) = when(currentChecklist.tasks[index].recurringTime != null){
-        true -> getString(R.string.CURRENT_RECURRING_TIME_TEXT) +
-                " " + currentChecklist.tasks[index].recurringTime
-        false -> "No current recurring time"
     }
 
     fun createNewTask(TaskText: String, IsReaccuring: Boolean, taskID: Int?) {
