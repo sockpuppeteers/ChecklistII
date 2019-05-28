@@ -31,27 +31,29 @@ class ChecklistViewHolder(
             ChecklistTextView.setTextColor(Color.parseColor("#038C65"))
         else
             ChecklistTextView.setTextColor(Color.BLACK)
-        if(viewModel.isComplete) {
-            ChecklistTextView.apply {
-                ChecklistTextView.paintFlags = ChecklistTextView.paintFlags!!.or(
-                    Paint.STRIKE_THRU_TEXT_FLAG
-                )
+        when {
+            viewModel.isComplete -> {
+                ChecklistTextView.apply {
+                    ChecklistTextView.paintFlags = ChecklistTextView.paintFlags!!.or(
+                        Paint.STRIKE_THRU_TEXT_FLAG
+                    )
+                }
+                ChecklistCheckView.visibility = View.INVISIBLE
             }
-            ChecklistCheckView.visibility = View.INVISIBLE
-        }
-        else {
-            ChecklistTextView.apply {
-                ChecklistTextView.paintFlags = 0
+            viewModel.isMessage -> {
+                ChecklistTextView.apply {
+                    ChecklistTextView.paintFlags = 0
+                }
+                ChecklistCheckView.visibility = View.INVISIBLE
             }
-            ChecklistCheckView.visibility = View.VISIBLE
+            else -> {
+                ChecklistTextView.apply {
+                    ChecklistTextView.paintFlags = 0
+                }
+                ChecklistTextView.isClickable = false
+                ChecklistCheckView.visibility = View.VISIBLE
+            }
         }
-    }
-
-    fun <T : RecyclerView.ViewHolder> T.listen(event: (position: Int, type: Int) -> Unit): T {
-        itemView.setOnClickListener {
-            event.invoke(adapterPosition, itemViewType)
-        }
-        return this
     }
 
     fun editName(currentChecklist: KProperty0<KMutableProperty0<Checklist>>, taskCount: Int, currentUser: User)

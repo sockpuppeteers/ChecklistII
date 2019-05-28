@@ -45,56 +45,58 @@ class ChecklistAdapter(private var ctx: Context,
             holder.vm.isChecked = !holder.vm.isChecked
         }
         holder.ChecklistTextView.setOnClickListener {
-            val popupFunctionWindow = PopupWindow(ctx)
-            val taskFunctionLayoutView = layoutInflater.inflate(R.layout.task_functions_layout, null)
+            if (!holder.vm.isMessage) {
+                val popupFunctionWindow = PopupWindow(ctx)
+                val taskFunctionLayoutView = layoutInflater.inflate(R.layout.task_functions_layout, null)
 
-            taskFunctionLayoutView.FunctionCloseButton.setOnClickListener {
-                popupFunctionWindow.dismiss()
+                taskFunctionLayoutView.FunctionCloseButton.setOnClickListener {
+                    popupFunctionWindow.dismiss()
 
-                popupPresent.set(false)
-            }
-
-            taskFunctionLayoutView.FunctionSettingsButton.setOnClickListener {
-                popupFunctionWindow.dismiss()
-
-                popupPresent.set(false)
-
-                createSettingsPopup(holder)
-            }
-
-            //Sets the delete button to remove the task
-            taskFunctionLayoutView.FunctionDeleteButton.setOnClickListener {
-                var data: MutableList<ChecklistViewModel> = myDataset as MutableList<ChecklistViewModel>
-                data.removeAt(position)
-                setDataset(data)
-                currentChecklist.get().deleteTask(position, currentUser)
-                GlobalScope.launch {
-                    deleteListDataFile()
-                    createListFile(currentChecklist.get())
-                }
-
-
-                popupFunctionWindow.dismiss()
-
-                popupPresent.set(false)
-            }
-
-            popupFunctionWindow.contentView = taskFunctionLayoutView
-
-            popupFunctionWindow.setOnDismissListener {
-                PopupWindow.OnDismissListener {
                     popupPresent.set(false)
                 }
-            }
-            if(!popupPresent.get()) {
 
-                popupPresent.set(true)
+                taskFunctionLayoutView.FunctionSettingsButton.setOnClickListener {
+                    popupFunctionWindow.dismiss()
 
-                popupFunctionWindow.isFocusable()
+                    popupPresent.set(false)
 
-                popupFunctionWindow.showAtLocation(mainView, Gravity.CENTER, 0, 0)
+                    createSettingsPopup(holder)
+                }
 
-                currentTask.set(myDataset[position])
+                //Sets the delete button to remove the task
+                taskFunctionLayoutView.FunctionDeleteButton.setOnClickListener {
+                    var data: MutableList<ChecklistViewModel> = myDataset as MutableList<ChecklistViewModel>
+                    data.removeAt(position)
+                    setDataset(data)
+                    currentChecklist.get().deleteTask(position, currentUser)
+                    GlobalScope.launch {
+                        deleteListDataFile()
+                        createListFile(currentChecklist.get())
+                    }
+
+
+                    popupFunctionWindow.dismiss()
+
+                    popupPresent.set(false)
+                }
+
+                popupFunctionWindow.contentView = taskFunctionLayoutView
+
+                popupFunctionWindow.setOnDismissListener {
+                    PopupWindow.OnDismissListener {
+                        popupPresent.set(false)
+                    }
+                }
+                if (!popupPresent.get()) {
+
+                    popupPresent.set(true)
+
+                    popupFunctionWindow.isFocusable()
+
+                    popupFunctionWindow.showAtLocation(mainView, Gravity.CENTER, 0, 0)
+
+                    currentTask.set(myDataset[position])
+                }
             }
         }
     }

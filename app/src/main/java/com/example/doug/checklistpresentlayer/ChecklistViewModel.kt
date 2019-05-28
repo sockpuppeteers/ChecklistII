@@ -12,6 +12,7 @@ class ChecklistViewModel(var ChecklistText: String) {
     var isRecurring = false
     var isComplete = false
     var isChecked = false
+    var isMessage = false
 
 
     fun setRecurringIfNotComplete(reccuring: Boolean) {

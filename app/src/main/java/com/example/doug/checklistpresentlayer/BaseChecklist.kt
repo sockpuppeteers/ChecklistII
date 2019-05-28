@@ -120,6 +120,10 @@ class BaseChecklist : AppCompatActivity(){
         recyclerView.layoutManager = LinearLayoutManager(this)
         recyclerView.setHasFixedSize(true)
 
+        val addButton = findViewById<Button>(R.id.AddTaskButton)
+        val checkoffButton = findViewById<Button>(R.id.CheckoffButton)
+        val historyButton = findViewById<Button>(R.id.HistoryButton)
+
         //loads the animation for recyclerview. The cascading list items one.
         val resId = R.anim.layout_animation_fall_down
         val animation = AnimationUtils.loadLayoutAnimation(this, resId)
@@ -131,8 +135,38 @@ class BaseChecklist : AppCompatActivity(){
         var db = Database()
         //deleteListDataFile()
 
+        //if there's no list then display a message
+        if (currentChecklist.listID == -1)
+        {
+            title = ""
+
+            //displays a message
+            var message = ChecklistViewModel("This list is empty. Select or create a new one.")
+            message.isMessage = true
+            currentListView.add(message)
+            //changes the data set in the adapter, changing whats in recyclerview
+            adapter = ChecklistAdapter(
+                this,
+                recyclerView,
+                currentListView,
+                this::popupPresent,
+                layoutInflater,
+                this::currentTask,
+                this::currentChecklist,
+                currentUser
+            )
+            recyclerView.adapter = adapter
+
+            addButton.visibility = View.INVISIBLE
+            checkoffButton.visibility = View.INVISIBLE
+            HistoryButton.visibility = View.INVISIBLE
+
+            //adds the "New List..." button to list of list nav drawer
+            leftsubMenu.add(0, Menu.FIRST + 1, Menu.FIRST, getString(R.string.ADD_LIST_TEXT))
+                .setIcon(R.drawable.ic_add_box_black_24dp)
+        }
         //if there's a local file, populate our list from that
-        if (listFileExists()) {
+        else if (listFileExists()) {
             spinner.visibility = View.VISIBLE
             currentChecklist.tasks = getListFromFile()
             //Need to do things with this information TODO
@@ -164,6 +198,10 @@ class BaseChecklist : AppCompatActivity(){
                 currentUser
             )
             recyclerView.adapter = adapter
+
+            addButton.visibility = View.VISIBLE
+            checkoffButton.visibility = View.VISIBLE
+            HistoryButton.visibility = View.VISIBLE
 
             println("loaded list from local file")
 
@@ -228,6 +266,11 @@ class BaseChecklist : AppCompatActivity(){
                     }
                     //changes the dataset in the adapter to the one from the database
                     adapter.setDataset(currentListView)
+
+                    addButton.visibility = View.VISIBLE
+                    checkoffButton.visibility = View.VISIBLE
+                    HistoryButton.visibility = View.VISIBLE
+
                     spinner.visibility = View.INVISIBLE
                 }
                 //remakes the local files
@@ -305,6 +348,10 @@ class BaseChecklist : AppCompatActivity(){
                     //sets the recyclerview adapter. This handles all recyclerview events, see "ChecklistAdapter for details.
                     recyclerView.adapter = adapter
 
+                    addButton.visibility = View.VISIBLE
+                    checkoffButton.visibility = View.VISIBLE
+                    HistoryButton.visibility = View.VISIBLE
+
                     //create a local file with the data
                     GlobalScope.launch {
                         createListFile(currentChecklist)
@@ -370,8 +417,6 @@ class BaseChecklist : AppCompatActivity(){
                             userLayout.closeDrawers()
                             //makes a new thread
                             GlobalScope.launch {
-                                /*Right here start up a loading swirly*/
-
                                 //disable certain actions while data is being loaded from database
                                 turnOnButtons()
                                 turnOffButtons()
@@ -413,6 +458,10 @@ class BaseChecklist : AppCompatActivity(){
                                     for ((i, up) in currentChecklist.users.withIndex()) {
                                         rightsubMenu.add(0, Menu.FIRST + i, Menu.FIRST, up.Username)
                                     }
+
+                                    addButton.visibility = View.VISIBLE
+                                    checkoffButton.visibility = View.VISIBLE
+                                    HistoryButton.visibility = View.VISIBLE
                                     spinner.visibility = View.INVISIBLE
                                     // close drawer when item is tapped
                                 }
@@ -438,7 +487,6 @@ class BaseChecklist : AppCompatActivity(){
                                     //Creates and adds the on click action to the add button
                                     acceptButton.setOnClickListener {
                                         val popup_edittext = popupView.PopupMainView.PopupEditText
-
                                         val list_name = popup_edittext.text.toString()
 
                                         if (list_name.length >= 1) {
@@ -531,17 +579,21 @@ class BaseChecklist : AppCompatActivity(){
                     //if the delete flag is set run this
                     //if this runs the user wants to delete a list
                     if (id < currentListofLists.lists.size && id >= 0) {
-                        GlobalScope.launch {
-                            deleteListDataFile(currentListofLists.lists[id].i_name)
-                        }
+                        deleteListDataFile(currentListofLists.lists[id].i_name)
 
                         //remove the task from the list, and delete it from the database
                         currentListofLists.deleteList(id, User(1))
 
                         //update the list of lists local file to be current
-                        GlobalScope.launch {
+                        if (currentListofLists.lists.size > 0) {
+                            GlobalScope.launch {
+                                deleteListsDataFile()
+                                createListsFile(currentListofLists)
+                            }
+                        }
+                        else
+                        {
                             deleteListsDataFile()
-                            createListsFile(currentListofLists)
                         }
 
                         leftsubMenu.clear()
@@ -562,6 +614,29 @@ class BaseChecklist : AppCompatActivity(){
                                 getString(R.string.DELETE_LIST_TEXT)
                             ).setIcon(R.drawable.ic_delete_black_24dp)
                         }
+                        else
+                        {
+                            //if this runs then the user deleted the list they were in
+                            //removes the title and tasks
+                            title = ""
+
+                            currentListView.removeAll(currentListView)
+                            //displays a message
+                            var message = ChecklistViewModel("This list is empty. Select or create a new one.")
+                            message.isMessage = true
+                            currentListView.add(message)
+                            //changes the data set in the adapter, changing whats in recyclerview
+                            adapter.setDataset(currentListView)
+
+                            addButton.visibility = View.INVISIBLE
+                            checkoffButton.visibility = View.INVISIBLE
+                            HistoryButton.visibility = View.INVISIBLE
+
+                            //replaces the user nav drawer items with the users in this list
+                            rightsubMenu.clear()
+
+                            userLayout.closeDrawers()
+                        }
                         spinner.visibility = View.INVISIBLE
 
                         deleteFlag = false
@@ -570,10 +645,6 @@ class BaseChecklist : AppCompatActivity(){
             }
             true
         }
-
-        val addButton = findViewById<Button>(R.id.AddTaskButton)
-        val checkoffButton = findViewById<Button>(R.id.CheckoffButton)
-        val historyButton = findViewById<Button>(R.id.HistoryButton)
 
         //Creates the click listener for the add button
         val addListener = View.OnClickListener {
