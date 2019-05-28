@@ -207,9 +207,11 @@ class BaseChecklist : AppCompatActivity(){
                     //adds the "New List..." button to list of list nav drawer
                     leftsubMenu.add(0, Menu.FIRST + ii + 1, Menu.FIRST, getString(R.string.ADD_LIST_TEXT))
                         .setIcon(R.drawable.ic_add_box_black_24dp)
-                    //adds the "Delete List..." button to list of list nav drawer
-                    leftsubMenu.add(0, Menu.FIRST + ii + 2, Menu.FIRST, getString(R.string.DELETE_LIST_TEXT))
-                        .setIcon(R.drawable.ic_delete_black_24dp)
+                    if (currentListofLists.lists.size != 0) {
+                        //adds the "Delete List..." button to list of list nav drawer
+                        leftsubMenu.add(0, Menu.FIRST + ii + 2, Menu.FIRST, getString(R.string.DELETE_LIST_TEXT))
+                            .setIcon(R.drawable.ic_delete_black_24dp)
+                    }
                     currentListView.removeAll(currentListView)
                     //add each task in currentChecklist to the page
                     for (Task in currentChecklist.tasks) {
@@ -294,9 +296,11 @@ class BaseChecklist : AppCompatActivity(){
                     //adds the "New List..." button to list of list nav drawer
                     leftsubMenu.add(0, Menu.FIRST + ii + 1, Menu.FIRST, getString(R.string.ADD_LIST_TEXT))
                         .setIcon(R.drawable.ic_add_box_black_24dp)
-                    //adds the "Delete List..." button to list of list nav drawer
-                    leftsubMenu.add(0, Menu.FIRST + ii + 2, Menu.FIRST, getString(R.string.DELETE_LIST_TEXT))
-                        .setIcon(R.drawable.ic_delete_black_24dp)
+                    if (currentListofLists.lists.size != 0) {
+                        //adds the "Delete List..." button to list of list nav drawer
+                        leftsubMenu.add(0, Menu.FIRST + ii + 2, Menu.FIRST, getString(R.string.DELETE_LIST_TEXT))
+                            .setIcon(R.drawable.ic_delete_black_24dp)
+                    }
 
                     //sets the recyclerview adapter. This handles all recyclerview events, see "ChecklistAdapter for details.
                     recyclerView.adapter = adapter
@@ -418,7 +422,7 @@ class BaseChecklist : AppCompatActivity(){
                             //checks if the selected item is the two items right after the list of list
                         } else if (id < currentListofLists.lists.size + 2 && id >= currentListofLists.lists.size) {
                             //checks if the selected item is the one right after the last list
-                            if (id == currentListofLists.lists.size) {
+                            if (id == currentListofLists.lists.size || (currentListofLists.lists.size == 0 && id == 1)) {
                                 //if this code runs then the user wants to make a new list
                                 if (!popupPresent) {
                                     //the following code makes a pop up with an edit field, add button, and close button
@@ -457,12 +461,14 @@ class BaseChecklist : AppCompatActivity(){
                                                         0, Menu.FIRST + ii + 1, Menu.FIRST,
                                                         getString(R.string.ADD_LIST_TEXT)
                                                     ).setIcon(R.drawable.ic_add_box_black_24dp)
-                                                    leftsubMenu.add(
-                                                        0,
-                                                        Menu.FIRST + ii + 2,
-                                                        Menu.FIRST,
-                                                        getString(R.string.DELETE_LIST_TEXT)
-                                                    ).setIcon(R.drawable.ic_delete_black_24dp)
+                                                    if (currentListofLists.lists.size != 0) {
+                                                        leftsubMenu.add(
+                                                            0,
+                                                            Menu.FIRST + ii + 2,
+                                                            Menu.FIRST,
+                                                            getString(R.string.DELETE_LIST_TEXT)
+                                                        ).setIcon(R.drawable.ic_delete_black_24dp)
+                                                    }
                                                     spinner.visibility = View.INVISIBLE
                                                 }
                                             }
@@ -548,12 +554,14 @@ class BaseChecklist : AppCompatActivity(){
                             0, Menu.FIRST + ii + 1, Menu.FIRST,
                             getString(R.string.ADD_LIST_TEXT)
                         ).setIcon(R.drawable.ic_add_box_black_24dp)
-                        leftsubMenu.add(
-                            0,
-                            Menu.FIRST + ii + 2,
-                            Menu.FIRST,
-                            getString(R.string.DELETE_LIST_TEXT)
-                        ).setIcon(R.drawable.ic_delete_black_24dp)
+                        if (currentListofLists.lists.size != 0) {
+                            leftsubMenu.add(
+                                0,
+                                Menu.FIRST + ii + 2,
+                                Menu.FIRST,
+                                getString(R.string.DELETE_LIST_TEXT)
+                            ).setIcon(R.drawable.ic_delete_black_24dp)
+                        }
                         spinner.visibility = View.INVISIBLE
 
                         deleteFlag = false
@@ -1071,12 +1079,14 @@ class BaseChecklist : AppCompatActivity(){
                         0, Menu.FIRST + ii + 1, Menu.FIRST,
                         getString(R.string.ADD_LIST_TEXT)
                     ).setIcon(R.drawable.ic_add_box_black_24dp)
-                    leftsubMenu.add(
-                        0,
-                        Menu.FIRST + ii + 2,
-                        Menu.FIRST,
-                        getString(R.string.DELETE_LIST_TEXT)
-                    ).setIcon(R.drawable.ic_delete_black_24dp)
+                    if (currentListofLists.lists.size != 0) {
+                        leftsubMenu.add(
+                            0,
+                            Menu.FIRST + ii + 2,
+                            Menu.FIRST,
+                            getString(R.string.DELETE_LIST_TEXT)
+                        ).setIcon(R.drawable.ic_delete_black_24dp)
+                    }
                     deleteFlag = false
                 }
                 true
