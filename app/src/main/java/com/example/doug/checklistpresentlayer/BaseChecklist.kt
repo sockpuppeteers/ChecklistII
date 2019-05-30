@@ -695,6 +695,8 @@ class BaseChecklist : AppCompatActivity(){
                                             currentChecklist.name = popup_edittext.text.toString()
                                         }
                                         currentListofLists.changeListName(id, User(1), popup_edittext.text.toString())
+                                        deleteListsDataFile()
+                                        createListsFile(currentListofLists)
 
 
                                         //update the list of lists local file to be current
