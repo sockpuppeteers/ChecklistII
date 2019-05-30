@@ -70,7 +70,11 @@ class ListofLists(var name: String, var error: String?, var uID : Int = 0) {
     }
 
     fun changeListName(arrayIndex: Int, modifiedBy: User, name: String) {
-        if (arrayIndex >= 0 && arrayIndex < lists.size)
+        if (arrayIndex >= 0 && arrayIndex < lists.size) {
             lists[arrayIndex].i_name = name
+            var db = Database()
+
+            db.PutChecklist(lists[arrayIndex])
+        }
     }
 }
