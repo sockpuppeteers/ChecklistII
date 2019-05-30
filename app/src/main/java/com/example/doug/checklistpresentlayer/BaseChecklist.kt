@@ -316,6 +316,7 @@ class BaseChecklist : AppCompatActivity(){
                 currentChecklist.tasks = db.GetTasks(intent.getIntExtra("ChecklistID", 0))
                 currentChecklist.users = db.GetUsers(intent.getIntExtra("ChecklistID", 0))
                 currentChecklist.changes = db.GetChanges(intent.getIntExtra("ChecklistID", 0))
+                currentListofLists.lists = db.GetListofLists(currentUser.Username)
 
                 //do things in the GUI thread
                 this@BaseChecklist.runOnUiThread {
@@ -1014,13 +1015,15 @@ class BaseChecklist : AppCompatActivity(){
     fun createNewTask(TaskText: String, IsReaccuring: Boolean, taskID: Int?) {
         var new_task_box = ChecklistViewModel(TaskText)
 
-        new_task_box.taskID = taskID as Int
-
         if(IsReaccuring)
             new_task_box.setRecurringIfNotComplete(IsReaccuring)
 
+        val size = currentChecklist.tasks.size
+
         //Adds the task to the checklist
         currentChecklist.createTask(TaskText, null, currentUser, null, currentChecklist.listID!!)
+
+        new_task_box.taskID = currentChecklist.tasks[size].TaskID as Int
 
         //rebuild the local file with the updated checklist
         GlobalScope.launch {
@@ -1433,9 +1436,6 @@ class BaseChecklist : AppCompatActivity(){
     }
 
     override fun onBackPressed() {
-//        if (!lastChecklist.isEmpty())
-//        {
-//
-//        }
+    //We don't want the back button to do anything
     }
 }
