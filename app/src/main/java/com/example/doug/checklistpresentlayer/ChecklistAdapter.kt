@@ -292,6 +292,7 @@ class ChecklistAdapter(private var ctx: Context,
                     taskSettingsRecurringLayoutView.CurrentDaysTextView.text = calcTempStringDays(taskCount)
 
                     taskSettingsRecurringLayoutView.CurrentTimeTextView.text = calcTempStringTime(taskCount)
+                    holder.ChangeVisual()
                 }
 
                 taskSettingsRecurringLayoutView.RecursionSwitch.isChecked =

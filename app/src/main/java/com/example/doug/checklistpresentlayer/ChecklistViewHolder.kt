@@ -91,15 +91,33 @@ class ChecklistViewHolder(
         }
     }
 
-    fun getEdit() : String
-    {
-        return ChecklistEditView.text.toString()
-    }
-
-    fun uneditName()
-    {
-
-        ChecklistEditView.visibility = View.INVISIBLE
-        ChecklistTextView.visibility = View.VISIBLE
+    fun ChangeVisual() {
+        if (vm.isRecurring)
+            ChecklistTextView.setTextColor(Color.parseColor("#038C65"))
+        else
+            ChecklistTextView.setTextColor(Color.BLACK)
+        when {
+            vm.isComplete -> {
+                ChecklistTextView.apply {
+                    ChecklistTextView.paintFlags = ChecklistTextView.paintFlags!!.or(
+                        Paint.STRIKE_THRU_TEXT_FLAG
+                    )
+                }
+                ChecklistCheckView.visibility = View.INVISIBLE
+            }
+            vm.isMessage -> {
+                ChecklistTextView.apply {
+                    ChecklistTextView.paintFlags = 0
+                }
+                ChecklistCheckView.visibility = View.INVISIBLE
+            }
+            else -> {
+                ChecklistTextView.apply {
+                    ChecklistTextView.paintFlags = 0
+                }
+                ChecklistTextView.isClickable = false
+                ChecklistCheckView.visibility = View.VISIBLE
+            }
+        }
     }
 }

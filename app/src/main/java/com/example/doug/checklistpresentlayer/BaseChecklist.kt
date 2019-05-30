@@ -1268,7 +1268,7 @@ class BaseChecklist : AppCompatActivity(){
         return when (item.itemId) {
             android.R.id.home -> {
                 userLayout.openDrawer(GravityCompat.START)
-                if (deleteFlag)
+                if (deleteFlag || editFlag)
                 {
                     leftsubMenu.clear()
                     var ii = 0
@@ -1292,6 +1292,7 @@ class BaseChecklist : AppCompatActivity(){
                         ).setIcon(R.drawable.ic_delete_black_24dp)
                     }
                     deleteFlag = false
+                    editFlag = false
                 }
                 true
             }
