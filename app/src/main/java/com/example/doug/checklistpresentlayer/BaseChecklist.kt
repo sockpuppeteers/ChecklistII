@@ -323,6 +323,8 @@ class BaseChecklist : AppCompatActivity(){
                             if (!now.isEqual(dead.toLocalDate())) {
                                 addTaskFromList(Task)
                             }
+                            else
+                                db.DeleteTask(Task)
                         } else
                             addTaskFromList(Task)
                     }
