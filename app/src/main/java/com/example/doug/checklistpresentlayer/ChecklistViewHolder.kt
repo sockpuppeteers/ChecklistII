@@ -84,11 +84,6 @@ class ChecklistViewHolder(
                 return@OnKeyListener false
             }
         })
-        ChecklistEditView.setOnFocusChangeListener { v, hasfocus ->
-            ChecklistEditView.visibility = View.INVISIBLE
-            ChecklistTextView.visibility = View.VISIBLE
-            true
-        }
     }
 
     fun ChangeVisual() {
