@@ -298,7 +298,6 @@ class BaseChecklist : AppCompatActivity(){
         //if no local file exists, populate our list from the database
         else {
             spinner.visibility = View.VISIBLE
-            println("loaded list from database")
             //sets the recyclerview adapter. This handles all recyclerview events, see "ChecklistAdapter for details.
             adapter = ChecklistAdapter(
                 this,
