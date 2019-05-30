@@ -2,6 +2,7 @@ package com.example.doug.checklistpresentlayer
 
 import android.app.Activity
 import android.app.AlertDialog
+import android.app.PendingIntent.getActivity
 import android.app.SearchManager
 import android.content.ClipData
 import android.content.Context
@@ -67,6 +68,7 @@ class BaseChecklist : AppCompatActivity(){
     var popupPresent = false
 
     var currentUser = User(1)
+    var numUser = 0
     var currentTask: ChecklistViewModel = ChecklistViewModel("")
     var currentListofLists = ListofLists("Your CheckLists", "none")
     var currentListView: ArrayList<ChecklistViewModel> = ArrayList()
@@ -1341,10 +1343,32 @@ class BaseChecklist : AppCompatActivity(){
 
                 searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
                     override fun onQueryTextSubmit(query: String?): Boolean {
+                        for (i in currentChecklist.users)
+                        {
+                            if (i.Username.toUpperCase() == (query as String).toUpperCase())
+                            {
+                                Toast.makeText(this@BaseChecklist, "User already on list.", Toast.LENGTH_SHORT).show()
+                                searchItem.collapseActionView()
+                                val activity: Activity = this@BaseChecklist
+                                val imm = activity.getSystemService(Activity.INPUT_METHOD_SERVICE) as InputMethodManager
+                                //Find the currently focused view, so we can grab the correct window token from it.
+                                var view = activity.currentFocus
+                                //If no view currently has focus, create a new one, just so we can grab a window token from it
+                                if (view == null) {
+                                    view = View(activity)
+                                }
+                                imm.hideSoftInputFromWindow(view.windowToken, 0)
+                                return true
+                            }
+                        }
                         val u = db.GetUser(query as String)
                         if (u.UserID != -1) {
                             db.AddUserToList(u.UserID as Int, currentChecklist.listID as Int)
                             rightsubMenu.add(0, Menu.FIRST + 7, Menu.FIRST, u.Username)
+                        }
+                        else
+                        {
+                            Toast.makeText(this@BaseChecklist, "User does not exist.", Toast.LENGTH_SHORT).show()
                         }
                         searchItem.collapseActionView()
                         val activity: Activity = this@BaseChecklist
