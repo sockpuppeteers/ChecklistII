@@ -87,7 +87,7 @@ class Checklist( var name: String, var cListID : Int? ) : ListClass(cListID, nam
     fun createTask(name: String, deadline: String?, createdBy: User, taskID: Int?, checklistID: Int?) {
         val task = Task(name, deadline, taskID, checklistID)
         task.TaskID = dbAccess.PostTask(task)
-        tasks.add(task)
+        tasks.add(0, task)
         logChange(task.TaskID!!, task.name, createdBy, kAction.CREATE_TASK)
     }
 
