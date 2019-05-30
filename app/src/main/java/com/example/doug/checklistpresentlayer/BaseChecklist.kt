@@ -59,6 +59,7 @@ class BaseChecklist : AppCompatActivity(){
     var currentChecklist = Checklist("Your Checklist", 0 )
     var taskFlag = true
     var deleteFlag = false
+    var editFlag = false
     //Flag to see if any popups are present
     var popupPresent = false
 
@@ -246,8 +247,11 @@ class BaseChecklist : AppCompatActivity(){
                     leftsubMenu.add(0, Menu.FIRST + ii + 1, Menu.FIRST, getString(R.string.ADD_LIST_TEXT))
                         .setIcon(R.drawable.ic_add_box_black_24dp)
                     if (currentListofLists.lists.size != 0) {
+                        //adds the "Edit List Name..." button to list of list nav drawer
+                        leftsubMenu.add(0, Menu.FIRST + ii + 2, Menu.FIRST, getString(R.string.EDIT_LIST_TEXT))
+                            .setIcon(R.drawable.ic_edit_black_24dp)
                         //adds the "Delete List..." button to list of list nav drawer
-                        leftsubMenu.add(0, Menu.FIRST + ii + 2, Menu.FIRST, getString(R.string.DELETE_LIST_TEXT))
+                        leftsubMenu.add(0, Menu.FIRST + ii + 3, Menu.FIRST, getString(R.string.DELETE_LIST_TEXT))
                             .setIcon(R.drawable.ic_delete_black_24dp)
                     }
                     currentListView.removeAll(currentListView)
@@ -340,6 +344,9 @@ class BaseChecklist : AppCompatActivity(){
                     leftsubMenu.add(0, Menu.FIRST + ii + 1, Menu.FIRST, getString(R.string.ADD_LIST_TEXT))
                         .setIcon(R.drawable.ic_add_box_black_24dp)
                     if (currentListofLists.lists.size != 0) {
+                        //adds the "Edit List Name..." button to list of list nav drawer
+                        leftsubMenu.add(0, Menu.FIRST + ii + 2, Menu.FIRST, getString(R.string.EDIT_LIST_TEXT))
+                            .setIcon(R.drawable.ic_edit_black_24dp)
                         //adds the "Delete List..." button to list of list nav drawer
                         leftsubMenu.add(0, Menu.FIRST + ii + 2, Menu.FIRST, getString(R.string.DELETE_LIST_TEXT))
                             .setIcon(R.drawable.ic_delete_black_24dp)
@@ -405,7 +412,7 @@ class BaseChecklist : AppCompatActivity(){
                 //diffrent number for every item that need it.
                 val id = menuItem.itemId - Menu.FIRST
                 //checks if the user is trying to delete a list
-                if (!deleteFlag) {
+                if (!deleteFlag && !editFlag) {
                     //runs a function and doesn't run the next few line if anything was done in that function
                     if (!onOptionsItemSelected(menuItem)) {
                         //checks to make sure that the item pressed is a list and not add or delete
@@ -468,8 +475,8 @@ class BaseChecklist : AppCompatActivity(){
                                 //turns the buttons back on
                                 turnOnButtons()
                             }
-                            //checks if the selected item is the two items right after the list of list
-                        } else if (id < currentListofLists.lists.size + 2 && id >= currentListofLists.lists.size) {
+                            //checks if the selected item is the three items right after the list of list
+                        } else if (id < currentListofLists.lists.size + 3 && id >= currentListofLists.lists.size) {
                             //checks if the selected item is the one right after the last list
                             if (id == currentListofLists.lists.size || (currentListofLists.lists.size == 0 && id == 1)) {
                                 //if this code runs then the user wants to make a new list
@@ -510,6 +517,9 @@ class BaseChecklist : AppCompatActivity(){
                                                         getString(R.string.ADD_LIST_TEXT)
                                                     ).setIcon(R.drawable.ic_add_box_black_24dp)
                                                     if (currentListofLists.lists.size != 0) {
+                                                        //adds the "Edit List Name..." button to list of list nav drawer
+                                                        leftsubMenu.add(0, Menu.FIRST + ii + 2, Menu.FIRST, getString(R.string.EDIT_LIST_TEXT))
+                                                            .setIcon(R.drawable.ic_edit_black_24dp)
                                                         leftsubMenu.add(
                                                             0,
                                                             Menu.FIRST + ii + 2,
@@ -561,6 +571,16 @@ class BaseChecklist : AppCompatActivity(){
                                     popupPresent = true
 
                                 }
+                            } else if (id == currentListofLists.lists.size + 1) {
+                                //if this code runs then the user wants to edit the name of a list
+                                leftsubMenu.clear()
+                                //replaces all the list of list items with ones with an x next to them so the user knows
+                                // they can delete them when they tap an item. the add and delete buttons disapear.
+                                for ((i, lol) in currentListofLists.lists.withIndex()) {
+                                    leftsubMenu.add(0, Menu.FIRST + i, Menu.FIRST, lol.i_name)
+                                        .setIcon(R.drawable.ic_edit_black_24dp)
+                                }
+                                editFlag = true
                             } else {
                                 //if this code runs then the user wants to delete a list
                                 leftsubMenu.clear()
@@ -575,7 +595,7 @@ class BaseChecklist : AppCompatActivity(){
                         }
 
                     }
-                } else {
+                } else if (!editFlag){
                     //if the delete flag is set run this
                     //if this runs the user wants to delete a list
                     if (id < currentListofLists.lists.size && id >= 0) {
@@ -607,6 +627,9 @@ class BaseChecklist : AppCompatActivity(){
                             getString(R.string.ADD_LIST_TEXT)
                         ).setIcon(R.drawable.ic_add_box_black_24dp)
                         if (currentListofLists.lists.size != 0) {
+                            //adds the "Edit List Name..." button to list of list nav drawer
+                            leftsubMenu.add(0, Menu.FIRST + ii + 2, Menu.FIRST, getString(R.string.EDIT_LIST_TEXT))
+                                .setIcon(R.drawable.ic_edit_black_24dp)
                             leftsubMenu.add(
                                 0,
                                 Menu.FIRST + ii + 2,
@@ -642,6 +665,113 @@ class BaseChecklist : AppCompatActivity(){
                         deleteFlag = false
                     }
                 }
+                else {
+                    //if the edit flag is set run this
+                    //if this runs the user wants to edit the name of a list
+                    if (id < currentListofLists.lists.size && id >= 0) {
+                        //If there is not a popup already present
+                        if (!popupPresent) {
+
+                            val popupWindow = PopupWindow(this)
+                            //Create a view that is of the popup_layout in resources
+                            val popupView = layoutInflater.inflate(R.layout.popup_layout, null)
+                            //Sets the content of the popup to the popup_layout
+                            popupWindow.contentView = popupView
+                            //set the hint to Edit List Name...
+                            //Retrieves the acceptButton from the popup
+                            val acceptButton = popupView.PopupMainView.AcceptButton
+
+                            //Creates and adds the on click action to the add button
+                            acceptButton.setOnClickListener {
+                                val popup_edittext = popupView.PopupMainView.PopupEditText
+
+                                //Retrieves the name of the task if the name is long enough
+                                if (popup_edittext.text.toString().isNotEmpty() && popup_edittext.text.toString().length < 40) {
+                                    if (hasInternetConnection()) {
+                                        if (currentChecklist.i_name == currentListofLists.lists[id].i_name) {
+                                            title = popup_edittext.text.toString()
+                                            currentChecklist.name = popup_edittext.text.toString()
+                                        }
+                                        currentListofLists.changeListName(id, User(1), popup_edittext.text.toString())
+
+
+                                        //update the list of lists local file to be current
+                                        GlobalScope.launch {
+                                            deleteListsDataFile()
+                                            createListsFile(currentListofLists)
+                                        }
+
+                                        leftsubMenu.clear()
+                                        var ii = 0
+                                        for ((i, lol) in currentListofLists.lists.withIndex()) {
+                                            leftsubMenu.add(0, Menu.FIRST + i, Menu.FIRST, lol.i_name)
+                                            ii = i
+                                        }
+                                        leftsubMenu.add(
+                                            0, Menu.FIRST + ii + 1, Menu.FIRST,
+                                            getString(R.string.ADD_LIST_TEXT)
+                                        ).setIcon(R.drawable.ic_add_box_black_24dp)
+                                        //adds the "Edit List Name..." button to list of list nav drawer
+                                        leftsubMenu.add(0, Menu.FIRST + ii + 2, Menu.FIRST, getString(R.string.EDIT_LIST_TEXT))
+                                            .setIcon(R.drawable.ic_edit_black_24dp)
+                                        leftsubMenu.add(
+                                            0,
+                                            Menu.FIRST + ii + 2,
+                                            Menu.FIRST,
+                                            getString(R.string.DELETE_LIST_TEXT)
+                                        ).setIcon(R.drawable.ic_delete_black_24dp)
+
+                                        spinner.visibility = View.INVISIBLE
+
+                                        editFlag = false
+                                    }
+                                    else
+                                    {
+                                        var alertDialog: AlertDialog = AlertDialog.Builder(this).create()
+
+                                        alertDialog.setTitle("Info");
+                                        alertDialog.setMessage("Internet not available, Cross check your internet connectivity and try again")
+                                        alertDialog.setIcon(android.R.drawable.ic_dialog_alert)
+
+                                        alertDialog.show()
+                                    }
+                                }
+
+                                //Set dismiss listener
+                                popupWindow.setOnDismissListener {
+                                    popupPresent = false
+                                }
+                                //Dismisses the popup
+                                popupWindow.dismiss()
+                            }
+                            //Set cancel button to dismiss the popup
+                            val cancelButton = popupView.PopupMainView.CancelButton
+
+                            cancelButton.setOnClickListener {
+
+                                popupWindow.dismiss()
+
+                            }
+                            //Have the popup clean up items when dismissed
+                            popupWindow.setOnDismissListener {
+                                val popupEdittext = popupView.PopupMainView.PopupEditText
+
+                                popupEdittext.text.clear()
+
+                                popupPresent = false
+                            }
+
+                            popupWindow.isFocusable = true
+
+                            popupWindow.showAtLocation(recyclerView, Gravity.CENTER, 0, 0)
+
+                            popupView.findViewById<EditText>(R.id.PopupEditText).hint = getString(R.string.EDIT_LIST_TEXT)
+
+                            popupPresent = true
+
+                        }
+                    }
+                }
             }
             true
         }
@@ -649,7 +779,7 @@ class BaseChecklist : AppCompatActivity(){
         //Creates the click listener for the add button
         val addListener = View.OnClickListener {
 
-            //If there is not a popup already [resent
+            //If there is not a popup already present
             if (!popupPresent) {
 
                 val popupWindow = PopupWindow(this)
@@ -1151,6 +1281,9 @@ class BaseChecklist : AppCompatActivity(){
                         getString(R.string.ADD_LIST_TEXT)
                     ).setIcon(R.drawable.ic_add_box_black_24dp)
                     if (currentListofLists.lists.size != 0) {
+                        //adds the "Edit List Name..." button to list of list nav drawer
+                        leftsubMenu.add(0, Menu.FIRST + ii + 2, Menu.FIRST, getString(R.string.EDIT_LIST_TEXT))
+                            .setIcon(R.drawable.ic_edit_black_24dp)
                         leftsubMenu.add(
                             0,
                             Menu.FIRST + ii + 2,

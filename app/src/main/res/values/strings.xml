@@ -40,6 +40,7 @@
     <string name="SOMETHING_TEXT">Something went wrong</string>
     <string name="LIST_TEXT">List of Lists</string>
     <string name="ADD_LIST_TEXT">New List...</string>
+    <string name="EDIT_LIST_TEXT">Edit List Name...</string>
     <string name="DELETE_LIST_TEXT">Delete List...</string>
     <string-array name="MINUTES_TEXT">
         <item>00</item>

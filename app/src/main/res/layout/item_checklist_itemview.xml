@@ -20,7 +20,8 @@
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintBottom_toBottomOf="parent" android:layout_marginTop="2dp"
                 android:layout_marginBottom="0dp" app:layout_constraintStart_toStartOf="parent"
-                android:layout_marginStart="8dp"/>
+                android:layout_marginStart="12dp" android:layout_alignParentStart="true"
+                android:layout_toStartOf="@+id/checkBox" android:layout_marginEnd="18dp"/>
         <EditText
                 android:inputType="textPersonName"
                 android:visibility="invisible"
@@ -33,7 +34,8 @@
                 android:layout_marginBottom="2dp" app:layout_constraintStart_toStartOf="parent"
                 android:layout_marginStart="8dp"
                 android:id="@+id/checklist_edit" android:fontFamily="@font/muli_light"
-                android:layout_alignTop="@+id/checklist_text"/>
+                android:layout_alignTop="@+id/checklist_text" android:layout_toStartOf="@+id/checkBox"
+                android:layout_marginEnd="18dp"/>
         <CheckBox
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content" android:id="@+id/checkBox"

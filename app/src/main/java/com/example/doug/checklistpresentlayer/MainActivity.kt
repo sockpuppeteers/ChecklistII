@@ -69,20 +69,11 @@ class MainActivity : AppCompatActivity() {
                 }
 
                 else {
-                    var lists = ListofLists(user.ViewUserName(), null, user.ViewID()!!)
-
-                    //create a new checklist
-                    lists.PostChecklist(ListClass(null, "My First List"))
-
-                    //update local file
-                    deleteListsDataFile()
-                    createListsFile(lists)
-
                     //Go to the checklist page of the my first list
                     val tempIntent = Intent(this, BaseChecklist::class.java).apply {
-                        putExtra("ListName", lists.lists[0].i_name)
+                        putExtra("ListName", "NULLLIST")
                         putExtra("UserName", user.ViewUserName())
-                        putExtra("ChecklistID", lists.lists[0].listID)
+                        putExtra("ChecklistID", -1)
                         putExtra("uname", user.ViewUserName())
                         putExtra("fname", user.ViewFName())
                         putExtra("lname", user.ViewLName())
