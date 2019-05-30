@@ -50,6 +50,7 @@ import android.widget.ImageButton
 import com.google.gson.reflect.TypeToken
 import org.jetbrains.anko.db.NULL
 import org.jetbrains.anko.searchView
+import org.joda.time.LocalDateTime
 import org.joda.time.format.DateTimeFormat
 import java.text.SimpleDateFormat
 import java.time.format.DateTimeFormatter
@@ -259,14 +260,16 @@ class BaseChecklist : AppCompatActivity(){
                     currentListView.removeAll(currentListView)
                     //add each task in currentChecklist to the page
                     for (Task in currentChecklist.tasks) {
-                        if (Task.compdatetime != null && Task.isRecurring != false) {
-                            val now = LocalDate.now()
+                        if (Task.compdatetime != null && Task.isRecurring == false) {
+                            val now = LocalDateTime.now()
                             val formatter = DateTimeFormat.forPattern("yyyy-MM-dd")
                             val dt = formatter.parseDateTime(Task.compdatetime)
                             val dead = dt.plusDays(2)
-                            if (!now.isEqual(dead.toLocalDate())) {
+                            if (now.isBefore(dead.toLocalDateTime())) {
                                 addTaskFromList(Task)
                             }
+                            else
+                                db.DeleteTask(Task)
                         } else
                             addTaskFromList(Task)
                     }
@@ -317,12 +320,12 @@ class BaseChecklist : AppCompatActivity(){
                     //Same issue as "Need to do things with this information" TODO
                     //add each task in currentChecklist to the page
                     for (Task in currentChecklist.tasks) {
-                        if (Task.compdatetime != null && Task.isRecurring != false) {
-                            val now = LocalDate.now()
+                        if (Task.compdatetime != null && Task.isRecurring == false) {
+                            val now = LocalDateTime.now()
                             val formatter = DateTimeFormat.forPattern("yyyy-MM-dd")
                             val dt = formatter.parseDateTime(Task.compdatetime)
                             val dead = dt.plusDays(2)
-                            if (!now.isEqual(dead.toLocalDate())) {
+                            if (now.isBefore(dead.toLocalDateTime())) {
                                 addTaskFromList(Task)
                             }
                             else
