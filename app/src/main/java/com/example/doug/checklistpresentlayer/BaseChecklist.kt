@@ -314,6 +314,7 @@ class BaseChecklist : AppCompatActivity(){
                 currentChecklist.tasks = db.GetTasks(intent.getIntExtra("ChecklistID", 0))
                 currentChecklist.users = db.GetUsers(intent.getIntExtra("ChecklistID", 0))
                 currentChecklist.changes = db.GetChanges(intent.getIntExtra("ChecklistID", 0))
+                currentListofLists.lists = db.GetListofLists(currentUser.Username)
 
                 //do things in the GUI thread
                 this@BaseChecklist.runOnUiThread {
@@ -1409,9 +1410,6 @@ class BaseChecklist : AppCompatActivity(){
     }
 
     override fun onBackPressed() {
-//        if (!lastChecklist.isEmpty())
-//        {
-//
-//        }
+    //We don't want the back button to do anything
     }
 }
