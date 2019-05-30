@@ -317,6 +317,7 @@ class BaseChecklist : AppCompatActivity(){
                 currentChecklist.users = db.GetUsers(intent.getIntExtra("ChecklistID", 0))
                 currentChecklist.changes = db.GetChanges(intent.getIntExtra("ChecklistID", 0))
                 currentListofLists.lists = db.GetListofLists(currentUser.Username)
+                currentChecklist.listID = intent.getIntExtra("ChecklistID", 0)
 
                 //do things in the GUI thread
                 this@BaseChecklist.runOnUiThread {
