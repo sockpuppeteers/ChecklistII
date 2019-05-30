@@ -632,7 +632,7 @@ class BaseChecklist : AppCompatActivity(){
                                 .setIcon(R.drawable.ic_edit_black_24dp)
                             leftsubMenu.add(
                                 0,
-                                Menu.FIRST + ii + 2,
+                                Menu.FIRST + ii + 3,
                                 Menu.FIRST,
                                 getString(R.string.DELETE_LIST_TEXT)
                             ).setIcon(R.drawable.ic_delete_black_24dp)
