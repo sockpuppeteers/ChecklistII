@@ -47,7 +47,10 @@ class ChecklistAdapter(private var ctx: Context,
         holder.ChecklistTextView.setOnClickListener {
             if (!holder.vm.isMessage) {
                 val popupFunctionWindow = PopupWindow(ctx)
-                val taskFunctionLayoutView = layoutInflater.inflate(R.layout.task_functions_layout, null)
+                val taskFunctionLayoutView : View = if (!holder.vm.isComplete)
+                    layoutInflater.inflate(R.layout.task_functions_layout, null)
+                else
+                    layoutInflater.inflate(R.layout.task_functions_nosettings_layout, null)
 
                 taskFunctionLayoutView.FunctionCloseButton.setOnClickListener {
                     popupFunctionWindow.dismiss()
@@ -55,12 +58,14 @@ class ChecklistAdapter(private var ctx: Context,
                     popupPresent.set(false)
                 }
 
-                taskFunctionLayoutView.FunctionSettingsButton.setOnClickListener {
-                    popupFunctionWindow.dismiss()
+                if (!holder.vm.isComplete) {
+                    taskFunctionLayoutView.FunctionSettingsButton.setOnClickListener {
+                        popupFunctionWindow.dismiss()
 
-                    popupPresent.set(false)
+                        popupPresent.set(false)
 
-                    createSettingsPopup(holder)
+                        createSettingsPopup(holder)
+                    }
                 }
 
                 //Sets the delete button to remove the task
