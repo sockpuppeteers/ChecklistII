@@ -202,7 +202,7 @@ class MainActivity : AppCompatActivity() {
             else{
                 var alertDialog : AlertDialog = AlertDialog.Builder(this).create()
 
-                alertDialog.setTitle("Info");
+                alertDialog.setTitle("Info")
                 alertDialog.setMessage("Internet not available, Cross check your internet connectivity and try again")
                 alertDialog.setIcon(android.R.drawable.ic_dialog_alert)
 
