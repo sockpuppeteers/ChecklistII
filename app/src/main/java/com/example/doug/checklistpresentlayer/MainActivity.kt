@@ -353,4 +353,8 @@ class MainActivity : AppCompatActivity() {
             it.write(userJson.toByteArray())
         }
     }
+    
+    override fun onBackPressed() {
+
+    }
 }

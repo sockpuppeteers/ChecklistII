@@ -53,10 +53,12 @@ import org.jetbrains.anko.searchView
 import org.joda.time.format.DateTimeFormat
 import java.text.SimpleDateFormat
 import java.time.format.DateTimeFormatter
+import java.util.*
 
 class BaseChecklist : AppCompatActivity(){
 
     var currentChecklist = Checklist("Your Checklist", 0 )
+    //var lastChecklist: Deque<Checklist> =
     var taskFlag = true
     var deleteFlag = false
     var editFlag = false
@@ -350,7 +352,7 @@ class BaseChecklist : AppCompatActivity(){
                         leftsubMenu.add(0, Menu.FIRST + ii + 2, Menu.FIRST, getString(R.string.EDIT_LIST_TEXT))
                             .setIcon(R.drawable.ic_edit_black_24dp)
                         //adds the "Delete List..." button to list of list nav drawer
-                        leftsubMenu.add(0, Menu.FIRST + ii + 2, Menu.FIRST, getString(R.string.DELETE_LIST_TEXT))
+                        leftsubMenu.add(0, Menu.FIRST + ii + 3, Menu.FIRST, getString(R.string.DELETE_LIST_TEXT))
                             .setIcon(R.drawable.ic_delete_black_24dp)
                     }
 
@@ -524,7 +526,7 @@ class BaseChecklist : AppCompatActivity(){
                                                             .setIcon(R.drawable.ic_edit_black_24dp)
                                                         leftsubMenu.add(
                                                             0,
-                                                            Menu.FIRST + ii + 2,
+                                                            Menu.FIRST + ii + 3,
                                                             Menu.FIRST,
                                                             getString(R.string.DELETE_LIST_TEXT)
                                                         ).setIcon(R.drawable.ic_delete_black_24dp)
@@ -720,7 +722,7 @@ class BaseChecklist : AppCompatActivity(){
                                             .setIcon(R.drawable.ic_edit_black_24dp)
                                         leftsubMenu.add(
                                             0,
-                                            Menu.FIRST + ii + 2,
+                                            Menu.FIRST + ii + 3,
                                             Menu.FIRST,
                                             getString(R.string.DELETE_LIST_TEXT)
                                         ).setIcon(R.drawable.ic_delete_black_24dp)
@@ -1290,7 +1292,7 @@ class BaseChecklist : AppCompatActivity(){
                             .setIcon(R.drawable.ic_edit_black_24dp)
                         leftsubMenu.add(
                             0,
-                            Menu.FIRST + ii + 2,
+                            Menu.FIRST + ii + 3,
                             Menu.FIRST,
                             getString(R.string.DELETE_LIST_TEXT)
                         ).setIcon(R.drawable.ic_delete_black_24dp)
@@ -1401,5 +1403,12 @@ class BaseChecklist : AppCompatActivity(){
         recyclerView.layoutAnimation = controller
         recyclerView.adapter?.notifyDataSetChanged()
         recyclerView.scheduleLayoutAnimation()
+    }
+
+    override fun onBackPressed() {
+//        if (!lastChecklist.isEmpty())
+//        {
+//
+//        }
     }
 }

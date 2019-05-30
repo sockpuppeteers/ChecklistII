@@ -27,15 +27,15 @@
                 android:visibility="invisible"
                 android:textSize="24sp"
                 android:ems="10"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_width="wrap_content"
+                android:layout_height="37dp"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintBottom_toBottomOf="parent" android:layout_marginTop="0dp"
                 android:layout_marginBottom="2dp" app:layout_constraintStart_toStartOf="parent"
                 android:layout_marginStart="8dp"
                 android:id="@+id/checklist_edit" android:fontFamily="@font/muli_light"
                 android:layout_alignTop="@+id/checklist_text" android:layout_toStartOf="@+id/checkBox"
-                android:layout_marginEnd="18dp"/>
+                android:layout_marginEnd="20dp"/>
         <CheckBox
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content" android:id="@+id/checkBox"
