@@ -19,7 +19,7 @@ class Checklist( var name: String, var cListID : Int? ) : ListClass(cListID, nam
      *      action that was taken, and what the value was changed to
      ***************************************************************/
     fun logChange(taskID: Int, taskName: String, changedBy: User, changeType: kAction, changedTo: String) {
-        val change = Change(listID, changedBy.UserID!!, taskID, taskName, changedBy.Username, changeType, changedTo)
+        val change = Change(listID, changedBy.UserID!!, null, taskName, changedBy.Username, changeType, changedTo)
         changes.add(change)
 
         GlobalScope.launch{
@@ -32,7 +32,7 @@ class Checklist( var name: String, var cListID : Int? ) : ListClass(cListID, nam
      *      include a "changed to" value.
      ***************************************************************/
     fun logChange(taskID: Int, taskName: String, changedBy: User, changeType: kAction) {
-        val change = Change(listID, changedBy.UserID!!, taskID, taskName, changedBy.Username, changeType, null)
+        val change = Change(listID, changedBy.UserID!!, null, taskName, changedBy.Username, changeType, null)
         changes.add(change)
 
         GlobalScope.launch{
@@ -45,7 +45,7 @@ class Checklist( var name: String, var cListID : Int? ) : ListClass(cListID, nam
      ***************************************************************/
     fun logChange(changeType: kAction, changedBy: User, changedTo: String)
     {
-        val change = Change(listID, changedBy.UserID!!, -1, "", changedBy.Username, changeType, changedTo)
+        val change = Change(listID, changedBy.UserID!!, null, "", changedBy.Username, changeType, changedTo)
         changes.add(change)
 
         GlobalScope.launch{
