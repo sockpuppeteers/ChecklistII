@@ -41,7 +41,7 @@ class Registration : AppCompatActivity() {
                     "", rFName.text.toString(), rLName.text.toString(),
                     rPW1.text.toString())
                 if (user.Error != "" && user.Error != null)
-                    rErrorText.text = ErrorText.text.toString() + user.Error + "\n"
+                    rErrorText.text = rErrorText.text.toString() + user.Error + "\n"
 
                 //else will be called if there were no errors
                 else {

@@ -25,7 +25,7 @@ import java.io.FileOutputStream
 import net.danlew.android.joda.JodaTimeAndroid
 import android.view.animation.AlphaAnimation
 import android.view.animation.Animation
-
+import android.widget.Toast
 
 
 //This is actually the user login page functionality
@@ -42,8 +42,6 @@ class MainActivity : AppCompatActivity() {
 
         var user: UserPage
         val spinner : ProgressBar = findViewById(R.id.progress_bar)
-        val error1 : TextView = findViewById(R.id.WrongText)
-        val error2 : TextView = findViewById(R.id.ErrorText)
 
         //if the USERDATA file exists already, the user doesn't
         //have to go through the login process
@@ -134,9 +132,6 @@ class MainActivity : AppCompatActivity() {
                 //sets the loading spinner to visible and to not fill as it goes, just to spin
                 spinner.visibility = View.VISIBLE
                 spinner.isIndeterminate = true
-                //turns off any errors that were set
-                error1.visibility = View.INVISIBLE
-                error2.visibility = View.INVISIBLE
                 //establish a database connection
                 val db = Database()
                 //try to login
@@ -148,9 +143,9 @@ class MainActivity : AppCompatActivity() {
                         //if there was an error, display it
                         if (user.HasError()) {
                             if (user.ViewError() == "404")
-                                error1.visibility = View.VISIBLE
+                                Toast.makeText(this@MainActivity, "Wrong username or password.", Toast.LENGTH_SHORT).show()
                             else
-                                error2.visibility = View.VISIBLE
+                                Toast.makeText(this@MainActivity, "Something went wrong.", Toast.LENGTH_SHORT).show()
                         }
 
                         //otherwise, log the user in and transfer to the list of lists page
