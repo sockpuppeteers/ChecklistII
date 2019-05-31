@@ -47,7 +47,7 @@ class ChecklistAdapter(private var ctx: Context,
         holder.ChecklistTextView.setOnClickListener {
             if (!holder.vm.isMessage) {
                 val popupFunctionWindow = PopupWindow(ctx)
-                val taskFunctionLayoutView : View = if (!holder.vm.isComplete)
+                val taskFunctionLayoutView : View = if (!holder.vm.isComplete || holder.vm.isRecurring)
                     layoutInflater.inflate(R.layout.task_functions_layout, null)
                 else
                     layoutInflater.inflate(R.layout.task_functions_nosettings_layout, null)
