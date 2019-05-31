@@ -58,7 +58,7 @@ class ChecklistAdapter(private var ctx: Context,
                     popupPresent.set(false)
                 }
 
-                if (!holder.vm.isComplete) {
+                if (!holder.vm.isComplete && !holder.vm.isRecurring) {
                     taskFunctionLayoutView.FunctionSettingsButton.setOnClickListener {
                         popupFunctionWindow.dismiss()
 
