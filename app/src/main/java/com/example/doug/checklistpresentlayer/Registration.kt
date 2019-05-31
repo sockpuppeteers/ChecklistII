@@ -38,7 +38,7 @@ class Registration : AppCompatActivity() {
             ) {
                 //error will be empty if everything was successful
                 var user: User = db.RegisterUser(rUserName.text.toString(),
-                    rEmail.text.toString(), rFName.text.toString(), rLName.text.toString(),
+                    "", rFName.text.toString(), rLName.text.toString(),
                     rPW1.text.toString())
                 if (user.Error != "" && user.Error != null)
                     rErrorText.text = ErrorText.text.toString() + user.Error + "\n"
