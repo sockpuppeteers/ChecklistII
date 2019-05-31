@@ -52,7 +52,12 @@ class MainActivity : AppCompatActivity() {
 
             //check if the user has any checklists
             if (listsFileExists()){
-                val lists = getListFromFile()
+                var lists = getListFromFile()
+
+                if (lists.isEmpty()){
+                    var db = Database()
+                    lists = db.GetListofLists(user.ViewUserName())
+                }
 
                 if (!lists.isEmpty()){
                     //Go to the checklist page of the first checklist in lists
