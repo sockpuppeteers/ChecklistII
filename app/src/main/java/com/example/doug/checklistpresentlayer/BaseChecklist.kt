@@ -816,7 +816,7 @@ class BaseChecklist : AppCompatActivity(){
                     //Retrieves the name of the task if the name is long enough
                     if (popup_edittext.text.toString().isNotEmpty() && popup_edittext.text.toString().length < 40) {
                         if (hasInternetConnection()) {
-                            createNewTask(popup_edittext.text.toString(), false, 0/*needs to be something later*/)
+                            createNewTask(popup_edittext.text.toString(), false, currentListView[0].taskID/*needs to be something later*/)
                         }
                         else
                         {
@@ -875,12 +875,7 @@ class BaseChecklist : AppCompatActivity(){
                     if (currentChild.isChecked) {
                         if (!currentChild.isComplete) {
                             if (currentChild.isRecurring) {
-                                /*createNewTask(
-                                    currentChild.getTaskText(),
-                                    true,
-                                    0/*needs to be something later*/
-                                )*/
-                                //currentChecklist.createTask(currentChild.getTaskText(), "enable Later", User(1))
+
                             }
 
                             currentChild.completeTask()
@@ -1025,12 +1020,14 @@ class BaseChecklist : AppCompatActivity(){
         if(IsReaccuring)
             new_task_box.setRecurringIfNotComplete(IsReaccuring)
 
-        val size = currentChecklist.tasks.size
+
 
         //Adds the task to the checklist
-        currentChecklist.createTask(TaskText, null, currentUser, null, currentChecklist.listID!!)
+        val temp = currentChecklist.createTask(TaskText, null, currentUser, null, currentChecklist.listID!!)
 
-        new_task_box.taskID = currentChecklist.tasks[size].TaskID as Int
+        if(temp != null) {
+            new_task_box.taskID = temp
+        }
 
         //rebuild the local file with the updated checklist
         GlobalScope.launch {

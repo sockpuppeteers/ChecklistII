@@ -57,6 +57,7 @@ class Checklist( var name: String, var cListID : Int? ) : ListClass(cListID, nam
         if (arrayIndex >= 0 && arrayIndex < tasks.size && tasks[arrayIndex].compdatetime.isNullOrEmpty()) {
             logChange(tasks[arrayIndex].TaskID!!, tasks[arrayIndex].name, modifiedBy, kAction.CHANGE_TASK_RECURRING);
             tasks[arrayIndex].isRecurring = toggle
+
             dbAccess.PutTask(tasks[arrayIndex])
         }
     }
@@ -84,11 +85,13 @@ class Checklist( var name: String, var cListID : Int? ) : ListClass(cListID, nam
      *  Purpose: Overloaded function of create task that includes all
      *      previous information and also includes a deadline
      ***************************************************************/
-    fun createTask(name: String, deadline: String?, createdBy: User, taskID: Int?, checklistID: Int?) {
+    fun createTask(name: String, deadline: String?, createdBy: User, taskID: Int?, checklistID: Int?): Int?{
         val task = Task(name, deadline, taskID, checklistID)
-        task.TaskID = dbAccess.PostTask(task)
         tasks.add(0, task)
+        task.TaskID = dbAccess.PostTask(task)
         logChange(task.TaskID!!, task.name, createdBy, kAction.CREATE_TASK)
+        val temp = task.TaskID
+        return temp
     }
 
     /****************************************************************
