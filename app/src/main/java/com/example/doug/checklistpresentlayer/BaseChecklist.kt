@@ -56,11 +56,12 @@ import org.joda.time.format.DateTimeFormat
 import java.text.SimpleDateFormat
 import java.time.format.DateTimeFormatter
 import java.util.*
+import kotlin.collections.ArrayList
 
 class BaseChecklist : AppCompatActivity(){
 
     var currentChecklist = Checklist("Your Checklist", 0 )
-    //var lastChecklist: Deque<Checklist> =
+    var lastChecklist: MutableList<Checklist> = arrayListOf()
     var taskFlag = true
     var deleteFlag = false
     var editFlag = false
@@ -431,6 +432,10 @@ class BaseChecklist : AppCompatActivity(){
                         if (id < currentListofLists.lists.size && id >= 0) {
                             //makes the loading spinner visible
                             spinner.visibility = View.VISIBLE
+                            val cc = Checklist(currentChecklist.i_name, currentChecklist.listID)
+                            cc.tasks = currentChecklist.tasks
+                            cc.users = currentChecklist.users
+                            lastChecklist.add(0,cc)
                             //closes the nav drawer
                             userLayout.closeDrawers()
                             //makes a new thread
@@ -1437,6 +1442,59 @@ class BaseChecklist : AppCompatActivity(){
     }
 
     override fun onBackPressed() {
-    //We don't want the back button to do anything
+        if (!lastChecklist.isEmpty())
+        {
+            val spinner: ProgressBar = findViewById(R.id.progress_bar2)
+            val db = Database()
+            currentChecklist = lastChecklist.removeAt(0)
+            spinner.visibility = View.VISIBLE
+            //makes a new thread
+            GlobalScope.launch {
+                //disable certain actions while data is being loaded from database
+                turnOnButtons()
+                turnOffButtons()
+
+                //mess of database calls
+                currentChecklist.tasks = db.GetTasks(currentChecklist.listID!!)
+                currentChecklist.users = db.GetUsers(currentChecklist.listID!!)
+                currentChecklist.changes = db.GetChanges(currentChecklist.listID!!)
+                currentListofLists.lists = db.GetListofLists(currentUser.Username)
+
+                //runs on the GUI thread
+                this@BaseChecklist.runOnUiThread {
+                    //replaces the tasks and title on screen
+                    title = currentChecklist.i_name
+
+                    currentListView.removeAll(currentListView)
+                    //add each task in currentChecklist to the page
+                    for (Task in currentChecklist.tasks) {
+                        if (Task.compdatetime != null && Task.isRecurring != false) {
+                            val now = LocalDate.now()
+                            val formatter = DateTimeFormat.forPattern("yyyy-MM-dd")
+                            val dt = formatter.parseDateTime(Task.compdatetime)
+                            val dead = dt.plusDays(2)
+                            if (!now.isEqual(dead.toLocalDate())) {
+                                addTaskFromList(Task)
+                            }
+                        } else
+                            addTaskFromList(Task)
+                    }
+                    //changes the data set in the adapter, changing whats in recyclerview
+                    adapter.setDataset(currentListView)
+                    //runs the cascading list animation
+                    runLayoutAnimation()
+
+                    //replaces the user nav drawer items with the users in this list
+                    rightsubMenu.clear()
+                    for ((i, up) in currentChecklist.users.withIndex()) {
+                        rightsubMenu.add(0, Menu.FIRST + i, Menu.FIRST, up.Username)
+                    }
+                    spinner.visibility = View.INVISIBLE
+                    // close drawer when item is tapped
+                }
+                //turns the buttons back on
+                turnOnButtons()
+            }
+        }
     }
 }
