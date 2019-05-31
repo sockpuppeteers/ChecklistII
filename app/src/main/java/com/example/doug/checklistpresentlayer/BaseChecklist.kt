@@ -183,13 +183,15 @@ class BaseChecklist : AppCompatActivity(){
             //add each task in currentChecklist to the page
             for (Task in currentChecklist.tasks) {
                 if (Task.compdatetime != null && Task.isRecurring != false) {
-                    val now = LocalDate.now()
+                    val now = LocalDateTime.now()
                     val formatter = DateTimeFormat.forPattern("yyyy-MM-dd")
                     val dt = formatter.parseDateTime(Task.compdatetime)
                     val dead = dt.plusDays(2)
-                    if (!now.isEqual(dead.toLocalDate())) {
+                    if (now.isBefore(dead.toLocalDateTime())) {
                         addTaskFromList(Task)
                     }
+                    else
+                        db.DeleteTask(Task)
                 } else
                     addTaskFromList(Task)
             }
